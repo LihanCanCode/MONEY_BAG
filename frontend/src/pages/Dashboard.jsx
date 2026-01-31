@@ -3,8 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FiDollarSign, FiTrendingUp, FiTrendingDown, FiPlusCircle, FiMinusCircle,
-  FiCamera, FiZap, FiCheck, FiX, FiActivity, FiArrowUpRight, FiArrowDownLeft, FiMenu, FiSmile, FiChevronDown, FiCalendar, FiPieChart, FiList, FiRefreshCcw
+  FiPlus, FiMinus, FiRefreshCw, FiSearch, FiFilter, FiDownload, FiTrash2, FiEdit2,
+  FiCheck, FiX, FiAlertCircle, FiTrendingUp, FiTrendingDown, FiPieChart, FiActivity,
+  FiDollarSign, FiCalendar, FiClock, FiArrowUpRight, FiArrowDownLeft, FiSmile, FiZap,
+  FiCamera, FiList, FiPlusCircle, FiMinusCircle, FiChevronDown, FiRefreshCcw,
+  FiArrowUp, FiArrowDown, FiBriefcase
 } from 'react-icons/fi';
 import AnimatedCounter from '../components/AnimatedCounter';
 import DashboardSkeleton from '../components/LoadingSkeleton';
@@ -57,6 +60,7 @@ const Dashboard = () => {
   const [receiptLoading, setReceiptLoading] = useState(false);
 
   const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
 
   // Search and Filter State
   const [filters, setFilters] = useState({
@@ -165,6 +169,8 @@ const Dashboard = () => {
     }
   };
 
+  // Transaction Handlers
+
   const handleTransactionSubmit = async (e) => {
     e.preventDefault();
 
@@ -187,7 +193,7 @@ const Dashboard = () => {
         type: transactionType === 'expense' ? 'SPEND' : 'ADD',
         amount: parseFloat(amount),
         message: description || (transactionType === 'expense' ? `Spent on ${category}` : 'Income Added'),
-        category: transactionType === 'expense' ? category : 'salary' // Default to salary for income if generic
+        category: transactionType === 'expense' ? category : 'salary'
       };
 
       const response = await fetch(API_ENDPOINTS.TRANSACTIONS, {
@@ -211,10 +217,11 @@ const Dashboard = () => {
           fetchFancyMessage(parseFloat(amount), category);
         }
 
-        // Reset Form
+        // Reset Form & Close Modal
         setAmount('');
         setDescription('');
         setCategory('food');
+        setShowTransactionModal(false);
       } else {
         toast.error(data.message || 'Failed to record transaction', { id: toastId });
       }
@@ -222,88 +229,6 @@ const Dashboard = () => {
       toast.error('Error: ' + err.message, { id: toastId });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleReceiptUpload = async () => {
-    if (!selectedReceipt) {
-      toast.error('Please select a receipt image');
-      return;
-    }
-
-    setReceiptLoading(true);
-    const toastId = toast.loading('Scanning receipt...');
-    try {
-      const token = await currentUser.getIdToken();
-      const formData = new FormData();
-      formData.append('receipt', selectedReceipt);
-
-      const response = await fetch(API_ENDPOINTS.TRANSACTION_PARSE_RECEIPT, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const { data } = result;
-        setTransactionType(data.type === 'income' ? 'income' : 'expense');
-        setAmount(data.amount || '');
-        setCategory(data.category || 'food');
-        setDescription(data.description || '');
-
-        setShowReceiptScanner(false);
-        setSelectedReceipt(null);
-        setReceiptPreview(null);
-
-        toast.success('Receipt scanned! Form auto-filled.', { id: toastId });
-      } else {
-        toast.error(result.message || 'Failed to scan receipt', { id: toastId });
-      }
-    } catch (err) {
-      toast.error('Error scanning receipt: ' + err.message, { id: toastId });
-    } finally {
-      setReceiptLoading(false);
-    }
-  };
-
-  const handleAIProcess = async () => {
-    if (!aiText.trim()) return;
-
-    setAiLoading(true);
-    const toastId = toast.loading('Processing...');
-    try {
-      const token = await currentUser.getIdToken();
-      const response = await fetch(API_ENDPOINTS.TRANSACTION_PARSE_AI, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: aiText })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const { data } = result;
-        setTransactionType(data.type === 'income' ? 'income' : 'expense');
-        setAmount(data.amount || '');
-        setCategory(data.category || 'food');
-        setDescription(data.description || '');
-
-        setShowAIInput(false);
-        setAiText('');
-
-        toast.success('AI processed! Form auto-filled.', { id: toastId });
-      } else {
-        toast.error(result.message || 'Failed to parse', { id: toastId });
-      }
-    } catch (err) {
-      toast.error('Error: ' + err.message, { id: toastId });
-    } finally {
-      setAiLoading(false);
     }
   };
 
@@ -350,6 +275,84 @@ const Dashboard = () => {
     }
   };
 
+  // AI Quick Add Processing
+  const handleAIProcessing = async () => {
+    if (!aiText.trim()) return;
+    setAiLoading(true);
+    const toastId = toast.loading('AI is analyzing your transaction...');
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch(API_ENDPOINTS.TRANSACTION_PARSE_AI, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: aiText })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setWallet(data.wallet);
+        toast.success('AI successfully added the transaction!', { id: toastId });
+        setAiText('');
+        setShowAIInput(false);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+      } else {
+        toast.error(data.message || 'AI failed to understand. Try being more specific.', { id: toastId });
+      }
+    } catch (err) {
+      toast.error('AI Error: ' + err.message, { id: toastId });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Receipt Scanner Processing
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedReceipt(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setReceiptPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleReceiptScan = async () => {
+    if (!selectedReceipt) return;
+    setReceiptLoading(true);
+    const toastId = toast.loading('Extracting data from receipt...');
+
+    try {
+      const token = await currentUser.getIdToken();
+      const formData = new FormData();
+      formData.append('receipt', selectedReceipt);
+
+      const response = await fetch(API_ENDPOINTS.TRANSACTION_PARSE_RECEIPT, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setWallet(data.wallet);
+        toast.success('Receipt scanned and recorded!', { id: toastId });
+        setShowReceiptScanner(false);
+        setSelectedReceipt(null);
+        setReceiptPreview(null);
+      } else {
+        toast.error(data.message || 'Failed to scan receipt', { id: toastId });
+      }
+    } catch (err) {
+      toast.error('Scanner Error: ' + err.message, { id: toastId });
+    } finally {
+      setReceiptLoading(false);
+    }
+  };
+
   if (loading) {
     return <DashboardSkeleton />;
   }
@@ -357,418 +360,440 @@ const Dashboard = () => {
   const recentTransactions = wallet?.transactions || [];
 
   return (
-    <div className="min-h-screen bg-[#0B0F1A] pb-20 relative font-sans text-[#E5E7EB]">
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-cyan-500/30 pb-24 relative overflow-x-hidden">
+
+      {/* Background Gradients */}
+      <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-900/20 to-transparent pointer-events-none" />
+      <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse" />
+      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       {showConfetti && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={300}
-        />
+        <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={400} colors={['#22d3ee', '#e879f9', '#ffffff']} />
       )}
 
-      {/* Fancy AI Message Popup */}
-      <AnimatePresence>
-        {showFancyPopup && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-50 max-w-sm w-full"
-          >
-            <div className="bg-[#141B2D] border border-[#10B981]/30 rounded-lg shadow-2xl p-6 relative overflow-hidden backdrop-blur-xl">
-              <div className="flex items-start gap-4 relative z-10">
-                <div className="bg-[#10B981]/20 p-3 rounded-md text-[#34D399]">
-                  <FiSmile size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold !text-white mb-1">Feedback</h4>
-                  <p className="!text-[#D1D5DB] text-sm leading-relaxed">"{fancyMessage}"</p>
-                </div>
-                <button onClick={() => setShowFancyPopup(false)} className="absolute top-0 right-0 !text-[#9CA3AF] hover:text-white">
-                  <FiX size={16} />
+      <Toaster position="bottom-center" toastOptions={{
+        style: { background: '#0f172a', color: '#e2e8f0', border: '1px solid #1e293b' },
+      }} />
+
+      {/* Navigation / Command Bar */}
+      <nav className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5 bg-[#020617]/80">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+              <FiDollarSign size={24} className="stroke-[3px]" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white">Money<span className="text-cyan-400">Bag</span></span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+              {['Overview', 'Analytics', 'Reports'].map(item => (
+                <button key={item} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${item === 'Overview' ? 'bg-white/10 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+                  {item}
                 </button>
-              </div>
+              ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="h-8 w-px bg-white/10 mx-2 hidden md:block"></div>
 
-      <Toaster position="top-right" />
-
-      {/* Navbar */}
-      <div className="bg-[#0B0F1A]/90 backdrop-blur-xl sticky top-0 z-40 border-b border-[#1F2937]/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <div className="bg-[#10B981] text-white p-2.5 rounded-lg shadow-lg">
-                <FiDollarSign size={22} />
-              </div>
-              <span className="font-bold text-xl text-white tracking-tight">MoneyBag</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#374151] rounded-full flex items-center justify-center text-white text-sm font-bold border border-[#4B5563]">
+              <button onClick={() => setShowTransactionModal(true)} className="flex items-center gap-2 px-4 py-2 bg-white text-slate-900 hover:bg-cyan-50 rounded-lg font-bold text-sm transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] active:scale-95">
+                <FiPlus size={18} /> <span className="hidden sm:inline">Add New</span>
+              </button>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center text-white font-bold ring-2 ring-transparent hover:ring-cyan-500/50 transition-all cursor-pointer">
                 {currentUser.email?.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+      <div className="max-w-[1600px] mx-auto px-8 md:px-12 py-12">
 
-        {/* Header */}
-        <div className="flex justify-between items-end mb-2">
-          <div>
-            <h1 className="text-2xl font-bold !text-white mb-1">Dashboard</h1>
-            <p className="!text-[#9CA3AF]">Overview of your finances</p>
-          </div>
-          <button
-            onClick={handleResetWallet}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1A233A] border border-[#2D3748] rounded-lg text-sm font-medium !text-[#9CA3AF] hover:!text-[#F87171] hover:border-[#F87171]/50 transition-all group"
-          >
-            <FiRefreshCcw className="group-hover:rotate-180 transition-transform duration-500" />
-            Reset Data
-          </button>
-        </div>
+        {/* HERO SECTION - Cockpit Style */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-40">
+          {/* Net Worth Display */}
+          <div className="lg:col-span-8 relative group mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-[2rem] blur opacity-20 group-hover:opacity-30 transition-opacity duration-1000"></div>
+            <div className="relative bg-[#0B1121] border border-white/10 rounded-[2rem] py-3 px-8 h-full flex flex-col justify-between overflow-hidden shadow-2xl">
+              {/* Background texture */}
+              <div className="absolute top-0 right-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 70% 20%, rgba(34, 211, 238, 0.15), transparent 40%)' }}></div>
 
-        {/* Stats Cards Row - CHANGED GRID to be wider (2 cols on md, 4 on xl) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-4">
-          {/* Total Balance - Solid Green */}
-          <div className="bg-[#10B981] rounded-[10px] p-8 shadow-lg !text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-20">
-              <FiDollarSign size={48} />
-            </div>
-            <p className="!text-[#D1FAE5] text-sm font-medium mb-1 relative z-10">Total Balance</p>
-            <h2 className="text-3xl font-bold tracking-tight relative z-10">
-              $<AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
-            </h2>
-          </div>
-
-          {/* Income */}
-          <div className="bg-[#141B2D] rounded-[10px] p-8 border border-[#2D3748] shadow-sm flex flex-col justify-center">
-            <div className="flex justify-between items-start mb-2">
-              <p className="!text-[#9CA3AF] text-sm font-medium">Total Income</p>
-              <span className="!text-[#10B981] bg-[#10B981]/10 p-1.5 rounded text-xs"><FiArrowDownLeft size={16} /></span>
-            </div>
-            <h3 className="text-2xl font-bold !text-[#34D399]">
-              $<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} />
-            </h3>
-          </div>
-
-          {/* Expenses */}
-          <div className="bg-[#141B2D] rounded-[10px] p-8 border border-[#2D3748] shadow-sm flex flex-col justify-center">
-            <div className="flex justify-between items-start mb-2">
-              <p className="!text-[#9CA3AF] text-sm font-medium">Total Expenses</p>
-              <span className="!text-[#F43F5E] bg-[#F43F5E]/10 p-1.5 rounded text-xs"><FiArrowUpRight size={16} /></span>
-            </div>
-            <h3 className="text-2xl font-bold !text-[#FB7185]">
-              $<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} />
-            </h3>
-          </div>
-
-          {/* Transactions Count */}
-          <div className="bg-[#141B2D] rounded-[10px] p-8 border border-[#2D3748] shadow-sm flex flex-col justify-center">
-            <div className="flex justify-between items-start mb-2">
-              <p className="!text-[#9CA3AF] text-sm font-medium">Transactions</p>
-              <span className="!text-[#818CF8] bg-[#6366F1]/10 p-1.5 rounded text-xs"><FiActivity size={16} /></span>
-            </div>
-            <h3 className="text-2xl font-bold !text-white">
-              {wallet?.transactions?.length || 0}
-            </h3>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* LEFT COLUMN: New Transaction Form */}
-          <div className="lg:col-span-1">
-            <div className="bg-[#141B2D] rounded-[10px] border border-[#2D3748] overflow-hidden shadow-lg sticky top-24">
-              <div className="p-4 border-b border-[#2D3748] bg-[#1A233A]">
-                <h3 className="font-bold !text-white">New Transaction</h3>
-              </div>
-
-              {/* Tabs - FORCED HEX COLORS */}
-              <div className="flex p-2 bg-[#141B2D] gap-2">
-                <button
-                  onClick={() => setTransactionType('expense')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${transactionType === 'expense'
-                    ? '!bg-[#F43F5E] !text-white shadow-lg'
-                    : '!text-[#9CA3AF] hover:bg-[#1A233A]'
-                    }`}
-                >
-                  <FiMinusCircle /> Expense
-                </button>
-                <button
-                  onClick={() => setTransactionType('income')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${transactionType === 'income'
-                    ? '!bg-[#10B981] !text-white shadow-lg'
-                    : '!text-[#9CA3AF] hover:bg-[#1A233A]'
-                    }`}
-                >
-                  <FiPlusCircle /> Income
-                </button>
-              </div>
-
-              <form onSubmit={handleTransactionSubmit} className="p-6 space-y-5">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold !text-[#9CA3AF] uppercase tracking-wider mb-2">Amount ($)</label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full bg-[#0B0F1A] border border-[#2D3748] !text-white p-3 rounded-lg focus:border-[#6366F1] focus:ring-1 focus:ring-[#6366F1] outline-none transition-all font-bold text-lg placeholder-[#4B5563]"
-                    step="0.01"
-                  />
-                </div>
-
-                {transactionType === 'expense' && (
-                  <div>
-                    <label className="block text-xs font-semibold !text-[#9CA3AF] uppercase tracking-wider mb-2">Category</label>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full bg-[#0B0F1A] border border-[#2D3748] !text-white p-3 rounded-lg focus:border-[#6366F1] outline-none appearance-none"
-                    >
-                      {categories.map(cat => (
-                        <option key={cat.value} value={cat.value}>{cat.label}</option>
-                      ))}
-                    </select>
+                  <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs tracking-widest mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#22d3ee]"></span>
+                    LIVE BALANCE
                   </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-semibold !text-[#9CA3AF] uppercase tracking-wider mb-2">Description (Optional)</label>
-                  <textarea
-                    rows="2"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="What is this for?"
-                    className="w-full bg-[#0B0F1A] border border-[#2D3748] !text-[#D1D5DB] p-3 rounded-lg focus:border-[#6366F1] outline-none resize-none placeholder-[#4B5563]"
-                  ></textarea>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tighter mb-0.5 drop-shadow-xl">
+                    $<AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
+                  </h1>
+                  <p className="text-slate-400 font-medium text-xs tracking-wide">Total liquid assets available</p>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full py-3.5 rounded-lg font-bold !text-white shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 ${transactionType === 'income'
-                    ? '!bg-[#10B981] hover:bg-[#059669]'
-                    : '!bg-[#F43F5E] hover:bg-[#E11D48]'
-                    }`}
-                >
-                  {isSubmitting ? <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" /> : <FiCheck />}
-                  {transactionType === 'income' ? 'Add Income' : 'Record Expense'}
-                </button>
-
-                {/* Quick Tools */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowReceiptScanner(true)}
-                    className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#1A233A] !text-[#38BDF8] text-sm font-medium hover:bg-[#252f48] border border-[#2D3748] transition-colors"
-                  >
-                    <FiCamera /> Scan Receipt
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAIInput(true)}
-                    className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#1A233A] !text-[#A855F7] text-sm font-medium hover:bg-[#252f48] border border-[#2D3748] transition-colors"
-                  >
-                    <FiZap /> AI Quick Add
-                  </button>
+                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-xl hover:bg-white/10 transition-colors shadow-lg group/refresh cursor-pointer" onClick={handleResetWallet}>
+                  <FiRefreshCcw className="text-slate-400 group-hover/refresh:text-white transition-colors group-hover/refresh:rotate-180 duration-700" size={20} />
                 </div>
-              </form>
+              </div>
+
+              <div className="relative z-10 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/10 hover:border-emerald-500/30 rounded-2xl p-4 backdrop-blur-sm flex items-center gap-4 transition-all duration-300">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-xl text-emerald-400 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]"><FiArrowDownLeft size={20} /></div>
+                  <div>
+                    <span className="text-emerald-400 font-mono text-[9px] uppercase tracking-widest block mb-0.5 font-bold opacity-80">Income</span>
+                    <div className="text-xl font-bold text-white tracking-tight">
+                      +$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-fuchsia-500/5 hover:bg-fuchsia-500/10 border border-fuchsia-500/10 hover:border-fuchsia-500/30 rounded-2xl p-4 backdrop-blur-sm flex items-center gap-4 transition-all duration-300">
+                  <div className="w-10 h-10 bg-fuchsia-500/20 rounded-xl text-fuchsia-400 flex items-center justify-center shadow-[0_0_15px_rgba(232,121,249,0.2)]"><FiArrowUpRight size={20} /></div>
+                  <div>
+                    <span className="text-fuchsia-400 font-mono text-[9px] uppercase tracking-widest block mb-0.5 font-bold opacity-80">Expense</span>
+                    <div className="text-xl font-bold text-white tracking-tight">
+                      -$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Recent Transactions & Charts */}
-          <div className="lg:col-span-2 flex flex-col" style={{ gap: '32px' }}>
-
-            {/* Search and Filters */}
-            <SearchAndFilters onFilterChange={setFilters} activeFilters={filters} />
-
-            {/* Recent Transactions List */}
-            <div className="bg-[#141B2D] rounded-[10px] border border-[#2D3748] overflow-hidden shadow-lg">
-              <div className="p-5 border-b border-[#2D3748] flex justify-between items-center bg-[#1A233A]">
-                <h3 className="font-bold !text-white">Recent Transactions</h3>
-                <button
-                  onClick={() => setShowAllTransactions(true)}
-                  className="text-xs !text-[#9CA3AF] hover:text-white flex items-center gap-1"
-                >
-                  View All <FiArrowUpRight />
-                </button>
+          {/* Quick Actions Panel */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <button className="w-full bg-[#1e293b]/40 border border-white/5 rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:border-purple-500/30 hover:bg-[#1e293b]/60 transition-all cursor-pointer shadow-xl appearance-none" onClick={() => setShowAIInput(true)}>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center text-purple-400 border border-purple-500/20 mb-4 group-hover:scale-110 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300 shadow-[0_0_30px_rgba(168,85,247,0.15)] relative z-10">
+                <FiZap size={32} />
               </div>
-              <div className="divide-y divide-[#2D3748]">
-                {recentTransactions.length > 0 ? (
-                  recentTransactions.slice(0, 5).map((tx, idx) => (
-                    <div key={idx} className="p-4 hover:bg-[#1A233A] transition-colors flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${(tx.type === 'income' || tx.type === 'ADD')
-                          ? 'bg-[#10B981]/10 !text-[#10B981]'
-                          : 'bg-[#F43F5E]/10 !text-[#F43F5E]'
-                          }`}>
-                          {(tx.type === 'income' || tx.type === 'ADD') ? <FiArrowDownLeft /> : <FiArrowUpRight />}
+              <h3 className="text-xl font-bold text-white mb-2 relative z-10">AI Quick Add</h3>
+              <p className="text-slate-400 text-xs relative z-10 leading-relaxed font-medium">Auto-categorize transactions<br />from natural text</p>
+            </button>
+
+            <button className="w-full bg-[#1e293b]/40 border border-white/5 rounded-[2.5rem] p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:border-sky-500/30 hover:bg-[#1e293b]/60 transition-all cursor-pointer shadow-xl appearance-none" onClick={() => setShowReceiptScanner(true)}>
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="w-16 h-16 bg-sky-500/10 rounded-3xl flex items-center justify-center text-sky-400 border border-sky-500/20 mb-4 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300 shadow-[0_0_30px_rgba(14,165,233,0.15)] relative z-10">
+                <FiCamera size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2 relative z-10">Scan Receipt</h3>
+              <p className="text-slate-400 text-xs relative z-10 leading-relaxed font-medium">Extract details instantly<br />from photos</p>
+            </button>
+          </div>
+        </div>
+
+        {/* ANALYTICS & LIST GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-20">
+
+          {/* Transaction Feed */}
+          <div className="lg:col-span-7 flex flex-col">
+            <div className="flex items-center justify-between mb-10 px-2">
+              <div className="flex items-center gap-3">
+                <FiList className="text-cyan-500" size={24} />
+                <h3 className="font-bold text-2xl text-white">Recent Activity</h3>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowAllTransactions(true); }} 
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-400 text-sm font-bold transition-all border border-white/5 hover:border-white/10 cursor-pointer relative z-50">
+                View All
+              </button>
+            </div>
+
+            <div className="flex-1">
+              {recentTransactions.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {recentTransactions.slice(0, 7).map((tx, idx) => (
+                    <div key={idx} className="bg-[#1e293b]/40 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-[#1e293b]/60 hover:border-white/10 hover:scale-[1.01] transition-all duration-300 shadow-sm cursor-default group">
+                      <div className="flex items-center gap-5">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-inner ${(tx.type === 'income' || tx.type === 'ADD')
+                          ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_15px_rgba(16,185,129,0.1)]'
+                          : 'bg-rose-500/10 text-rose-400 shadow-[inset_0_0_15px_rgba(244,63,94,0.1)]'}`}>
+                          {(tx.type === 'income' || tx.type === 'ADD') ? <FiArrowDownLeft size={24} /> : <FiArrowUpRight size={24} />}
                         </div>
                         <div>
-                          <p className="font-medium !text-white">{tx.message || tx.category}</p>
-                          <p className="text-xs !text-[#9CA3AF] capitalize">{tx.category} • {tx.date || (tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'Today')}</p>
+                          <p className="font-bold text-lg text-slate-200 group-hover:text-white transition-colors mb-1">{tx.message || tx.category}</p>
+                          <p className="text-xs text-slate-500 font-mono flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-md bg-black/20 border border-white/5 uppercase text-[10px] tracking-wider">{tx.category}</span>
+                            {tx.date ? new Date(tx.date).toLocaleDateString() : 'Today'}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`font-mono font-bold ${(tx.type === 'income' || tx.type === 'ADD') ? '!text-[#34D399]' : '!text-[#FB7185]'
-                          }`}>
-                          {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
-                        </span>
-                        <button className="!text-[#9CA3AF] hover:text-[#F87171] opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FiX />
-                        </button>
+                      <div className={`font-mono font-bold text-xl ${(tx.type === 'income' || tx.type === 'ADD') ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-12 text-center">
-                    <div className="w-16 h-16 bg-[#1A233A] rounded-full flex items-center justify-center mx-auto mb-3 !text-[#4B5563]">
-                      <FiList size={24} />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-[#1e293b]/30 border border-white/5 rounded-3xl p-12 flex flex-col items-center justify-center text-slate-500">
+                  <FiActivity size={48} className="mb-4 opacity-30" />
+                  <p className="text-lg">No activity recorded yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Live Analytics Panel */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="bg-[#0B1121] border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <h3 className="font-bold text-lg text-white">Focus Category</h3>
+                <select className="bg-white/5 border border-white/10 rounded-lg text-xs p-2 text-slate-300 outline-none">
+                  <option>This Month</option>
+                  <option>Last Month</option>
+                </select>
+              </div>
+
+              {/* Styled Chart Container */}
+              <div className="w-full h-[300px] relative z-10">
+                <SpendingChart wallet={wallet} />
+              </div>
+
+              {/* Decorative Glow */}
+              {/* Decorative Glow */}
+              <div className="absolute bottom-0 right-0 w-[200px] h-[200px] bg-indigo-600/10 blur-[80px] rounded-full pointer-events-none"></div>
+            </div>
+
+            <div className="bg-gradient-to-br from-indigo-900 to-[#0B1121] border border-white/10 rounded-3xl p-8 text-center relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
+              <h3 className="text-xl font-bold text-white mb-2">Financial Health</h3>
+              <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 mb-2">94%</div>
+              <p className="text-sm text-indigo-200/60">Excellent! Your spending is well optimized.</p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* MODALS SECTION - Re-styled for consistency */}
+      <AnimatePresence>
+        {showTransactionModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowTransactionModal(false)} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-[#0f172a] border border-white/10 rounded-3xl w-full max-w-md relative z-10 overflow-hidden shadow-2xl shadow-black/50">
+
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <h3 className="text-xl font-bold text-white">Add Transaction</h3>
+                <button onClick={() => setShowTransactionModal(false)} className="text-slate-400 hover:text-white transition-colors"><FiX size={24} /></button>
+              </div>
+
+              <div className="p-8">
+                <form onSubmit={handleTransactionSubmit} className="space-y-6">
+
+                  <div className="grid grid-cols-2 gap-2 bg-[#020617] p-1 rounded-xl border border-white/5">
+                    <button type="button" onClick={() => setTransactionType('expense')} className={`py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${transactionType === 'expense' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-slate-400 hover:text-slate-200'}`}>
+                      Expense
+                    </button>
+                    <button type="button" onClick={() => setTransactionType('income')} className={`py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${transactionType === 'income' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-slate-200'}`}>
+                      Income
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-1">Amount</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl font-light">$</span>
+                      <input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full bg-[#020617] border border-white/10 text-white p-4 pl-10 rounded-xl focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-3xl font-bold placeholder-slate-700 transition-all font-mono"
+                        autoFocus
+                      />
                     </div>
-                    <p className="!text-[#6B7280] text-sm">No transactions yet.</p>
+                  </div>
+
+                  {transactionType === 'expense' && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-1">Category</label>
+                      <div className="relative">
+                        <select
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          className="w-full bg-[#020617] border border-white/10 text-white p-4 rounded-xl focus:border-cyan-500 outline-none appearance-none font-medium cursor-pointer hover:border-white/20 transition-all"
+                        >
+                          {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
+                        </select>
+                        <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 pl-1">Description</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="What is this for?"
+                      className="w-full bg-[#020617] border border-white/10 text-white p-4 rounded-xl focus:border-cyan-500 outline-none resize-none placeholder-slate-700 min-h-[100px]"
+                    />
+                  </div>
+
+                  <button type="submit" disabled={isSubmitting} className={`w-full py-4 rounded-xl font-bold text-white shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-lg ${transactionType === 'income' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-500'}`}>
+                    {isSubmitting ? 'Processing...' : `Confirm ${transactionType === 'income' ? 'Income' : 'Expense'}`}
+                  </button>
+
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Fancy AI Popup (Preserved Logic) */}
+      <AnimatePresence>
+        {showFancyPopup && (
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-8 right-8 z-50 max-w-sm w-full">
+            <div className="bg-[#1E293B]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-400 to-purple-500"></div>
+              <div className="flex items-start gap-4">
+                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-3 rounded-xl text-white shadow-lg"><FiZap size={20} /></div>
+                <div>
+                  <h4 className="font-bold text-white mb-1">AI Insight</h4>
+                  <p className="text-slate-300 text-sm leading-relaxed">"{fancyMessage}"</p>
+                </div>
+                <button onClick={() => setShowFancyPopup(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white"><FiX size={16} /></button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+      </AnimatePresence>
+
+      {/* AI Quick Add Modal */}
+      <AnimatePresence>
+        {showAIInput && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowAIInput(false)} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-[#0f172a] border border-purple-500/20 rounded-3xl w-full max-w-lg relative z-10 overflow-hidden shadow-2xl shadow-purple-500/10">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-purple-500/5">
+                <div className="flex items-center gap-2">
+                  <FiZap className="text-purple-400" size={24} />
+                  <h3 className="text-xl font-bold text-white">AI Wisdom Add</h3>
+                </div>
+                <button onClick={() => setShowAIInput(false)} className="text-slate-400 hover:text-white"><FiX size={24} /></button>
+              </div>
+              <div className="p-8">
+                <textarea
+                  value={aiText}
+                  onChange={(e) => setAiText(e.target.value)}
+                  placeholder="e.g., 'I spent 50 dollars on sushi today' or 'Got 2000 salary from work'"
+                  className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-2xl focus:border-purple-500 outline-none resize-none min-h-[160px] text-lg placeholder-slate-600"
+                  disabled={aiLoading}
+                />
+                <button
+                  onClick={handleAIProcessing}
+                  disabled={aiLoading || !aiText.trim()}
+                  className="w-full mt-6 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-xl shadow-purple-900/20 transition-all flex items-center justify-center gap-2"
+                >
+                  {aiLoading ? <FiRefreshCw className="animate-spin" /> : <FiZap />}
+                  {aiLoading ? 'AI is Thinking...' : 'Analyze & Add'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Receipt Scanner Modal */}
+      <AnimatePresence>
+        {showReceiptScanner && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowReceiptScanner(false)} />
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-[#0f172a] border border-sky-500/20 rounded-3xl w-full max-w-lg relative z-10 overflow-hidden shadow-2xl shadow-sky-500/10">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-sky-500/5">
+                <div className="flex items-center gap-2">
+                  <FiCamera className="text-sky-400" size={24} />
+                  <h3 className="text-xl font-bold text-white">Optical Receipt Scanner</h3>
+                </div>
+                <button onClick={() => setShowReceiptScanner(false)} className="text-slate-400 hover:text-white"><FiX size={24} /></button>
+              </div>
+              <div className="p-8">
+                {!receiptPreview ? (
+                  <label className="border-2 border-dashed border-white/10 rounded-3xl p-12 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 hover:border-sky-500/30 transition-all">
+                    <FiDownload className="text-slate-500 mb-4" size={48} />
+                    <p className="text-slate-400 font-medium">Drop receipt or click to upload</p>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
+                  </label>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-video bg-black">
+                      <img src={receiptPreview} alt="Receipt Preview" className="w-full h-full object-contain" />
+                      <button onClick={() => { setReceiptPreview(null); setSelectedReceipt(null); }} className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all shadow-lg">
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleReceiptScan}
+                      disabled={receiptLoading}
+                      className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 shadow-xl shadow-sky-900/20 transition-all flex items-center justify-center gap-2"
+                    >
+                      {receiptLoading ? <FiRefreshCw className="animate-spin" /> : <FiZap />}
+                      {receiptLoading ? 'Scanning Pixels...' : 'Start Extraction'}
+                    </button>
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Smaller Chart */}
-            <SpendingChart wallet={wallet} />
+            </motion.div>
           </div>
-        </div>
+        )}
+      </AnimatePresence>
 
-        <AnimatePresence>
-          {(showAIInput || showReceiptScanner || showAllTransactions) && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                onClick={() => {
-                  setShowAIInput(false);
-                  setShowReceiptScanner(false);
-                  setShowAllTransactions(false);
-                }}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className={`${showAllTransactions ? 'max-w-2xl' : 'max-w-md'} bg-[#141B2D] rounded-[10px] w-full p-6 relative z-10 border border-[#2D3748] shadow-2xl overflow-hidden`}
-              >
-                <button
-                  onClick={() => {
-                    setShowAIInput(false);
-                    setShowReceiptScanner(false);
-                    setShowAllTransactions(false);
-                  }}
-                  className="absolute top-4 right-4 !text-[#9CA3AF] hover:text-white z-20"
-                >
-                  <FiX size={20} />
+      {/* Full History Modal */}
+      <AnimatePresence>
+        {showAllTransactions && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowAllTransactions(false)} />
+            <motion.div initial={{ scale: 0.95, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 30 }} className="bg-[#0f172a] border border-white/10 rounded-[2.5rem] w-full max-w-5xl h-[85vh] relative z-20 flex flex-col overflow-hidden shadow-[0_0_100px_rgba(34,211,238,0.1)]">
+              <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                  <h3 className="text-3xl font-black text-white tracking-tight">Full Ledger</h3>
+                  <p className="text-slate-400 text-sm mt-1">Audit and filter every digital footprint</p>
+                </div>
+                <button onClick={() => setShowAllTransactions(false)} className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-all">
+                  <FiX size={28} />
                 </button>
+              </div>
 
-                {showAIInput && (
-                  <>
-                    <h3 className="text-lg font-bold !text-white mb-4 flex items-center gap-2"><FiZap className="!text-[#A855F7]" /> AI Quick Add</h3>
-                    <textarea
-                      value={aiText}
-                      onChange={(e) => setAiText(e.target.value)}
-                      placeholder="e.g. Spent $25 on Coffee at Starbucks"
-                      className="w-full bg-[#0B0F1A] border border-[#2D3748] rounded-lg p-4 !text-white min-h-[120px] focus:border-[#A855F7] outline-none resize-none mb-4 placeholder-[#4B5563]"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleAIProcess}
-                      disabled={!aiText.trim() || aiLoading}
-                      className="w-full !bg-[#9333EA] hover:bg-[#7E22CE] !text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2"
-                    >
-                      {aiLoading ? <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : 'Process Transaction'}
-                    </button>
-                  </>
-                )}
+              <div className="p-6 bg-white/[0.01] border-b border-white/5">
+                <SearchAndFilters onFilterChange={setFilters} activeFilters={filters} />
+              </div>
 
-                {showReceiptScanner && (
-                  <>
-                    <h3 className="text-lg font-bold !text-white mb-4 flex items-center gap-2"><FiCamera className="!text-[#0EA5E9]" /> Scan Receipt</h3>
-                    <div className="border-2 border-dashed border-[#2D3748] rounded-lg p-8 bg-[#0B0F1A] text-center relative hover:border-[#0EA5E9] transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={(e) => {
-                          if (e.target.files[0]) {
-                            setSelectedReceipt(e.target.files[0]);
-                            setReceiptPreview(URL.createObjectURL(e.target.files[0]));
-                          }
-                        }}
-                      />
-                      {receiptPreview ? (
-                        <img src={receiptPreview} className="max-h-48 mx-auto rounded shadow-md" />
-                      ) : (
-                        <div className="!text-[#9CA3AF]">
-                          <FiCamera size={32} className="mx-auto mb-2" />
-                          <p className="text-sm">Click to upload receipt</p>
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={handleReceiptUpload}
-                      disabled={!selectedReceipt || receiptLoading}
-                      className="w-full !bg-[#0284C7] hover:bg-[#0369A1] !text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
-                    >
-                      {receiptLoading ? <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : 'Extract Data'}
-                    </button>
-                  </>
-                )}
-
-                {showAllTransactions && (
-                  <div className="flex flex-col max-h-[70vh]">
-                    <h3 className="text-xl font-bold !text-white mb-6 flex items-center gap-2">
-                      <FiList className="!text-[#6366F1]" /> Full Transaction History
-                    </h3>
-                    <div className="overflow-y-auto pr-2 custom-scrollbar divide-y divide-[#2D3748]">
-                      {recentTransactions.map((tx, idx) => (
-                        <div key={idx} className="py-4 flex items-center justify-between group">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${(tx.type === 'income' || tx.type === 'ADD')
-                              ? 'bg-[#10B981]/10 !text-[#10B981]'
-                              : 'bg-[#F43F5E]/10 !text-[#F43F5E]'
-                              }`}>
-                              {(tx.type === 'income' || tx.type === 'ADD') ? <FiArrowDownLeft /> : <FiArrowUpRight />}
-                            </div>
-                            <div>
-                              <p className="font-medium !text-white">{tx.message || tx.category}</p>
-                              <p className="text-xs !text-[#9CA3AF] capitalize">
-                                {tx.category} • {tx.date || (tx.createdAt ? new Date(tx.createdAt).toLocaleDateString(undefined, {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric'
-                                }) : 'Today')}
-                              </p>
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-3">
+                  {wallet?.transactions?.length > 0 ? (
+                    wallet.transactions.map((tx, idx) => (
+                      <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/5 transition-all group">
+                        <div className="flex items-center gap-5">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${(tx.type === 'income' || tx.type === 'ADD')
+                            ? 'bg-emerald-500/10 text-emerald-400'
+                            : 'bg-rose-500/10 text-rose-400'}`}>
+                            {(tx.type === 'income' || tx.type === 'ADD') ? <FiArrowDownLeft /> : <FiArrowUpRight />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-white group-hover:text-cyan-400 transition-colors">{tx.message || tx.category}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="px-2 py-0.5 rounded bg-black/40 border border-white/10 uppercase text-[10px] text-slate-400 tracking-wider ">{tx.category}</span>
+                              <span className="text-xs text-slate-500 font-mono">{new Date(tx.date).toLocaleString()}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <span className={`font-mono font-bold ${(tx.type === 'income' || tx.type === 'ADD') ? '!text-[#34D399]' : '!text-[#FB7185]'
-                              }`}>
-                              {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
-                            </span>
-                          </div>
                         </div>
-                      ))}
+                        <div className={`font-mono font-black text-xl ${(tx.type === 'income' || tx.type === 'ADD') ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="h-64 flex flex-col items-center justify-center text-slate-500">
+                      <FiSearch size={48} className="mb-4 opacity-20" />
+                      <p className="text-xl font-medium">No transactions found for the current filters</p>
                     </div>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-      </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -203,6 +203,48 @@ const ExportReports = () => {
       </div>
 
       <div className="export-content">
+        {/* Date Range Selection */}
+        <div className="date-range-section">
+          <h3 className="section-title">
+            <FaCalendar className="inline mr-2" />
+            Select Date Range
+          </h3>
+
+          <div className="quick-ranges">
+            {quickDateRanges.map((range) => (
+              <button
+                key={range.label}
+                onClick={() => setDateRange(range.getValue())}
+                className="quick-range-btn"
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="custom-range">
+            <div className="date-input-group">
+              <label>Start Date</label>
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                className="date-input"
+              />
+            </div>
+            <div className="date-input-group">
+              <label>End Date</label>
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                min={dateRange.startDate}
+                className="date-input"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Dynamic Report Summary Section */}
         {stats && (
           <motion.div
@@ -263,48 +305,6 @@ const ExportReports = () => {
           </motion.div>
         )}
 
-        {/* Date Range Selection */}
-        <div className="date-range-section">
-          <h3 className="section-title">
-            <FaCalendar className="inline mr-2" />
-            Select Date Range
-          </h3>
-
-          <div className="quick-ranges">
-            {quickDateRanges.map((range) => (
-              <button
-                key={range.label}
-                onClick={() => setDateRange(range.getValue())}
-                className="quick-range-btn"
-              >
-                {range.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="custom-range">
-            <div className="date-input-group">
-              <label>Start Date</label>
-              <input
-                type="date"
-                value={dateRange.startDate}
-                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-                className="date-input"
-              />
-            </div>
-            <div className="date-input-group">
-              <label>End Date</label>
-              <input
-                type="date"
-                value={dateRange.endDate}
-                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-                min={dateRange.startDate}
-                className="date-input"
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Export Options */}
         <div className="export-options">
           <motion.div
@@ -363,7 +363,7 @@ const ExportReports = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .export-reports-container {
           padding: 2rem;
           max-width: 1200px;
