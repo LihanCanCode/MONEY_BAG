@@ -4,84 +4,109 @@ import Dashboard from './Dashboard';
 import RecurringTransactions from '../components/RecurringTransactions';
 import ExportReports from '../components/ExportReports';
 import SpendingHeatmap from '../components/SpendingHeatmap';
-import { FiHome, FiRepeat, FiDownload, FiTrendingUp } from 'react-icons/fi';
+import BudgetManagement from '../components/BudgetManagement';
+import FinancialGoals from '../components/FinancialGoals';
+import Transactions from './Transactions';
+import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity } from 'react-icons/fi';
 
 const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: FiHome },
-    { id: 'recurring', label: 'Recurring', icon: FiRepeat },
-    { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
-    { id: 'export', label: 'Export', icon: FiDownload }
+  { id: 'dashboard', label: 'Dashboard', icon: FiHome },
+  { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
+  { id: 'goals', label: 'Goals', icon: FiTarget },
+  { id: 'recurring', label: 'Recurring', icon: FiRepeat },
+  { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
+  { id: 'export', label: 'Export', icon: FiDownload },
+  { id: 'transactions', label: 'Transactions', icon: FiActivity }
 ];
 
 const EnhancedDashboard = () => {
-    const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
-    return (
-        <div className="enhanced-dashboard">
-            {/* Tab Navigation */}
-            <div className="tabs-container">
-                {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-                        >
-                            <Icon className="tab-icon" />
-                            <span className="tab-label">{tab.label}</span>
-                            {activeTab === tab.id && (
-                                <motion.div
-                                    layoutId="activeTab"
-                                    className="tab-indicator"
-                                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                                />
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Tab Content */}
-            <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="tab-content"
+  return (
+    <div className="enhanced-dashboard">
+      {/* Tab Navigation */}
+      <div className="tabs-container">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
             >
-                {activeTab === 'dashboard' && <Dashboard />}
-                {activeTab === 'recurring' && (
-                    <div className="min-h-screen bg-[#0B0F1A] pt-6">
-                        <RecurringTransactions />
-                    </div>
-                )}
-                {activeTab === 'analytics' && (
-                    <div className="min-h-screen bg-[#0B0F1A] pt-6">
-                        <SpendingHeatmap />
-                    </div>
-                )}
-                {activeTab === 'export' && (
-                    <div className="min-h-screen bg-[#0B0F1A] pt-6">
-                        <ExportReports />
-                    </div>
-                )}
-            </motion.div>
+              <Icon className="tab-icon" />
+              <span className="tab-label">{tab.label}</span>
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="tab-indicator"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-            <style jsx>{`
+      {/* Tab Content */}
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="tab-content"
+      >
+        {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'budgets' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <BudgetManagement />
+          </div>
+        )}
+        {activeTab === 'goals' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <FinancialGoals />
+          </div>
+        )}
+        {activeTab === 'recurring' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <RecurringTransactions />
+          </div>
+        )}
+        {activeTab === 'analytics' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <SpendingHeatmap />
+          </div>
+        )}
+        {activeTab === 'export' && (
+          <div className="min-h-screen bg-[#020617] pt-6">
+            <ExportReports />
+          </div>
+        )}
+        {activeTab === 'transactions' && (
+          <div className="min-h-screen bg-[#020617]">
+            <Transactions />
+          </div>
+        )}
+      </motion.div>
+
+      <style>{`
         .enhanced-dashboard {
           min-height: 100vh;
-          background: #0B0F1A;
+          background: #020617;
         }
 
         .tabs-container {
           display: flex;
           gap: 0.5rem;
           padding: 1rem 2rem;
-          background: #141B2D;
-          border-bottom: 2px solid #2D3748;
+          background: #0B1121;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
           overflow-x: auto;
+          position: sticky;
+          top: 0;
+          z-index: 30;
+          backdrop-blur-md;
         }
 
         .tab-button {
@@ -153,8 +178,8 @@ const EnhancedDashboard = () => {
           }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default EnhancedDashboard;

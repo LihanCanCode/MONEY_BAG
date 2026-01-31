@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import EnhancedDashboard from "../pages/EnhancedDashboard";
+import Transactions from "../pages/Transactions";
 
 
 const router = createBrowserRouter([

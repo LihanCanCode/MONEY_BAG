@@ -26,7 +26,7 @@ const transactionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['food', 'bills', 'entertainment', 'transport', 'shopping', 'health', 'other', 'education', 'salary', null],
+    enum: ['food', 'bills', 'entertainment', 'transport', 'shopping', 'health', 'other', 'education', 'salary', 'vacation', 'emergency', 'purchase', 'investment', 'home', 'car', 'savings', null],
     default: null
   },
   amount: {
@@ -50,7 +50,7 @@ const transactionSchema = new mongoose.Schema({
   }
 });
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema, 'transactions');
 
 module.exports = Transaction;
 

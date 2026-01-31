@@ -1078,3 +1078,670 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ===== BUDGET MANAGEMENT STYLES ===== */
+.budget-management,
+.financial-goals {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: white;
+}
+
+.budget-header,
+.goals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.budget-header h2,
+.goals-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10B981, #34D399);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.create-budget-btn,
+.create-goal-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #10B981, #34D399);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-budget-btn:hover,
+.create-goal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+/* Budget/Goal Form */
+.budget-form-container,
+.goal-form-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.budget-form h3,
+.goal-form h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #1F2937;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.form-group input::placeholder,
+.form-group select::placeholder {
+  color: #9CA3AF;
+  opacity: 1;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group select option {
+  background: #1A233A;
+  color: white;
+  padding: 0.5rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #10B981;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.form-group input[type="range"] {
+  cursor: pointer;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #4B5563;
+  font-size: 0.875rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #10B981, #34D399);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Budget Grid */
+.budgets-grid,
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Budget Card */
+.budget-card,
+.goal-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.budget-card:hover,
+.goal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.budget-card.inactive {
+  opacity: 0.6;
+}
+
+.budget-card.exceeded {
+  border-color: #F44336;
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.2);
+}
+
+.budget-card.warning {
+  border-color: #FFC107;
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
+}
+
+.budget-card.good {
+  border-color: #4CAF50;
+}
+
+.budget-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.category-info,
+.goal-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.category-icon,
+.goal-icon {
+  font-size: 2rem;
+}
+
+.category-info h3,
+.goal-info h3 {
+  font-size: 1.25rem;
+  color: white;
+  margin: 0;
+}
+
+.goal-category {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.budget-actions,
+.goal-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.budget-actions button,
+.goal-actions button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.budget-actions button:hover,
+.goal-actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.delete-btn {
+  color: #F44336 !important;
+}
+
+.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.2) !important;
+}
+
+.budget-visual,
+.goal-visual {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.budget-details,
+.goal-details {
+  margin-top: 1rem;
+}
+
+.budget-amounts,
+.goal-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.amount-item,
+.amount-row {
+  text-align: center;
+}
+
+.amount-item .label,
+.amount-row .label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.25rem;
+}
+
+.amount-item .value,
+.amount-row .value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.amount-row.highlight {
+  padding: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 8px;
+}
+
+.value.negative {
+  color: #F44336;
+}
+
+.value.positive {
+  color: #4CAF50;
+}
+
+.progress-bar,
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-fill,
+.progress-bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+
+.progress-fill.good {
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+}
+
+.progress-fill.warning {
+  background: linear-gradient(90deg, #FFC107, #FFD54F);
+}
+
+.progress-fill.exceeded {
+  background: linear-gradient(90deg, #F44336, #E57373);
+}
+
+.budget-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.days-remaining {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.good {
+  background: rgba(76, 175, 80, 0.2);
+  color: #81C784;
+}
+
+.status-badge.warning {
+  background: rgba(255, 193, 7, 0.2);
+  color: #FFD54F;
+}
+
+.status-badge.exceeded {
+  background: rgba(244, 67, 54, 0.2);
+  color: #E57373;
+}
+
+/* Budget Analytics */
+.budget-analytics-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.budget-analytics-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+/* Financial Goals Specific Styles */
+.goal-card.completed {
+  border-color: #10B981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.05));
+}
+
+.goal-card.overdue {
+  border-color: #F44336;
+}
+
+.completed-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #10B981, #34D399);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.goal-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.overdue-text {
+  color: #F44336;
+  font-weight: 600;
+}
+
+.goal-predictions {
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.goal-predictions h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.prediction-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.prediction-item span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.prediction-item strong {
+  color: white;
+}
+
+.on-track {
+  color: #4CAF50 !important;
+}
+
+.off-track {
+  color: #FFC107 !important;
+}
+
+.goal-footer-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.contribute-btn,
+.complete-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contribute-btn {
+  background: linear-gradient(135deg, #2196F3, #42A5F5);
+  color: white;
+}
+
+.complete-btn {
+  background: linear-gradient(135deg, #10B981, #34D399);
+  color: white;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #1A233A;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  min-width: 400px;
+  max-width: 90%;
+}
+
+.modal-content h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.modal-body {
+  margin-bottom: 1.5rem;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.modal-body input:focus {
+  outline: none;
+  border-color: #10B981;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #10B981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+  .budgets-grid,
+  .goals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-header,
+  .goals-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .modal-content {
+    min-width: unset;
+    width: 90%;
+  }
+
+  .goal-footer-actions {
+    flex-direction: column;
+  }
+
+  .budget-amounts,
+  .goal-amounts {
+    grid-template-columns: 1fr;
+  }
+}

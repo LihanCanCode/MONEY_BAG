@@ -30,6 +30,20 @@ export const API_ENDPOINTS = {
   EXPORT_CSV: `${API_BASE_URL}/api/analytics/export/csv`,
   EXPORT_PDF: `${API_BASE_URL}/api/analytics/export/pdf`,
 
+  // Budget Management
+  BUDGETS: `${API_BASE_URL}/api/budgets`,
+  BUDGET_BY_ID: (id) => `${API_BASE_URL}/api/budgets/${id}`,
+  BUDGET_TOGGLE: (id) => `${API_BASE_URL}/api/budgets/${id}/toggle`,
+  BUDGET_STATUS: `${API_BASE_URL}/api/budgets/status`,
+  BUDGET_ANALYTICS: `${API_BASE_URL}/api/budgets/analytics`,
+
+  // Financial Goals
+  GOALS: `${API_BASE_URL}/api/goals`,
+  GOAL_BY_ID: (id) => `${API_BASE_URL}/api/goals/${id}`,
+  GOAL_CONTRIBUTE: (id) => `${API_BASE_URL}/api/goals/${id}/contribute`,
+  GOAL_COMPLETE: (id) => `${API_BASE_URL}/api/goals/${id}/complete`,
+  GOAL_PREDICTIONS: (id) => `${API_BASE_URL}/api/goals/${id}/predictions`,
+
   // User Management
   USERS: `${API_BASE_URL}/api/users`,
   USER_PROFILE: (userId) => `${API_BASE_URL}/api/users/${userId}/profile`,
