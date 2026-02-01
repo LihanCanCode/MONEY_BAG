@@ -22,12 +22,36 @@ MoneyBag is an end-to-end personal finance platform that combines real-time mone
 
 ## Features
 
-- **Unified money cockpit**: Interactive dashboards for balances, spending history, net cash flow, and category heatmaps.
-- **Smart transaction capture**: Log expenses and income manually, via recurring schedules, CSV/PDF exports, or Gemini-powered natural language and receipt parsing.
-- **Budget guardrails**: Build monthly or yearly category budgets with alert thresholds, progress bars, and analytics.
-- **Goal tracking**: Create savings goals, monitor progress, predict outcomes from spending habits, and celebrate completions.
-- **Automation suite**: Manage recurring transactions, trigger due payments, and export detailed reports in CSV or branded PDF layouts.
-- **Security first**: Firebase Authentication protects the UI, while the API verifies ID tokens and isolates user data in MongoDB.
+### Financial Overview
+- Interactive dashboards surface real-time balances, cash flow, and category spending heatmaps.
+- Enhanced dashboard tabs bundle core workflows (budgets, goals, recurring, analytics, exports, transactions).
+
+### Transaction Management
+- Capture spend or income manually with rich metadata and satisfaction scoring.
+- Process CSV and PDF exports for comprehensive record keeping.
+- Parse natural language descriptions or receipt images via Gemini 2.5 Flash.
+
+### Budget Management
+- Create monthly or yearly budgets by category with customizable alert thresholds.
+- Visualize status with circular and linear progress bars plus color-coded states (green, yellow, red).
+- Review analytics comparing budget targets against actual spending and toggle budgets on/off without losing history.
+
+### Financial Goals
+- Define savings targets with priorities, deadlines, and ongoing contributions.
+- Predict goal attainment using historical savings rates and real-time progress indicators.
+- Celebrate completions with confetti animations and status tracking for on-track vs behind goals.
+
+### Recurring Automation
+- Schedule recurring income or expense entries with daily, weekly, monthly, or yearly cadence.
+- Pause or resume recurring items, process due transactions on demand, and maintain detailed audit trails.
+
+### Analytics & Reporting
+- Generate category breakdowns, trend charts, and spending heatmaps across day and time dimensions.
+- Export branded PDF or CSV transaction reports, including summaries and detailed itemization.
+
+### Security & Access
+- Enforce Firebase Authentication across the SPA and verify ID tokens in the API layer.
+- Scope all database operations by authenticated user and protect sensitive keys via environment variables.
 
 ---
 
@@ -206,17 +230,6 @@ Planned enhancements drawn from internal guides:
 
 Refer to `BUDGET_AND_GOALS_GUIDE.md`, `NEW_FEATURES_GUIDE.md`, and `IMPLEMENTATION_CHECKLIST.md` for deeper implementation notes.
 
----
-
-## Contributing
-
-1. Fork the repository and create a feature branch.
-2. Ensure linting passes (`npm run lint` in the frontend) and the API runs without runtime errors.
-3. Submit a pull request describing changes, testing steps, and screenshots for UI updates.
-
-Issues and feature suggestions are welcome via GitHub issues.
-
----
 
 ## License
 
