@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Budget Management Component
+ * 
+ * Comprehensive budget tracking and management interface with:
+ * - Create, read, update, delete (CRUD) operations for budgets
+ * - Visual budget progress indicators with circular charts
+ * - Budget status tracking (good/warning/exceeded)
+ * - Category-based budget organization
+ * - Budget vs actual spending analytics
+ * - Alert threshold configuration
+ * - Budget activation/deactivation toggle
+ * - Animated UI elements for better UX
+ */
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +23,15 @@ import {
     FaChartBar, FaExclamationTriangle, FaCheckCircle
 } from 'react-icons/fa';
 
+/**
+ * Budget Categories Configuration
+ * 
+ * Predefined categories for budget organization.
+ * Each category includes:
+ * - value: Internal identifier for API/database
+ * - label: User-friendly display name
+ * - icon: Emoji icon for visual identification
+ */
 const CATEGORIES = [
     { value: 'food', label: 'Food & Dining', icon: '🍔' },
     { value: 'transport', label: 'Transportation', icon: '🚗' },
@@ -20,22 +43,50 @@ const CATEGORIES = [
     { value: 'other', label: 'Other', icon: '📦' }
 ];
 
+/**
+ * BudgetManagement Component
+ * 
+ * Main component for managing user budgets.
+ * Provides complete budget lifecycle management with visual feedback.
+ * 
+ * Features:
+ * - Create new budgets with customizable categories, amounts, and alert thresholds
+ * - View all budgets with current spending and progress visualization
+ * - Edit existing budgets (except category which is locked after creation)
+ * - Delete budgets with confirmation
+ * - Toggle budget active/inactive status
+ * - Real-time budget status indicators (good/warning/exceeded)
+ * - Analytics chart comparing budget vs actual spending
+ * 
+ * @returns {JSX.Element} Budget management interface
+ */
 const BudgetManagement = () => {
     const { currentUser } = useAuth();
-    const [budgets, setBudgets] = useState([]);
-    const [budgetAnalytics, setBudgetAnalytics] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingBudget, setEditingBudget] = useState(null);
+    
+    // Data state
+    const [budgets, setBudgets] = useState([]);                   // All user budgets
+    const [budgetAnalytics, setBudgetAnalytics] = useState([]);   // Budget vs actual data for charts
+    const [loading, setLoading] = useState(true);                 // Initial data loading state
+    
+    // UI state
+    const [showCreateForm, setShowCreateForm] = useState(false);  // Toggle create/edit form visibility
+    const [editingBudget, setEditingBudget] = useState(null);     // Budget currently being edited (null if creating)
 
-    // Form state
+    /**
+     * Form data state
+     * Manages all form field values for create/edit operations
+     */
     const [formData, setFormData] = useState({
-        category: '',
-        amount: '',
-        period: 'monthly',
-        alertThreshold: 80
+        category: '',          // Budget category (food, transport, etc.)
+        amount: '',            // Budget limit amount in dollars
+        period: 'monthly',     // Budget period (monthly or yearly)
+        alertThreshold: 80     // Percentage at which to trigger alerts (50-100)
     });
 
+    /**
+     * Effect: Load budgets and analytics on mount or user change
+     * Fetches both budget list and analytics data when user is authenticated
+     */
     useEffect(() => {
         if (currentUser) {
             fetchBudgets();
@@ -43,6 +94,13 @@ const BudgetManagement = () => {
         }
     }, [currentUser]);
 
+    /**
+     * Fetch all budgets for the current user
+     * 
+     * Retrieves the complete list of budgets from the backend API.
+     * Each budget includes current spending, status, and configuration.
+     * Updates the budgets state and clears loading flag.
+     */
     const fetchBudgets = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -63,6 +121,13 @@ const BudgetManagement = () => {
         }
     };
 
+    /**
+     * Fetch budget analytics data
+     * 
+     * Retrieves aggregated data comparing budget limits to actual spending.
+     * Used to populate the budget vs actual spending chart.
+     * This data helps users visualize their spending patterns.
+     */
     const fetchBudgetAnalytics = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -81,6 +146,17 @@ const BudgetManagement = () => {
         }
     };
 
+    /**
+     * Create a new budget
+     * 
+     * Submits form data to create a new budget for the selected category.
+     * On success:
+     * - Closes the form
+     * - Resets form data
+     * - Refreshes budget list and analytics
+     * 
+     * @param {Event} e - Form submit event
+     */
     const handleCreateBudget = async (e) => {
         e.preventDefault();
 
@@ -110,6 +186,18 @@ const BudgetManagement = () => {
         }
     };
 
+    /**
+     * Update an existing budget
+     * 
+     * Saves changes to a budget being edited.
+     * Note: Category cannot be changed once budget is created.
+     * On success:
+     * - Clears editing state
+     * - Resets form data
+     * - Refreshes budget list and analytics
+     * 
+     * @param {Event} e - Form submit event
+     */
     const handleUpdateBudget = async (e) => {
         e.preventDefault();
 
@@ -135,6 +223,14 @@ const BudgetManagement = () => {
         }
     };
 
+    /**
+     * Delete a budget
+     * 
+     * Removes a budget permanently after user confirmation.
+     * Refreshes both budget list and analytics after successful deletion.
+     * 
+     * @param {string} budgetId - ID of the budget to delete
+     */
     const handleDeleteBudget = async (budgetId) => {
         if (!confirm('Are you sure you want to delete this budget?')) return;
 
@@ -156,6 +252,14 @@ const BudgetManagement = () => {
         }
     };
 
+    /**
+     * Toggle budget active/inactive status
+     * 
+     * Enables or disables budget tracking without deleting the budget.
+     * Useful for temporarily pausing budget monitoring.
+     * 
+     * @param {string} budgetId - ID of the budget to toggle
+     */
     const handleToggleBudget = async (budgetId) => {
         try {
             const token = await currentUser.getIdToken();

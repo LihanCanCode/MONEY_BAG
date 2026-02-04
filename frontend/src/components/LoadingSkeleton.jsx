@@ -1,9 +1,30 @@
+/**
+ * @fileoverview Loading Skeleton Components
+ * 
+ * Provides skeleton loading placeholders for better UX during data fetching.
+ * Uses react-loading-skeleton library for smooth loading animations.
+ * 
+ * Components:
+ * - DashboardSkeleton: Full dashboard loading state with multiple card placeholders
+ * - CardSkeleton: Reusable single card skeleton for individual components
+ */
+
 import React from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 /**
- * LoadingSkeleton - Displays skeleton loading for dashboard cards
+ * DashboardSkeleton Component
+ * 
+ * Displays comprehensive loading skeleton for the entire dashboard page.
+ * Mimics the layout of the actual dashboard to provide visual continuity.
+ * 
+ * Includes skeletons for:
+ * - Page header (title and subtitle)
+ * - Wallet overview card with 3 stat columns
+ * - 4 action buttons in a grid
+ * 
+ * @returns {JSX.Element} Full dashboard loading skeleton
  */
 const DashboardSkeleton = () => {
     return (

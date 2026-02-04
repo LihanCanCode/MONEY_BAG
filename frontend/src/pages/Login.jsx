@@ -1,30 +1,69 @@
+/**
+ * @fileoverview Login Page Component
+ * 
+ * Provides user authentication interface with:
+ * - Email/password login form
+ * - Google OAuth sign-in option
+ * - Password visibility toggle
+ * - Responsive design with illustration
+ * - Navigation to registration page
+ */
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Login Component
+ * 
+ * Full-featured login page with split-screen design:
+ * - Left side: Animated illustration (desktop only)
+ * - Right side: Login form with email/password and Google sign-in
+ * 
+ * Features:
+ * - Form validation
+ * - Password visibility toggle
+ * - Google OAuth integration
+ * - Error handling and user feedback
+ * - Responsive design (mobile-first)
+ * 
+ * @returns {JSX.Element} Login page component
+ */
 const Login = () => {
+  // Form state management
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Authentication and navigation hooks
   const { loginUser, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
+  /**
+   * Handle email/password login form submission
+   * 
+   * @param {Event} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await loginUser(email, password);
       alert("Login successful");
-      navigate("/dashboard");
+      navigate("/dashboard"); // Redirect to dashboard on success
     } catch (error) {
       alert("Login failed: " + (error.message || "Please try again"));
     }
   };
 
+  /**
+   * Handle Google OAuth sign-in
+   * Opens Google authentication popup
+   */
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
       alert("Google sign-in successful");
-      navigate("/dashboard");
+      navigate("/dashboard"); // Redirect to dashboard on success
     } catch (error) {
       alert("Google sign-in failed");
     }
@@ -32,12 +71,14 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side - Illustration Section */}
+      {/* ==========================================
+          LEFT SIDE - ILLUSTRATION SECTION (Desktop Only)
+          ========================================== */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-cyan-400 items-center justify-center p-12">
         <div className="relative w-full max-w-lg">
           {/* Illustration Container */}
           <div className="relative">
-            {/* Person sitting with laptop */}
+            {/* Person sitting with laptop - Custom SVG illustration */}
             <div className="flex items-center justify-center">
               <svg viewBox="0 0 400 400" className="w-full h-auto">
                 {/* Decorative plant */}
@@ -69,7 +110,7 @@ const Login = () => {
                 <rect x="165" y="190" width="50" height="35" rx="3" fill="#9ca3af" />
                 <rect x="167" y="192" width="46" height="30" rx="2" fill="#1f2937" />
 
-                {/* Login window floating */}
+                {/* Login window floating - Represents the login interface */}
                 <g transform="translate(240, 120)">
                   <rect x="0" y="0" width="120" height="140" rx="8" fill="white" filter="url(#shadow)" />
                   <rect x="0" y="0" width="120" height="25" rx="8" fill="#e5e7eb" />
@@ -77,7 +118,7 @@ const Login = () => {
                   <circle cx="20" cy="12" r="3" fill="#fbbf24" />
                   <circle cx="30" cy="12" r="3" fill="#10b981" />
 
-                  {/* Lock icon */}
+                  {/* Lock icon - Security symbol */}
                   <rect x="50" y="45" width="20" height="25" rx="3" fill="#dc2626" />
                   <circle cx="60" cy="42" r="8" fill="none" stroke="#dc2626" strokeWidth="3" />
                   <text x="60" y="80" textAnchor="middle" fontSize="8" fill="#666">username@gmail</text>
@@ -89,6 +130,7 @@ const Login = () => {
                 <circle cx="380" cy="175" r="8" fill="#9ca3af" />
                 <path d="M 365,195 Q 380,185 395,195" fill="#9ca3af" />
 
+                {/* SVG filter for shadow effects */}
                 <defs>
                   <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
                     <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.2" />
@@ -100,15 +142,20 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
+      {/* ==========================================
+          RIGHT SIDE - LOGIN FORM
+          ========================================== */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
+          {/* Welcome Header */}
           <div className="mb-8">
             <h2 className="text-4xl font-bold text-gray-900 mb-2">Welcome back!</h2>
             <p className="text-gray-500">Sign in to your account to continue</p>
           </div>
 
+          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Input Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -124,6 +171,7 @@ const Login = () => {
               />
             </div>
 
+            {/* Password Input Field with Visibility Toggle */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -138,6 +186,7 @@ const Login = () => {
                   className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   placeholder="••••••"
                 />
+                {/* Toggle password visibility button */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -145,8 +194,10 @@ const Login = () => {
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {showPassword ? (
+                      // Eye icon (password visible)
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     ) : (
+                      // Eye-off icon (password hidden)
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                     )}
                   </svg>
@@ -154,12 +205,14 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Forgot Password Link */}
             <div className="text-right">
               <a href="#" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Forgot password?
               </a>
             </div>
 
+            {/* Sign In Button */}
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-cyan-400 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-cyan-500 transition duration-200 font-semibold text-lg"
@@ -167,6 +220,7 @@ const Login = () => {
               Sign In
             </button>
 
+            {/* Divider - Separates email/password from OAuth */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -176,11 +230,13 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Google Sign-In Button */}
             <button
               type="button"
               onClick={handleGoogleSignIn}
               className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium flex items-center justify-center space-x-3"
             >
+              {/* Google Logo SVG */}
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -191,6 +247,7 @@ const Login = () => {
             </button>
           </form>
 
+          {/* Registration Link */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
