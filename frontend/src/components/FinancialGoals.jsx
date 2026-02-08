@@ -259,7 +259,7 @@ const FinancialGoals = () => {
             {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
 
             <div className="goals-header">
-                <h2>🎯 Financial Goals</h2>
+                <h2 style={{ color: '#ffffff' }}>🎯 Financial Goals</h2>
                 <motion.button
                     className="create-goal-btn"
                     onClick={() => setShowCreateForm(!showCreateForm)}

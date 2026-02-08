@@ -418,7 +418,7 @@ const RecurringTransactions = () => {
         .recurring-title {
           font-size: 2rem;
           font-weight: 700;
-          color: #1e293b;
+          color: #ffffff;
           margin: 0;
         }
 

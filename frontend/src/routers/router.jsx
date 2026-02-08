@@ -9,13 +9,15 @@ import Transactions from "../pages/Transactions";
 
 const router = createBrowserRouter([
     {
+        // Home page renders standalone without App layout (has its own navbar)
+        path: "/",
+        element: <Home />
+    },
+    {
+        // All other pages use the App layout with Navbar and Footer
         path: "/",
         element: <App />,
         children: [
-            {
-                path: "/",
-                element: <Home />
-            },
             {
                 path: "login",
                 element: <Login />
@@ -28,12 +30,9 @@ const router = createBrowserRouter([
                 path: "dashboard",
                 element: <EnhancedDashboard />
             }
-
-
-
         ]
     },
 ]);
 
 
-export default router; //exporting to use on main.jsx 
+export default router;

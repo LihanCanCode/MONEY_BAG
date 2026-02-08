@@ -65,14 +65,14 @@ const Transactions = () => {
     }
 
     return (
-        <div className="text-slate-200 font-sans pb-12 relative pt-8">
+        <div className="text-slate-200 font-sans pb-12 relative pt-8 w-full min-h-screen flex justify-center">
             <Toaster position="bottom-center" />
 
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="w-full max-w-7xl px-8 md:px-16 lg:px-24">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-2">
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-2" style={{ color: '#ffffff' }}>
                             Transaction <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Ledger</span>
                         </h1>
                         <p className="text-slate-500 font-medium">Audit every digital footprint and financial movement</p>

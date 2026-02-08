@@ -317,7 +317,7 @@ const BudgetManagement = () => {
     return (
         <div className="budget-management">
             <div className="budget-header">
-                <h2>💰 Budget Management</h2>
+                <h2 style={{ color: '#ffffff' }}>💰 Budget Management</h2>
                 <motion.button
                     className="create-budget-btn"
                     onClick={() => setShowCreateForm(!showCreateForm)}

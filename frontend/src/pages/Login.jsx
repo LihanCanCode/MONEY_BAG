@@ -1,31 +1,28 @@
 /**
  * @fileoverview Login Page Component
  * 
- * Provides user authentication interface with:
+ * Modern, dark-themed authentication interface with:
  * - Email/password login form
  * - Google OAuth sign-in option
  * - Password visibility toggle
- * - Responsive design with illustration
- * - Navigation to registration page
+ * - Animated entrance effects
+ * - Responsive design
  */
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn, FiArrowRight } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
+import { GiTwoCoins, GiWallet, GiMoneyStack } from 'react-icons/gi';
+import toast from 'react-hot-toast';
 
 /**
  * Login Component
  * 
- * Full-featured login page with split-screen design:
- * - Left side: Animated illustration (desktop only)
- * - Right side: Login form with email/password and Google sign-in
- * 
- * Features:
- * - Form validation
- * - Password visibility toggle
- * - Google OAuth integration
- * - Error handling and user feedback
- * - Responsive design (mobile-first)
+ * Full-featured login page with modern dark aesthetic
+ * Features animated elements and smooth transitions
  * 
  * @returns {JSX.Element} Login page component
  */
@@ -34,6 +31,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Authentication and navigation hooks
   const { loginUser, signInWithGoogle } = useAuth();
@@ -41,223 +39,654 @@ const Login = () => {
 
   /**
    * Handle email/password login form submission
-   * 
-   * @param {Event} e - Form submit event
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       await loginUser(email, password);
-      alert("Login successful");
-      navigate("/dashboard"); // Redirect to dashboard on success
+      toast.success("Welcome back! 🎉", {
+        duration: 3000,
+        style: {
+          background: '#1E293B',
+          color: '#fff',
+          border: '1px solid #10B981'
+        }
+      });
+      navigate("/dashboard");
     } catch (error) {
-      alert("Login failed: " + (error.message || "Please try again"));
+      toast.error("Login failed: " + (error.message || "Please try again"), {
+        duration: 4000,
+        style: {
+          background: '#7F1D1D',
+          color: '#FEF2F2',
+          border: '2px solid #EF4444'
+        }
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   /**
    * Handle Google OAuth sign-in
-   * Opens Google authentication popup
    */
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      alert("Google sign-in successful");
-      navigate("/dashboard"); // Redirect to dashboard on success
+      toast.success("Google sign-in successful! 🎉", {
+        duration: 3000,
+        style: {
+          background: '#1E293B',
+          color: '#fff',
+          border: '1px solid #10B981'
+        }
+      });
+      navigate("/dashboard");
     } catch (error) {
-      alert("Google sign-in failed");
+      toast.error("Google sign-in failed", {
+        duration: 4000,
+        style: {
+          background: '#7F1D1D',
+          color: '#FEF2F2',
+          border: '2px solid #EF4444'
+        }
+      });
+    }
+  };
+
+  // Floating icons animation variants
+  const floatingAnimation = {
+    animate: {
+      y: [0, -15, 0],
+      transition: {
+        duration: 3,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* ==========================================
-          LEFT SIDE - ILLUSTRATION SECTION (Desktop Only)
-          ========================================== */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-cyan-400 items-center justify-center p-12">
-        <div className="relative w-full max-w-lg">
-          {/* Illustration Container */}
-          <div className="relative">
-            {/* Person sitting with laptop - Custom SVG illustration */}
-            <div className="flex items-center justify-center">
-              <svg viewBox="0 0 400 400" className="w-full h-auto">
-                {/* Decorative plant */}
-                <g transform="translate(320, 280)">
-                  <ellipse cx="0" cy="20" rx="25" ry="8" fill="#8B4513" />
-                  <path d="M -15,-20 Q -15,-40 -5,-50 Q 0,-55 5,-50 Q 15,-40 15,-20" fill="#2d5016" />
-                  <path d="M -10,-25 Q -8,-38 0,-42 Q 8,-38 10,-25" fill="#3d6b1f" />
-                </g>
+    <div className="login-page">
+      {/* Background decorative elements */}
+      <div className="bg-gradient-blob bg-blob-1"></div>
+      <div className="bg-gradient-blob bg-blob-2"></div>
+      <div className="bg-gradient-blob bg-blob-3"></div>
 
-                {/* Desk */}
-                <rect x="80" y="280" width="180" height="15" rx="5" fill="#5a3a31" />
-                <rect x="75" y="295" width="190" height="10" rx="3" fill="#4a2a21" />
+      {/* Floating decorative icons */}
+      <motion.div 
+        className="floating-icon icon-1"
+        variants={floatingAnimation}
+        animate="animate"
+      >
+        <GiTwoCoins />
+      </motion.div>
+      <motion.div 
+        className="floating-icon icon-2"
+        variants={floatingAnimation}
+        animate="animate"
+        style={{ animationDelay: '1s' }}
+      >
+        <GiWallet />
+      </motion.div>
+      <motion.div 
+        className="floating-icon icon-3"
+        variants={floatingAnimation}
+        animate="animate"
+        style={{ animationDelay: '2s' }}
+      >
+        <GiMoneyStack />
+      </motion.div>
 
-                {/* Chair */}
-                <rect x="140" y="200" width="80" height="100" rx="10" fill="#7d4e57" />
-                <rect x="135" y="195" width="90" height="15" rx="7" fill="#6d3e47" />
-
-                {/* Person */}
-                <ellipse cx="180" cy="160" rx="25" ry="28" fill="#1e3a5f" /> {/* Body */}
-                <rect x="155" y="185" width="50" height="40" rx="5" fill="#1e3a5f" /> {/* Lower body */}
-                <ellipse cx="180" cy="130" rx="20" ry="22" fill="#d4a574" /> {/* Head */}
-                <ellipse cx="165" cy="125" rx="15" ry="18" fill="#2d2d2d" /> {/* Hair */}
-                <circle cx="175" cy="135" r="2" fill="#2d2d2d" /> {/* Eye */}
-                <path d="M 165,145 Q 175,148 180,145" stroke="#c47b5a" strokeWidth="2" fill="none" /> {/* Smile */}
-                <rect x="155" y="160" width="15" height="35" rx="7" fill="#f4a460" /> {/* Arm */}
-                <rect x="190" y="175" width="15" height="25" rx="7" fill="#f4a460" /> {/* Arm */}
-
-                {/* Laptop */}
-                <rect x="165" y="190" width="50" height="35" rx="3" fill="#9ca3af" />
-                <rect x="167" y="192" width="46" height="30" rx="2" fill="#1f2937" />
-
-                {/* Login window floating - Represents the login interface */}
-                <g transform="translate(240, 120)">
-                  <rect x="0" y="0" width="120" height="140" rx="8" fill="white" filter="url(#shadow)" />
-                  <rect x="0" y="0" width="120" height="25" rx="8" fill="#e5e7eb" />
-                  <circle cx="10" cy="12" r="3" fill="#ef4444" />
-                  <circle cx="20" cy="12" r="3" fill="#fbbf24" />
-                  <circle cx="30" cy="12" r="3" fill="#10b981" />
-
-                  {/* Lock icon - Security symbol */}
-                  <rect x="50" y="45" width="20" height="25" rx="3" fill="#dc2626" />
-                  <circle cx="60" cy="42" r="8" fill="none" stroke="#dc2626" strokeWidth="3" />
-                  <text x="60" y="80" textAnchor="middle" fontSize="8" fill="#666">username@gmail</text>
-                  <rect x="30" y="90" width="60" height="8" rx="2" fill="#e5e7eb" />
-                </g>
-
-                {/* User icon floating */}
-                <circle cx="380" cy="180" r="25" fill="white" opacity="0.9" />
-                <circle cx="380" cy="175" r="8" fill="#9ca3af" />
-                <path d="M 365,195 Q 380,185 395,195" fill="#9ca3af" />
-
-                {/* SVG filter for shadow effects */}
-                <defs>
-                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.2" />
-                  </filter>
-                </defs>
-              </svg>
+      {/* Main login card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="login-card"
+      >
+        {/* Header Section */}
+        <div className="card-header">
+          <motion.div 
+            className="logo-container"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <div className="logo-icon">
+              <FiLogIn />
             </div>
-          </div>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Welcome Back!
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="subtitle"
+          >
+            Sign in to continue managing your finances
+          </motion.p>
         </div>
-      </div>
 
-      {/* ==========================================
-          RIGHT SIDE - LOGIN FORM
-          ========================================== */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">Welcome back!</h2>
-            <p className="text-gray-500">Sign in to your account to continue</p>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Input Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="login-form">
+          {/* Email Field */}
+          <motion.div 
+            className="form-group"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <label className="form-label">Email Address</label>
+            <div className="input-wrapper">
+              <div className="input-icon">
+                <FiMail />
+              </div>
               <input
                 type="email"
-                id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                placeholder="multazam@gmail.com"
+                className="form-input"
+                placeholder="you@example.com"
               />
             </div>
+          </motion.div>
 
-            {/* Password Input Field with Visibility Toggle */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  placeholder="••••••"
-                />
-                {/* Toggle password visibility button */}
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {showPassword ? (
-                      // Eye icon (password visible)
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    ) : (
-                      // Eye-off icon (password hidden)
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    )}
-                  </svg>
-                </button>
+          {/* Password Field */}
+          <motion.div 
+            className="form-group"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <label className="form-label">Password</label>
+            <div className="input-wrapper">
+              <div className="input-icon">
+                <FiLock />
               </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="form-input"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="toggle-password"
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
             </div>
+          </motion.div>
 
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                Forgot password?
-              </a>
-            </div>
+          {/* Forgot Password Link */}
+          <motion.div 
+            className="forgot-password"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <a href="#">Forgot password?</a>
+          </motion.div>
 
-            {/* Sign In Button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-400 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-cyan-500 transition duration-200 font-semibold text-lg"
-            >
-              Sign In
-            </button>
+          {/* Sign In Button */}
+          <motion.button
+            type="submit"
+            disabled={isLoading}
+            className="submit-btn"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {isLoading ? (
+              <span className="loading-text">Signing in...</span>
+            ) : (
+              <>
+                Sign In <FiArrowRight className="btn-icon" />
+              </>
+            )}
+          </motion.button>
 
-            {/* Divider - Separates email/password from OAuth */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">OR</span>
-              </div>
-            </div>
+          {/* Divider */}
+          <motion.div 
+            className="divider"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+          >
+            <span>or continue with</span>
+          </motion.div>
 
-            {/* Google Sign-In Button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium flex items-center justify-center space-x-3"
-            >
-              {/* Google Logo SVG */}
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              <span>Sign in with Google</span>
-            </button>
-          </form>
+          {/* Google Sign-In Button */}
+          <motion.button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="google-btn"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <FcGoogle className="google-icon" />
+            <span>Sign in with Google</span>
+          </motion.button>
+        </form>
 
-          {/* Registration Link */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+        {/* Footer - Registration Link */}
+        <motion.div 
+          className="card-footer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+        >
+          <p>
+            Don't have an account?{' '}
+            <Link to="/register" className="register-link">
+              Create one now
+            </Link>
+          </p>
+        </motion.div>
+      </motion.div>
+
+      <style>{`
+        .login-page {
+          min-height: 100vh;
+          background: #0B0F1A;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        /* Background gradient blobs */
+        .bg-gradient-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(120px);
+          pointer-events: none;
+        }
+
+        .bg-blob-1 {
+          top: -15%;
+          right: -10%;
+          width: 40%;
+          height: 40%;
+          background: rgba(16, 185, 129, 0.15);
+        }
+
+        .bg-blob-2 {
+          bottom: -15%;
+          left: -10%;
+          width: 45%;
+          height: 45%;
+          background: rgba(59, 130, 246, 0.12);
+        }
+
+        .bg-blob-3 {
+          top: 40%;
+          left: 30%;
+          width: 30%;
+          height: 30%;
+          background: rgba(139, 92, 246, 0.08);
+        }
+
+        /* Floating icons */
+        .floating-icon {
+          position: absolute;
+          font-size: 3rem;
+          opacity: 0.15;
+          color: #10B981;
+          pointer-events: none;
+        }
+
+        .icon-1 {
+          top: 15%;
+          left: 10%;
+        }
+
+        .icon-2 {
+          top: 25%;
+          right: 15%;
+          color: #3B82F6;
+        }
+
+        .icon-3 {
+          bottom: 20%;
+          left: 15%;
+          color: #8B5CF6;
+        }
+
+        /* Login card */
+        .login-card {
+          width: 100%;
+          max-width: 580px;
+          background: rgba(20, 27, 45, 0.9);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 2.5rem;
+          padding: 4rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          position: relative;
+          z-index: 10;
+        }
+
+        /* Header */
+        .card-header {
+          text-align: center;
+          margin-bottom: 3rem;
+        }
+
+        .logo-container {
+          display: inline-block;
+          margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+          width: 90px;
+          height: 90px;
+          background: linear-gradient(135deg, #10B981, #059669);
+          border-radius: 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2.5rem;
+          color: white;
+          box-shadow: 0 15px 40px rgba(16, 185, 129, 0.35);
+        }
+
+        .card-header h1 {
+          font-size: 2.75rem;
+          font-weight: 800;
+          color: white;
+          margin: 0 0 1rem;
+          letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+          color: #94A3B8;
+          font-size: 1.15rem;
+          margin: 0;
+          font-weight: 500;
+        }
+
+        /* Form */
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .form-label {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #94A3B8;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-left: 0.5rem;
+        }
+
+        .input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .input-icon {
+          position: absolute;
+          left: 1.5rem;
+          color: #64748B;
+          font-size: 1.4rem;
+          display: flex;
+          align-items: center;
+          transition: color 0.3s;
+        }
+
+        .input-wrapper:focus-within .input-icon {
+          color: #10B981;
+        }
+
+        .form-input {
+          width: 100%;
+          padding: 1.25rem 1.5rem 1.25rem 4rem;
+          background: rgba(11, 15, 26, 0.7);
+          border: 2px solid rgba(255, 255, 255, 0.08);
+          border-radius: 1.25rem;
+          color: white;
+          font-size: 1.1rem;
+          font-weight: 500;
+          transition: all 0.3s;
+        }
+
+        .form-input::placeholder {
+          color: #475569;
+        }
+
+        .form-input:focus {
+          outline: none;
+          border-color: rgba(16, 185, 129, 0.6);
+          box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+          background: rgba(11, 15, 26, 0.9);
+        }
+
+        .toggle-password {
+          position: absolute;
+          right: 1.25rem;
+          background: none;
+          border: none;
+          color: #64748B;
+          cursor: pointer;
+          font-size: 1.4rem;
+          display: flex;
+          align-items: center;
+          padding: 0.75rem;
+          transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+          color: #10B981;
+        }
+
+        .forgot-password {
+          text-align: right;
+          margin-top: -0.5rem;
+        }
+
+        .forgot-password a {
+          color: #10B981;
+          font-size: 1rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.3s;
+        }
+
+        .forgot-password a:hover {
+          color: #34D399;
+        }
+
+        /* Submit button */
+        .submit-btn {
+          width: 100%;
+          padding: 1.35rem 2rem;
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+          border: none;
+          border-radius: 1.25rem;
+          font-size: 1.2rem;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          transition: all 0.3s;
+          box-shadow: 0 12px 35px rgba(16, 185, 129, 0.3);
+          margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+          box-shadow: 0 18px 45px rgba(16, 185, 129, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .btn-icon {
+          font-size: 1.4rem;
+          transition: transform 0.3s;
+        }
+
+        .submit-btn:hover .btn-icon {
+          transform: translateX(5px);
+        }
+
+        .loading-text {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        /* Divider */
+        .divider {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          margin: 1rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+          content: '';
+          flex: 1;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .divider span {
+          color: #64748B;
+          font-size: 1rem;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        /* Google button */
+        .google-btn {
+          width: 100%;
+          padding: 1.25rem 2rem;
+          background: rgba(255, 255, 255, 0.04);
+          border: 2px solid rgba(255, 255, 255, 0.1);
+          border-radius: 1.25rem;
+          color: white;
+          font-size: 1.1rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          transition: all 0.3s;
+        }
+
+        .google-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.25);
+          transform: translateY(-2px);
+        }
+
+        .google-icon {
+          font-size: 1.75rem;
+        }
+
+        /* Footer */
+        .card-footer {
+          text-align: center;
+          margin-top: 2.5rem;
+          padding-top: 2.5rem;
+          border-top: 2px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-footer p {
+          color: #94A3B8;
+          font-size: 1.1rem;
+          margin: 0;
+        }
+
+        .register-link {
+          color: #10B981;
+          font-weight: 700;
+          text-decoration: none;
+          transition: color 0.3s;
+        }
+
+        .register-link:hover {
+          color: #34D399;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+          .login-page {
+            padding: 1.5rem;
+          }
+
+          .login-card {
+            padding: 2.5rem 2rem;
+            border-radius: 2rem;
+          }
+
+          .card-header h1 {
+            font-size: 2rem;
+          }
+
+          .logo-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+          }
+
+          .form-input {
+            padding: 1.1rem 1.25rem 1.1rem 3.5rem;
+            font-size: 1rem;
+          }
+
+          .input-icon {
+            left: 1.25rem;
+            font-size: 1.25rem;
+          }
+
+          .submit-btn, .google-btn {
+            padding: 1.1rem 1.5rem;
+            font-size: 1.05rem;
+          }
+
+          .floating-icon {
+            display: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };

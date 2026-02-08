@@ -192,10 +192,13 @@ const SpendingChart = ({ wallet }) => {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-[#0B1121] p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group my-8">
+        <div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            style={{ paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}
+        >
+            <div className="bg-[#0B1121] p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <h3 className="text-xl font-bold mb-8 flex items-center gap-2" style={{ color: '#ffffff' }}>
                     <FiActivity className="text-emerald-400" />
                     Income vs Expense
                 </h3>
@@ -204,9 +207,9 @@ const SpendingChart = ({ wallet }) => {
                 </div>
             </div>
 
-            <div className="bg-[#0B1121] p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group my-8">
+            <div className="bg-[#0B1121] p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-indigo-500/10 transition-colors"></div>
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <h3 className="text-xl font-bold mb-8 flex items-center gap-2" style={{ color: '#ffffff' }}>
                     <FiPieChart className="text-indigo-400" />
                     Financial Overview
                 </h3>
