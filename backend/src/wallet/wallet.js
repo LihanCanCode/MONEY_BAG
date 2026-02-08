@@ -67,11 +67,20 @@ const resetWallet = async (req, res) => {
     let wallet = await Wallet.findOne({ userId });
     if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
 
+    // Reset all wallet fields
     wallet.currentBalance = 0;
     wallet.referenceBudget = 0;
+    wallet.totalIncome = 0;
+    wallet.totalExpense = 0;
     await wallet.save();
+
+    // Also clear all debts for this user
+    const Debt = require('../debts/debt.model');
+    await Debt.deleteMany({ userId });
+    console.log(`[RESET] Cleared all debts for user: ${userId}`);
+
     const walletData = await getWalletWithTransactions(userId);
-    res.status(200).json({ message: 'Wallet reset successfully', wallet: walletData });
+    res.status(200).json({ message: 'Wallet and debts reset successfully', wallet: walletData });
   } catch (error) {
     res.status(500).json({ message: 'Error resetting wallet', error: error.message });
   }

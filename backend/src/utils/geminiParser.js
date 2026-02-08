@@ -207,4 +207,62 @@ const fancyMessage = async (amount, category) => {
   return result.response.text();
 }
 
-module.exports = { parseTransactionText, parseReceiptImage, fancyMessage };
+/**
+ * Generate a dramatic message for debt-related actions using Gemini AI
+ * @param {string} action - The action type (create_owed, create_owe, add, subtract, resolve)
+ * @param {string} personName - Name of the person involved
+ * @param {number} amount - The amount of money involved
+ * @param {string} dramaLabel - The drama label of the person
+ * @returns {Promise<string>} A dramatic message
+ */
+const generateDramaticMessage = async (action, personName, amount, dramaLabel) => {
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: { temperature: 0.9 }
+    });
+
+    const dramaContext = {
+      trustworthy: "a reliable ally",
+      suspicious: "a shifty character",
+      always_late: "a notorious procrastinator",
+      doubtful: "someone of questionable reliability",
+      sworn_enemy: "your sworn nemesis",
+      best_friend: "your trusted companion",
+      family: "your beloved family member",
+      colleague: "your fellow warrior of the workplace"
+    };
+
+    const actionDescriptions = {
+      create_owed: `You just lent $${amount} to ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
+      create_owe: `You just borrowed $${amount} from ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
+      add: `The debt with ${personName} just increased by $${amount}`,
+      subtract: `${personName} just paid back $${amount} of their debt`,
+      resolve: `The debt with ${personName} has been fully resolved`
+    };
+
+    const prompt = `
+Context: ${actionDescriptions[action] || 'A debt transaction occurred'}
+Person's drama label: ${dramaLabel}
+
+Task: Write a single dramatic, theatrical announcement (1-2 sentences, under 25 words) about this debt event.
+Style: Over-the-top dramatic, like a medieval herald announcing news, or a soap opera narrator.
+Include relevant emojis.
+
+Examples of the style we want:
+- "The sacred coins have changed hands! A bond of debt now ties your fates together! 📜⚔️"
+- "BETRAYAL APPROACHES! Your sworn enemy dares to ask for more gold! 😈💰"
+- "The prophecy unfolds! The debt shrinks like shadows at dawn! ✨🌅"
+
+Return ONLY the dramatic message, nothing else.
+    `;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Error generating dramatic message:", error);
+    throw error;
+  }
+};
+
+module.exports = { parseTransactionText, parseReceiptImage, fancyMessage, generateDramaticMessage };

@@ -22,7 +22,6 @@ app.use(cors(
 
 
 //routes 
-//routes 
 const userRoutes = require('./src/users/user.route')
 const transactionRoutes = require('./src/transactions/transaction.route')
 const walletRoutes = require('./src/wallet/wallet.route')
@@ -30,6 +29,7 @@ const recurringRoutes = require('./src/recurring/recurring.route')
 const analyticsRoutes = require('./src/analytics/analytics.route')
 const budgetRoutes = require('./src/budgets/budget.route')
 const goalRoutes = require('./src/goals/goal.route')
+const debtRoutes = require('./src/debts/debt.route')
 
 app.use("/api/users", userRoutes)
 app.use("/api/transactions", transactionRoutes)
@@ -38,6 +38,7 @@ app.use("/api/recurring", recurringRoutes)
 app.use("/api/analytics", analyticsRoutes)
 app.use("/api/budgets", budgetRoutes)
 app.use("/api/goals", goalRoutes)
+app.use("/api/debts", debtRoutes)
 
 async function main() {
   await mongoose.connect(process.env.DB_URL);

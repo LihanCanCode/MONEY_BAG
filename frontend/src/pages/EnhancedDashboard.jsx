@@ -6,13 +6,15 @@ import ExportReports from '../components/ExportReports';
 import SpendingHeatmap from '../components/SpendingHeatmap';
 import BudgetManagement from '../components/BudgetManagement';
 import FinancialGoals from '../components/FinancialGoals';
+import DebtTracker from '../components/DebtTracker';
 import Transactions from './Transactions';
-import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers } from 'react-icons/fi';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: FiHome },
   { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
   { id: 'goals', label: 'Goals', icon: FiTarget },
+  { id: 'debts', label: 'Debts', icon: FiUsers },
   { id: 'recurring', label: 'Recurring', icon: FiRepeat },
   { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
   { id: 'export', label: 'Export', icon: FiDownload },
@@ -68,6 +70,11 @@ const EnhancedDashboard = () => {
             <FinancialGoals />
           </div>
         )}
+        {activeTab === 'debts' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <DebtTracker />
+          </div>
+        )}
         {activeTab === 'recurring' && (
           <div className="min-h-screen bg-[#0B0F1A] pt-6">
             <RecurringTransactions />
@@ -100,6 +107,7 @@ const EnhancedDashboard = () => {
           display: flex;
           gap: 0.5rem;
           padding: 1rem 2rem;
+          padding-bottom: 0.5rem;
           background: #0B1121;
           border-bottom: 1px solid rgba(255,255,255,0.05);
           overflow-x: auto;
@@ -115,6 +123,7 @@ const EnhancedDashboard = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 0.75rem 1.25rem;
+          padding-bottom: 1rem;
           background: transparent;
           border: none;
           border-radius: 8px;
@@ -145,10 +154,9 @@ const EnhancedDashboard = () => {
 
         .tab-indicator {
           position: absolute;
-          bottom: -0.5rem;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 80%;
+          bottom: 0;
+          left: 0;
+          width: 100%;
           height: 3px;
           background: linear-gradient(90deg, #10B981, #34D399);
           border-radius: 2px 2px 0 0;

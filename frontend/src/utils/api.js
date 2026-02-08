@@ -90,6 +90,18 @@ export const API_ENDPOINTS = {
   GOAL_PREDICTIONS: (id) => `${API_BASE_URL}/api/goals/${id}/predictions`, // Get goal completion predictions
 
   // ==========================================
+  // DEBT MANAGEMENT ENDPOINTS
+  // ==========================================
+  // Track money owed to/by the user with dramatic flair 🎭
+  
+  DEBTS: `${API_BASE_URL}/api/debts`,
+  DEBT_BY_ID: (id) => `${API_BASE_URL}/api/debts/${id}`,
+  DEBT_ADD: (id) => `${API_BASE_URL}/api/debts/${id}/add`,
+  DEBT_SUBTRACT: (id) => `${API_BASE_URL}/api/debts/${id}/subtract`,
+  DEBT_SUMMARY: `${API_BASE_URL}/api/debts/summary`,
+  DEBT_DRAMATIC_MESSAGE: `${API_BASE_URL}/api/debts/dramatic-message`,
+
+  // ==========================================
   // USER MANAGEMENT ENDPOINTS
   // ==========================================
   // Handle user accounts and profiles

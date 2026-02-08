@@ -26,7 +26,7 @@ const transactionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['food', 'bills', 'entertainment', 'transport', 'shopping', 'health', 'other', 'education', 'salary', 'vacation', 'emergency', 'purchase', 'investment', 'home', 'car', 'savings', null],
+    enum: ['food', 'bills', 'entertainment', 'transport', 'shopping', 'health', 'other', 'education', 'salary', 'vacation', 'emergency', 'purchase', 'investment', 'home', 'car', 'savings', 'debt', null],
     default: null
   },
   amount: {
