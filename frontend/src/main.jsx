@@ -11,6 +11,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import router from './routers/router.jsx'
 import { RouterProvider } from 'react-router-dom'
+import { AuthProvide } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 /**
  * Initialize and render the React application
@@ -21,6 +23,11 @@ import { RouterProvider } from 'react-router-dom'
  */
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvide>
+      {/* Global theme provider ensures consistent dark/light state */}
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthProvide>
   </StrictMode>
 )

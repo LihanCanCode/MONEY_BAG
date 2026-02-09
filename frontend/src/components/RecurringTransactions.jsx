@@ -401,7 +401,7 @@ const RecurringTransactions = () => {
                 )}
             </AnimatePresence>
 
-            <style jsx>{`
+                        <style>{`
         .recurring-transactions-container {
           padding: 2rem;
           max-width: 1200px;
@@ -692,7 +692,7 @@ const RecurringTransactions = () => {
           font-size: 1.2rem;
           color: #64748b;
         }
-      `}</style>
+            `}</style>
         </div>
     );
 };

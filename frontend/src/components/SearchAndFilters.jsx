@@ -210,7 +210,7 @@ const SearchAndFilters = ({ onFilterChange, activeFilters }) => {
                 )}
             </AnimatePresence>
 
-            <style jsx>{`
+            <style>{`
         .search-and-filters {
           margin-bottom: 2rem;
         }

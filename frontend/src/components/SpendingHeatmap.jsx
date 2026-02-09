@@ -289,7 +289,7 @@ const SpendingHeatmap = () => {
         </>
       )}
 
-      <style jsx>{`
+      <style>{`
                 .heatmap-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
                 .heatmap-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
                 .heatmap-title { font-size: 2rem; font-weight: 700; color: white; margin: 0; }
