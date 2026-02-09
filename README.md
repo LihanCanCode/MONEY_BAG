@@ -45,6 +45,11 @@ MoneyBag is an end-to-end personal finance platform that combines real-time mone
 - Schedule recurring income or expense entries with daily, weekly, monthly, or yearly cadence.
 - Pause or resume recurring items, process due transactions on demand, and maintain detailed audit trails.
 
+### Debt Tracking
+- Monitor money owed to you versus obligations you need to settle.
+- Capture dramatic persona tags (best friend, suspicious, sworn enemy) to add context to each lender or borrower.
+- Adjust balances with add/subtract actions, resolve settled debts, and review running history with celebratory feedback.
+
 ### Analytics & Reporting
 - Generate category breakdowns, trend charts, and spending heatmaps across day and time dimensions.
 - Export branded PDF or CSV transaction reports, including summaries and detailed itemization.
@@ -162,7 +167,7 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 ### Frontend (`frontend/.env`)
 
 ```
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:5000
 VITE_FIREBASE_API_KEY=your_firebase_web_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
@@ -214,6 +219,7 @@ All endpoints require a valid Firebase ID token via the `Authorization: Bearer <
 - **Responsive design** leveraging Tailwind CSS, custom theming, and dark-first styling.
 - **Data visualizations** powered by Chart.js, Recharts, and bespoke components such as `BudgetChart`, `SpendingHeatmap`, and `AnimatedCounter`.
 - **Progress feedback** through circular and linear indicators, confetti celebrations for goal completions, and contextual toasts for actions.
+- **Debt Tracker** experience with dramatic labels, history timeline, and confetti-filled payoff celebrations.
 - **State management** handled via React context providers for authentication and theme preferences.
 
 ---
