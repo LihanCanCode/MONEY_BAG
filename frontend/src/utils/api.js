@@ -102,6 +102,18 @@ export const API_ENDPOINTS = {
   DEBT_DRAMATIC_MESSAGE: `${API_BASE_URL}/api/debts/dramatic-message`,
 
   // ==========================================
+  // SPLIT BILLS ENDPOINTS
+  // ==========================================
+  // Split shared expenses among friends
+
+  SPLITS: `${API_BASE_URL}/api/splits`,
+  SPLIT_BY_ID: (id) => `${API_BASE_URL}/api/splits/${id}`,
+  SPLIT_SUMMARY: `${API_BASE_URL}/api/splits/summary`,
+  SPLIT_SETTLE: (splitId, participantId) => `${API_BASE_URL}/api/splits/${splitId}/settle/${participantId}`,
+  SPLIT_PARTIAL: (splitId, participantId) => `${API_BASE_URL}/api/splits/${splitId}/partial/${participantId}`,
+  SPLIT_TREAT: (splitId, participantId) => `${API_BASE_URL}/api/splits/${splitId}/treat/${participantId}`,
+
+  // ==========================================
   // FINANCIAL CALENDAR ENDPOINTS
   // ==========================================
   // Aggregated calendar view of all financial events

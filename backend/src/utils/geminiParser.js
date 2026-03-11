@@ -265,4 +265,50 @@ Return ONLY the dramatic message, nothing else.
   }
 };
 
-module.exports = { parseTransactionText, parseReceiptImage, fancyMessage, generateDramaticMessage };
+/**
+ * Generate a dramatic message for split bill actions using Gemini AI
+ * @param {string} action - create, settle_one, settle_all
+ * @param {string} title - The split title
+ * @param {number} amount - The relevant amount
+ * @param {number} participantCount - Number of participants
+ * @param {string} names - Participant name(s)
+ * @returns {Promise<string>} A dramatic message
+ */
+const generateSplitMessage = async (action, title, amount, participantCount, names) => {
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: { temperature: 0.9 }
+    });
+
+    const actionDescriptions = {
+      create: `A bill of $${amount} for "${title}" has been split among ${participantCount} people (${names}). The creator paid the full bill upfront.`,
+      settle_one: `${names} just paid back their share of $${amount} for "${title}".`,
+      settle_all: `The LAST person (${names}) just paid their share! The split "${title}" is now FULLY SETTLED — everyone has paid!`,
+      treat: `The user has TREATED ${names} by covering their $${amount} share of "${title}"! No payment expected — pure generosity!`
+    };
+
+    const prompt = `
+Context: ${actionDescriptions[action] || 'A split bill event occurred'}
+
+Task: Write a single dramatic, theatrical announcement (1-2 sentences, under 30 words) about this split bill event.
+Style: Over-the-top dramatic, like a medieval herald or soap opera narrator. Fun and humorous.
+Include relevant emojis (food/money themed).
+
+Examples of style:
+- "The sacred bill has been DIVIDED! 4 souls now bound by a $120 pizza covenant! May they honor their debts! 🍕⚔️💰"
+- "MIRACLE! Against all odds, Rahul has returned $30! Faith in humanity: RESTORED! 🎉💸"
+- "THE GREAT DEBT IS CLEARED! All have paid their share! Tonight we feast as FREE souls! 🏆🎭🍽️"
+
+Return ONLY the dramatic message, nothing else.
+    `;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Error generating split message:", error);
+    throw error;
+  }
+};
+
+module.exports = { parseTransactionText, parseReceiptImage, fancyMessage, generateDramaticMessage, generateSplitMessage };

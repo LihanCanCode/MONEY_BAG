@@ -8,14 +8,16 @@ import BudgetManagement from '../components/BudgetManagement';
 import FinancialGoals from '../components/FinancialGoals';
 import DebtTracker from '../components/DebtTracker';
 import FinancialCalendar from '../components/FinancialCalendar';
+import SplitBills from '../components/SplitBills';
 import Transactions from './Transactions';
-import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar, FiScissors } from 'react-icons/fi';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: FiHome },
   { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
   { id: 'goals', label: 'Goals', icon: FiTarget },
   { id: 'debts', label: 'Debts', icon: FiUsers },
+  { id: 'splits', label: 'Split Bills', icon: FiScissors },
   { id: 'recurring', label: 'Recurring', icon: FiRepeat },
   { id: 'calendar', label: 'Calendar', icon: FiCalendar },
   { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
@@ -75,6 +77,11 @@ const EnhancedDashboard = () => {
         {activeTab === 'debts' && (
           <div className="min-h-screen bg-[#0B0F1A] pt-6">
             <DebtTracker />
+          </div>
+        )}
+        {activeTab === 'splits' && (
+          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+            <SplitBills />
           </div>
         )}
         {activeTab === 'recurring' && (
