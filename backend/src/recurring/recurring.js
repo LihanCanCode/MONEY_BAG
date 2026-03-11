@@ -41,8 +41,9 @@ exports.createRecurringTransaction = async (req, res) => {
         }
 
         const start = new Date(startDate);
-        const nextDue = calculateNextDueDate(start, frequency);
 
+        // FIX: Set nextDueDate to startDate itself so the first occurrence
+        // is processed on (or after) the start date, not one interval later.
         const recurringTransaction = new RecurringTransaction({
             userId,
             type,
@@ -52,7 +53,7 @@ exports.createRecurringTransaction = async (req, res) => {
             frequency,
             startDate: start,
             endDate: endDate ? new Date(endDate) : null,
-            nextDueDate: nextDue,
+            nextDueDate: start,
             isActive: true
         });
 
@@ -197,66 +198,81 @@ exports.toggleRecurringTransaction = async (req, res) => {
         });
     }
 };
+    
+/**
+ * Standalone function to process all due recurring transactions.
+ * Can be called by the cron scheduler (no req/res needed) OR by the HTTP handler.
+ * @returns {Promise<Array>} Array of result objects for each processed recurring transaction
+ */
+const processDueRecurring = async () => {
+    const now = new Date();
 
-// Process due recurring transactions (called by cron or manually)
+    // Find all active recurring transactions that are due
+    const dueRecurringTransactions = await RecurringTransaction.find({
+        isActive: true,
+        nextDueDate: { $lte: now },
+        $or: [
+            { endDate: null },
+            { endDate: { $gte: now } }
+        ]
+    });
+
+    console.log(`[Recurring] Found ${dueRecurringTransactions.length} due recurring transactions`);
+
+    const results = [];
+
+    for (const recurring of dueRecurringTransactions) {
+        try {
+            // Create the actual transaction
+            const transaction = new Transaction({
+                userId: recurring.userId,
+                type: recurring.type,
+                category: recurring.category,
+                amount: recurring.amount,
+                message: `${recurring.message} (Auto-generated)`.trim(),
+                createdAt: recurring.nextDueDate
+            });
+
+            await transaction.save();
+
+            // Update wallet balance
+            await updateWallet(recurring.userId, recurring.type, recurring.amount);
+
+            // Advance nextDueDate and record lastProcessedDate
+            recurring.lastProcessedDate = recurring.nextDueDate;
+            recurring.nextDueDate = calculateNextDueDate(recurring.nextDueDate, recurring.frequency);
+
+            // Deactivate if next due date exceeds end date
+            if (recurring.endDate && recurring.nextDueDate > recurring.endDate) {
+                recurring.isActive = false;
+            }
+
+            await recurring.save();
+
+            results.push({
+                recurringId: recurring._id,
+                transactionId: transaction._id,
+                success: true
+            });
+
+            console.log(`[Recurring] Processed: ${recurring._id} -> Transaction ${transaction._id}`);
+        } catch (error) {
+            console.error(`[Recurring] Error processing ${recurring._id}:`, error);
+            results.push({
+                recurringId: recurring._id,
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    return results;
+};
+
+// HTTP handler — thin wrapper around the standalone function
 exports.processDueRecurringTransactions = async (req, res) => {
     try {
-        const now = new Date();
-
-        // Find all active recurring transactions that are due
-        const dueRecurringTransactions = await RecurringTransaction.find({
-            isActive: true,
-            nextDueDate: { $lte: now },
-            $or: [
-                { endDate: null },
-                { endDate: { $gte: now } }
-            ]
-        });
-
-        const results = [];
-
-        for (const recurring of dueRecurringTransactions) {
-            try {
-                // Create the actual transaction
-                const transaction = new Transaction({
-                    userId: recurring.userId,
-                    type: recurring.type,
-                    category: recurring.category,
-                    amount: recurring.amount,
-                    message: `${recurring.message} (Auto-generated)`,
-                    createdAt: recurring.nextDueDate
-                });
-
-                await transaction.save();
-
-                // Update wallet
-                await updateWallet(recurring.userId, recurring.type, recurring.amount);
-
-                // Update recurring transaction
-                recurring.lastProcessedDate = recurring.nextDueDate;
-                recurring.nextDueDate = calculateNextDueDate(recurring.nextDueDate, recurring.frequency);
-
-                // Deactivate if past end date
-                if (recurring.endDate && recurring.nextDueDate > recurring.endDate) {
-                    recurring.isActive = false;
-                }
-
-                await recurring.save();
-
-                results.push({
-                    recurringId: recurring._id,
-                    transactionId: transaction._id,
-                    success: true
-                });
-            } catch (error) {
-                console.error(`Error processing recurring transaction ${recurring._id}:`, error);
-                results.push({
-                    recurringId: recurring._id,
-                    success: false,
-                    error: error.message
-                });
-            }
-        }
+        const results = await processDueRecurring();
 
         res.status(200).json({
             success: true,
@@ -272,3 +288,6 @@ exports.processDueRecurringTransactions = async (req, res) => {
         });
     }
 };
+
+// Export the standalone function for use by the cron scheduler
+exports.processDueRecurring = processDueRecurring;

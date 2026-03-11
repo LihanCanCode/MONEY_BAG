@@ -4,6 +4,8 @@ const app = express()
 const port = process.env.PORT || 5000
 const mongoose = require('mongoose');
 const cors = require('cors')
+const cron = require('node-cron');
+const { processDueRecurring } = require('./src/recurring/recurring');
 
 
 //middleware
@@ -46,7 +48,26 @@ async function main() {
   // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }
 
-main().then(() => console.log("Mongodb connected successfully")).catch(err => console.log(err));
+main().then(() => {
+  console.log("Mongodb connected successfully");
+
+  // ─── Recurring Transactions Cron Scheduler ───
+  // Runs every hour at minute 0 to process all due recurring transactions.
+  // Change to '* * * * *' (every minute) for demo/testing purposes.
+  const cronSchedule = process.env.RECURRING_CRON || '0 * * * *';
+  cron.schedule(cronSchedule, async () => {
+    console.log('[Cron] Running recurring transactions processor...');
+    try {
+      const results = await processDueRecurring();
+      const succeeded = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+      console.log(`[Cron] Done — ${succeeded} succeeded, ${failed} failed out of ${results.length} total`);
+    } catch (error) {
+      console.error('[Cron] Error processing recurring transactions:', error);
+    }
+  });
+  console.log(`[Cron] Recurring transaction scheduler started (schedule: ${cronSchedule})`);
+}).catch(err => console.log(err));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

@@ -38,4 +38,41 @@ const getWalletWithTransactions = async (userId) => {
     }
 };
 
-module.exports = { getWalletWithTransactions };
+/**
+ * Update wallet balance when a transaction occurs.
+ * Mirrors the logic used in transactions.js for manual transactions.
+ * @param {string} userId - The Firebase UID of the user
+ * @param {string} type - 'ADD' or 'SPEND'
+ * @param {number} amount - The transaction amount
+ * @returns {Promise<Object>} The updated wallet document
+ */
+const updateWallet = async (userId, type, amount) => {
+    try {
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            wallet = new Wallet({ userId });
+        }
+
+        const parsedAmount = parseFloat(amount);
+
+        if (type === 'ADD') {
+            wallet.currentBalance += parsedAmount;
+            wallet.totalIncome += parsedAmount;
+            if (wallet.currentBalance > wallet.referenceBudget) {
+                wallet.referenceBudget = wallet.currentBalance;
+            }
+        } else {
+            wallet.currentBalance -= parsedAmount;
+            wallet.totalExpense += parsedAmount;
+        }
+
+        await wallet.save();
+        console.log(`[WalletHelper] Updated wallet for user ${userId}: ${type} $${parsedAmount}`);
+        return wallet;
+    } catch (error) {
+        console.error(`[WalletHelper] Error updating wallet for user ${userId}:`, error);
+        throw error;
+    }
+};
+
+module.exports = { getWalletWithTransactions, updateWallet };

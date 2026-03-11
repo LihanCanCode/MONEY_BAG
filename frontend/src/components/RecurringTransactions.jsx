@@ -32,6 +32,17 @@ const RecurringTransactions = () => {
     const [recurringTransactions, setRecurringTransactions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        type: 'SPEND',
+        category: 'bills',
+        amount: '',
+        message: '',
+        frequency: 'monthly',
+        startDate: '',
+        endDate: ''
+    });
     const [formData, setFormData] = useState({
         type: 'SPEND',
         category: 'bills',
@@ -175,6 +186,54 @@ const RecurringTransactions = () => {
         }
     };
 
+    const handleEdit = (recurring) => {
+        setEditingTransaction(recurring);
+        setEditFormData({
+            type: recurring.type,
+            category: recurring.category || 'bills',
+            amount: recurring.amount.toString(),
+            message: recurring.message || '',
+            frequency: recurring.frequency,
+            startDate: new Date(recurring.startDate).toISOString().split('T')[0],
+            endDate: recurring.endDate ? new Date(recurring.endDate).toISOString().split('T')[0] : ''
+        });
+        setShowEditModal(true);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        if (!editingTransaction) return;
+
+        try {
+            const token = await currentUser.getIdToken();
+            const response = await fetch(API_ENDPOINTS.RECURRING_BY_ID(editingTransaction._id), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    ...editFormData,
+                    amount: parseFloat(editFormData.amount)
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success('Recurring transaction updated!');
+                setShowEditModal(false);
+                setEditingTransaction(null);
+                fetchRecurringTransactions();
+            } else {
+                toast.error(data.message || 'Failed to update recurring transaction');
+            }
+        } catch (error) {
+            console.error('Error updating recurring transaction:', error);
+            toast.error('Failed to update recurring transaction');
+        }
+    };
+
     return (
         <div className="recurring-transactions-container">
             {/* Header */}
@@ -257,6 +316,12 @@ const RecurringTransactions = () => {
                                             <FaToggleOff className="mr-1" /> Paused
                                         </>
                                     )}
+                                </button>
+                                <button
+                                    onClick={() => handleEdit(recurring)}
+                                    className="btn-edit"
+                                >
+                                    <FaEdit />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(recurring._id)}
@@ -401,11 +466,144 @@ const RecurringTransactions = () => {
                 )}
             </AnimatePresence>
 
+            {/* Edit Recurring Transaction Modal */}
+            <AnimatePresence>
+                {showEditModal && editingTransaction && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="modal-overlay"
+                        onClick={() => setShowEditModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="modal-content"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h2 className="modal-title">Edit Recurring Transaction</h2>
+
+                            <form onSubmit={handleEditSubmit} className="recurring-form">
+                                <div className="form-group">
+                                    <label>Type</label>
+                                    <div className="type-toggle">
+                                        <button
+                                            type="button"
+                                            className={editFormData.type === 'SPEND' ? 'active' : ''}
+                                            onClick={() => setEditFormData({ ...editFormData, type: 'SPEND', category: 'bills' })}
+                                        >
+                                            💸 Expense
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={editFormData.type === 'ADD' ? 'active' : ''}
+                                            onClick={() => setEditFormData({ ...editFormData, type: 'ADD', category: 'salary' })}
+                                        >
+                                            💰 Income
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {editFormData.type === 'SPEND' && (
+                                    <div className="form-group">
+                                        <label>Category</label>
+                                        <select
+                                            value={editFormData.category}
+                                            onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                                            required
+                                        >
+                                            {CATEGORIES.map(cat => (
+                                                <option key={cat.value} value={cat.value}>
+                                                    {cat.icon} {cat.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <div className="form-group">
+                                    <label>Amount ($)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={editFormData.amount}
+                                        onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
+                                        placeholder="0.00"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Description</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.message}
+                                        onChange={(e) => setEditFormData({ ...editFormData, message: e.target.value })}
+                                        placeholder="e.g., Netflix Subscription, Monthly Rent"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Frequency</label>
+                                    <select
+                                        value={editFormData.frequency}
+                                        onChange={(e) => setEditFormData({ ...editFormData, frequency: e.target.value })}
+                                        required
+                                    >
+                                        {FREQUENCIES.map(freq => (
+                                            <option key={freq.value} value={freq.value}>
+                                                {freq.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={editFormData.startDate}
+                                            onChange={(e) => setEditFormData({ ...editFormData, startDate: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>End Date (Optional)</label>
+                                        <input
+                                            type="date"
+                                            value={editFormData.endDate}
+                                            onChange={(e) => setEditFormData({ ...editFormData, endDate: e.target.value })}
+                                            min={editFormData.startDate}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button type="button" onClick={() => setShowEditModal(false)} className="btn-cancel">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn-submit">
+                                        Update Recurring Transaction
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
                         <style>{`
         .recurring-transactions-container {
-          padding: 2rem;
+          padding: 1.5rem;
           max-width: 1200px;
           margin: 0 auto;
+          min-height: 100vh;
+          background: #0B0F1A;
         }
 
         .recurring-header {
@@ -423,8 +621,8 @@ const RecurringTransactions = () => {
         }
 
         .recurring-subtitle {
-          color: #64748b;
-          margin-top: 0.5rem;
+          color: #9CA3AF;
+          margin-top: 0.25rem;
         }
 
         .recurring-actions {
@@ -435,27 +633,27 @@ const RecurringTransactions = () => {
         .btn-process, .btn-add {
           display: flex;
           align-items: center;
-          padding: 0.75rem 1.5rem;
-          border-radius: 12px;
+          padding: 0.625rem 1rem;
+          border-radius: 8px;
           font-weight: 600;
+          font-size: 0.875rem;
           transition: all 0.3s ease;
           border: none;
           cursor: pointer;
+          color: white;
         }
 
         .btn-process {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+          background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
         .btn-add {
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-          color: white;
+          background: linear-gradient(135deg, #10B981, #059669);
         }
 
         .btn-process:hover, .btn-add:hover {
           transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .recurring-list {
@@ -464,20 +662,20 @@ const RecurringTransactions = () => {
         }
 
         .recurring-card {
-          background: white;
+          background: #1E293B;
           border-radius: 16px;
           padding: 1.5rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          border: 1px solid rgba(255,255,255,0.05);
           transition: all 0.3s ease;
         }
 
         .recurring-card.inactive {
-          opacity: 0.6;
-          background: #f8fafc;
+          opacity: 0.5;
+          background: #111827;
         }
 
         .recurring-card:hover {
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
           transform: translateY(-2px);
         }
 
@@ -501,12 +699,12 @@ const RecurringTransactions = () => {
         .recurring-message {
           font-size: 1.1rem;
           font-weight: 600;
-          color: #1e293b;
+          color: #ffffff;
           margin: 0;
         }
 
         .recurring-details {
-          color: #64748b;
+          color: #9CA3AF;
           font-size: 0.9rem;
           margin-top: 0.25rem;
         }
@@ -539,8 +737,8 @@ const RecurringTransactions = () => {
         }
 
         .btn-toggle.inactive {
-          background: #94a3b8;
-          color: white;
+          background: rgba(255,255,255,0.1);
+          color: #9CA3AF;
         }
 
         .btn-delete {
@@ -557,23 +755,67 @@ const RecurringTransactions = () => {
           background: #dc2626;
         }
 
+        .btn-edit {
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          border: none;
+          background: #3b82f6;
+          color: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-edit:hover {
+          background: #2563eb;
+        }
+
         .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           text-align: center;
           padding: 4rem 2rem;
+          color: #64748B;
+        }
+
+        .empty-state svg {
+          font-size: 3rem;
+          margin-bottom: 1rem;
+          opacity: 0.5;
+        }
+
+        .empty-state h3 {
+          color: #9CA3AF;
+        }
+
+        .empty-state p {
+          color: #64748B;
+        }
+
+        .empty-state .btn-primary {
+          margin-top: 1rem;
+          padding: 0.75rem 1.5rem;
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
         }
 
         .empty-icon {
-          color: #cbd5e1;
+          color: #64748B;
           margin-bottom: 1rem;
         }
 
+        /* ─── Modal (dark theme matching Debt module) ─── */
         .modal-overlay {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.8);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -582,25 +824,27 @@ const RecurringTransactions = () => {
         }
 
         .modal-content {
-          background: white;
-          border-radius: 24px;
+          background: #1E293B;
+          border-radius: 16px;
           padding: 2rem;
           max-width: 600px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
+          border: 1px solid rgba(255,255,255,0.1);
         }
 
         .modal-title {
-          font-size: 1.5rem;
+          font-size: 1.25rem;
           font-weight: 700;
+          color: #ffffff;
           margin-bottom: 1.5rem;
         }
 
         .recurring-form {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
 
         .form-group {
@@ -610,23 +854,42 @@ const RecurringTransactions = () => {
         }
 
         .form-group label {
-          font-weight: 600;
-          color: #475569;
+          display: block;
+          font-weight: 500;
+          font-size: 0.875rem;
+          color: #9CA3AF;
         }
 
         .form-group input,
         .form-group select {
-          padding: 0.75rem;
-          border: 2px solid #e2e8f0;
-          border-radius: 12px;
+          width: 100%;
+          padding: 0.75rem 1rem;
+          background: #0F172A;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          color: #ffffff;
           font-size: 1rem;
-          transition: all 0.2s ease;
+          transition: border-color 0.2s ease;
+        }
+
+        .form-group input::placeholder {
+          color: #64748B;
+        }
+
+        .form-group input::-webkit-calendar-picker-indicator {
+          filter: invert(0.7);
+          cursor: pointer;
         }
 
         .form-group input:focus,
         .form-group select:focus {
           outline: none;
-          border-color: #3b82f6;
+          border-color: #10B981;
+        }
+
+        .form-group select option {
+          background: #0F172A;
+          color: #ffffff;
         }
 
         .type-toggle {
@@ -637,17 +900,19 @@ const RecurringTransactions = () => {
 
         .type-toggle button {
           padding: 0.75rem;
-          border: 2px solid #e2e8f0;
-          border-radius: 12px;
-          background: white;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          background: rgba(255,255,255,0.05);
+          color: #9CA3AF;
           cursor: pointer;
           transition: all 0.2s ease;
+          font-size: 0.95rem;
         }
 
         .type-toggle button.active {
-          background: #3b82f6;
+          background: linear-gradient(135deg, #10B981, #059669);
           color: white;
-          border-color: #3b82f6;
+          border-color: #10B981;
         }
 
         .form-row {
@@ -659,38 +924,60 @@ const RecurringTransactions = () => {
         .modal-actions {
           display: flex;
           gap: 1rem;
-          justify-content: flex-end;
-          margin-top: 1rem;
+          margin-top: 1.5rem;
         }
 
         .btn-cancel, .btn-submit {
-          padding: 0.75rem 1.5rem;
-          border-radius: 12px;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.875rem 1.5rem;
+          border-radius: 8px;
           font-weight: 600;
+          font-size: 1rem;
           border: none;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .btn-cancel {
-          background: #e2e8f0;
-          color: #475569;
+          background: rgba(255,255,255,0.05);
+          color: #9CA3AF;
+          border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .btn-submit {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        .btn-cancel:hover {
+          background: rgba(255,255,255,0.1);
           color: white;
         }
 
-        .btn-cancel:hover, .btn-submit:hover {
+        .btn-submit {
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+        }
+
+        .btn-submit:hover {
           transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
         }
 
         .loading-state {
           text-align: center;
           padding: 4rem;
           font-size: 1.2rem;
-          color: #64748b;
+          color: #9CA3AF;
+        }
+
+        @media (max-width: 768px) {
+          .recurring-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+          .form-row {
+            grid-template-columns: 1fr;
+          }
         }
             `}</style>
         </div>
