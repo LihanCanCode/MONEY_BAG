@@ -10,19 +10,19 @@ import DebtTracker from '../components/DebtTracker';
 import FinancialCalendar from '../components/FinancialCalendar';
 import SplitBills from '../components/SplitBills';
 import Transactions from './Transactions';
-import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar, FiScissors } from 'react-icons/fi';
+import { FaHome, FaRedoAlt, FaDownload, FaChartLine, FaDollarSign, FaBullseye, FaUsers, FaCalendarAlt, FaCut, FaExchangeAlt } from 'react-icons/fa';
 
 const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: FiHome },
-  { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
-  { id: 'goals', label: 'Goals', icon: FiTarget },
-  { id: 'debts', label: 'Debts', icon: FiUsers },
-  { id: 'splits', label: 'Split Bills', icon: FiScissors },
-  { id: 'recurring', label: 'Recurring', icon: FiRepeat },
-  { id: 'calendar', label: 'Calendar', icon: FiCalendar },
-  { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
-  { id: 'export', label: 'Export', icon: FiDownload },
-  { id: 'transactions', label: 'Transactions', icon: FiActivity }
+  { id: 'dashboard', label: 'Dashboard', icon: FaHome },
+  { id: 'budgets', label: 'Budgets', icon: FaDollarSign },
+  { id: 'goals', label: 'Goals', icon: FaBullseye },
+  { id: 'debts', label: 'Debts', icon: FaUsers },
+  { id: 'splits', label: 'Split Bills', icon: FaCut },
+  { id: 'recurring', label: 'Recurring', icon: FaRedoAlt },
+  { id: 'calendar', label: 'Calendar', icon: FaCalendarAlt },
+  { id: 'analytics', label: 'Analytics', icon: FaChartLine },
+  { id: 'export', label: 'Export', icon: FaDownload },
+  { id: 'transactions', label: 'Transactions', icon: FaExchangeAlt }
 ];
 
 const EnhancedDashboard = () => {
@@ -65,47 +65,47 @@ const EnhancedDashboard = () => {
       >
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'budgets' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <BudgetManagement />
           </div>
         )}
         {activeTab === 'goals' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <FinancialGoals />
           </div>
         )}
         {activeTab === 'debts' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <DebtTracker />
           </div>
         )}
         {activeTab === 'splits' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <SplitBills />
           </div>
         )}
         {activeTab === 'recurring' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <RecurringTransactions />
           </div>
         )}
         {activeTab === 'calendar' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <FinancialCalendar />
           </div>
         )}
         {activeTab === 'analytics' && (
-          <div className="min-h-screen bg-[#0B0F1A] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <SpendingHeatmap />
           </div>
         )}
         {activeTab === 'export' && (
-          <div className="min-h-screen bg-[#020617] pt-6">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
             <ExportReports />
           </div>
         )}
         {activeTab === 'transactions' && (
-          <div className="min-h-screen bg-[#020617]">
+          <div style={{ minHeight: '100vh', background: '#0B0F1A' }}>
             <Transactions />
           </div>
         )}
@@ -114,7 +114,7 @@ const EnhancedDashboard = () => {
       <style>{`
         .enhanced-dashboard {
           min-height: 100vh;
-          background: #020617;
+          background: #0B0F1A;
         }
 
         .tabs-container {
@@ -122,13 +122,12 @@ const EnhancedDashboard = () => {
           gap: 0.5rem;
           padding: 1rem 2rem;
           padding-bottom: 0.5rem;
-          background: #0B1121;
+          background: #111827;
           border-bottom: 1px solid rgba(255,255,255,0.05);
           overflow-x: auto;
           position: sticky;
           top: 0;
           z-index: 30;
-          backdrop-blur-md;
         }
 
         .tab-button {
@@ -149,17 +148,17 @@ const EnhancedDashboard = () => {
         }
 
         .tab-button:hover {
-          background: #1A233A;
+          background: rgba(255,255,255,0.05);
           color: #E5E7EB;
         }
 
         .tab-button.active {
           color: white;
-          background: #1A233A;
+          background: rgba(255,255,255,0.05);
         }
 
         .tab-icon {
-          font-size: 1.25rem;
+          font-size: 1.125rem;
         }
 
         .tab-label {

@@ -12,7 +12,7 @@ import {
     Filler
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
-import { FiActivity, FiPieChart } from 'react-icons/fi';
+import { FaChartLine, FaChartPie } from 'react-icons/fa';
 
 ChartJS.register(
     CategoryScale,
@@ -27,7 +27,6 @@ ChartJS.register(
 );
 
 const SpendingChart = ({ wallet }) => {
-    // Safe default data
     const income = wallet?.totalIncome || 0;
     const expense = wallet?.totalExpense || 0;
     const balance = wallet?.currentBalance || 0;
@@ -37,24 +36,16 @@ const SpendingChart = ({ wallet }) => {
         datasets: [
             {
                 data: [expense, balance],
-                backgroundColor: [
-                    '#F43F5E', // Rose-500
-                    '#6366F1', // Indigo-500
-                ],
-                borderColor: [
-                    '#F43F5E',
-                    '#6366F1',
-                ],
+                backgroundColor: ['#EF4444', '#10B981'],
+                borderColor: ['#EF4444', '#10B981'],
                 borderWidth: 0,
             },
         ],
     };
 
-    // Process real transactions for monthly aggregates
     const processMonthlyData = () => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Get last 6 months including current
         const last6Months = [];
         for (let i = 5; i >= 0; i--) {
             const d = new Date();
@@ -91,10 +82,8 @@ const SpendingChart = ({ wallet }) => {
             });
         }
 
-        // Check if we have any real data
         const hasData = last6Months.some(m => m.income > 0 || m.expense > 0);
 
-        // If no real data, use sample data for better UI
         if (!hasData) {
             return {
                 labels: last6Months.map(m => m.label),
@@ -118,7 +107,7 @@ const SpendingChart = ({ wallet }) => {
             {
                 label: 'Income',
                 data: dynamicData.income,
-                borderColor: '#10B981', // Emerald-500
+                borderColor: '#10B981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
                 fill: true,
@@ -129,8 +118,8 @@ const SpendingChart = ({ wallet }) => {
             {
                 label: 'Expenses',
                 data: dynamicData.expense,
-                borderColor: '#F43F5E', // Rose-500
-                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                borderColor: '#EF4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 tension: 0.4,
                 fill: true,
                 borderWidth: 2,
@@ -153,7 +142,7 @@ const SpendingChart = ({ wallet }) => {
                     },
                     usePointStyle: true,
                     boxWidth: 8,
-                    padding: 24 // Add more space between legend items
+                    padding: 24
                 }
             },
             title: {
@@ -163,7 +152,7 @@ const SpendingChart = ({ wallet }) => {
         scales: {
             y: {
                 grid: {
-                    color: '#374151', // Border color
+                    color: 'rgba(255,255,255,0.05)',
                     drawBorder: false,
                 },
                 ticks: {
@@ -192,28 +181,23 @@ const SpendingChart = ({ wallet }) => {
     };
 
     return (
-        <div 
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-            style={{ paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}
-        >
-            <div className="bg-[#0B1121] p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
-                <h3 className="text-xl font-bold mb-8 flex items-center gap-2" style={{ color: '#ffffff' }}>
-                    <FiActivity className="text-emerald-400" />
+        <div className="spending-charts">
+            <div className="chart-card">
+                <h3 className="chart-title">
+                    <FaChartLine className="chart-icon green" />
                     Income vs Expense
                 </h3>
-                <div className="h-72 w-full">
+                <div className="chart-wrapper line-chart">
                     <Line data={lineData} options={{ ...options, maintainAspectRatio: false }} />
                 </div>
             </div>
 
-            <div className="bg-[#0B1121] p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-indigo-500/10 transition-colors"></div>
-                <h3 className="text-xl font-bold mb-8 flex items-center gap-2" style={{ color: '#ffffff' }}>
-                    <FiPieChart className="text-indigo-400" />
+            <div className="chart-card">
+                <h3 className="chart-title">
+                    <FaChartPie className="chart-icon blue" />
                     Financial Overview
                 </h3>
-                <div className="h-64 flex items-center justify-center">
+                <div className="chart-wrapper doughnut-chart">
                     <Doughnut
                         data={doughnutData}
                         options={{
@@ -222,10 +206,10 @@ const SpendingChart = ({ wallet }) => {
                                 legend: {
                                     position: 'bottom',
                                     labels: {
-                                        color: '#94a3b8',
+                                        color: '#9CA3AF',
                                         usePointStyle: true,
                                         padding: 20,
-                                        font: { family: 'inherit', size: 12, weight: '600' }
+                                        font: { size: 12, weight: '600' }
                                     }
                                 }
                             },
@@ -234,6 +218,57 @@ const SpendingChart = ({ wallet }) => {
                     />
                 </div>
             </div>
+
+            <style>{`
+                .spending-charts {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                    padding: 0;
+                }
+
+                .chart-card {
+                    background: #1E293B;
+                    border-radius: 16px;
+                    padding: 1.5rem;
+                    border: 1px solid rgba(255,255,255,0.05);
+                }
+
+                .chart-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.625rem;
+                    color: white;
+                    font-size: 1.125rem;
+                    font-weight: 700;
+                    margin: 0 0 1.5rem;
+                }
+
+                .chart-icon {
+                    font-size: 1.125rem;
+                }
+
+                .chart-icon.green { color: #10B981; }
+                .chart-icon.blue { color: #3B82F6; }
+
+                .chart-wrapper.line-chart {
+                    height: 280px;
+                    width: 100%;
+                }
+
+                .chart-wrapper.doughnut-chart {
+                    height: 260px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                @media (max-width: 900px) {
+                    .spending-charts {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

@@ -441,9 +441,30 @@ const SplitBills = () => {
 
   if (loading) {
     return (
-      <div className="split-loading">
-        <GiReceiveMoney className="loading-icon" />
-        <p>Loading split bills...</p>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        width: '100%',
+        color: 'white',
+        background: '#0B0F1A'
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '4px solid rgba(255, 255, 255, 0.1)',
+          borderTopColor: '#10B981',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <p style={{ marginTop: '1rem' }}>Loading split bills...</p>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -1014,19 +1035,23 @@ const SplitBills = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 60vh;
-          color: #9CA3AF;
+          min-height: 100vh;
+          width: 100%;
+          color: white;
         }
 
-        .split-loading .loading-icon {
-          font-size: 4rem;
-          color: #10B981;
-          animation: pulse 1.5s ease-in-out infinite;
+        .split-loading .loading-spinner {
+          width: 50px;
+          height: 50px;
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top-color: #10B981;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.1); }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
 
         /* Header */

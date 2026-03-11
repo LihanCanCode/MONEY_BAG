@@ -2,61 +2,64 @@
  * @fileoverview Loading Skeleton Components
  * 
  * Provides skeleton loading placeholders for better UX during data fetching.
- * Uses react-loading-skeleton library for smooth loading animations.
+ * Uses CSS pulse animations matching the dark theme design system.
  * 
  * Components:
- * - DashboardSkeleton: Full dashboard loading state with multiple card placeholders
+ * - DashboardSkeleton: Full dashboard loading state with pulsing icon
  * - CardSkeleton: Reusable single card skeleton for individual components
  */
 
 import React from 'react';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import { FaDollarSign } from 'react-icons/fa';
 
 /**
  * DashboardSkeleton Component
  * 
- * Displays comprehensive loading skeleton for the entire dashboard page.
- * Mimics the layout of the actual dashboard to provide visual continuity.
- * 
- * Includes skeletons for:
- * - Page header (title and subtitle)
- * - Wallet overview card with 3 stat columns
- * - 4 action buttons in a grid
+ * Displays a centered pulsing loading indicator matching the dark theme.
  * 
  * @returns {JSX.Element} Full dashboard loading skeleton
  */
 const DashboardSkeleton = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-            <div className="max-w-6xl mx-auto">
-                {/* Header Skeleton */}
-                <div className="text-center mb-12">
-                    <Skeleton height={48} width={400} className="mx-auto mb-3" />
-                    <Skeleton height={24} width={300} className="mx-auto" />
-                </div>
-
-                {/* Wallet Overview Skeleton */}
-                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 mb-8">
-                    <Skeleton height={32} width={250} className="mb-6" />
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="p-8 rounded-xl">
-                                <Skeleton height={16} width={120} className="mb-2" />
-                                <Skeleton height={40} width={150} className="mb-1" />
-                                <Skeleton height={4} width={64} className="mt-3" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Action Buttons Skeleton */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    {[1, 2, 3, 4].map((i) => (
-                        <Skeleton key={i} height={80} className="rounded-xl" />
-                    ))}
-                </div>
+        <div className="dash-skeleton">
+            <div className="dash-skeleton-inner">
+                <FaDollarSign className="dash-skeleton-icon" />
+                <p className="dash-skeleton-text">Loading your dashboard...</p>
             </div>
+
+            <style>{`
+                .dash-skeleton {
+                    min-height: 100vh;
+                    background: #0B0F1A;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .dash-skeleton-inner {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1.5rem;
+                }
+
+                .dash-skeleton-icon {
+                    font-size: 3rem;
+                    color: #10B981;
+                    animation: skeletonPulse 1.5s ease-in-out infinite;
+                }
+
+                .dash-skeleton-text {
+                    color: #9CA3AF;
+                    font-size: 1rem;
+                    font-weight: 500;
+                }
+
+                @keyframes skeletonPulse {
+                    0%, 100% { opacity: 0.4; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.15); }
+                }
+            `}</style>
         </div>
     );
 };
@@ -66,10 +69,44 @@ const DashboardSkeleton = () => {
  */
 export const CardSkeleton = () => {
     return (
-        <div className="bg-white rounded-xl p-6 shadow-md">
-            <Skeleton height={24} width="60%" className="mb-4" />
-            <Skeleton height={16} count={3} className="mb-2" />
-            <Skeleton height={40} className="mt-4" />
+        <div className="card-skeleton">
+            <div className="card-skeleton-bar title-bar"></div>
+            <div className="card-skeleton-bar"></div>
+            <div className="card-skeleton-bar"></div>
+            <div className="card-skeleton-bar short-bar"></div>
+
+            <style>{`
+                .card-skeleton {
+                    background: #1E293B;
+                    border-radius: 16px;
+                    padding: 1.5rem;
+                    border: 1px solid rgba(255,255,255,0.05);
+                }
+
+                .card-skeleton-bar {
+                    height: 14px;
+                    background: rgba(255,255,255,0.05);
+                    border-radius: 6px;
+                    margin-bottom: 0.75rem;
+                    animation: skeletonShimmer 1.5s ease-in-out infinite;
+                }
+
+                .card-skeleton-bar.title-bar {
+                    width: 60%;
+                    height: 20px;
+                    margin-bottom: 1.25rem;
+                }
+
+                .card-skeleton-bar.short-bar {
+                    width: 40%;
+                    margin-bottom: 0;
+                }
+
+                @keyframes skeletonShimmer {
+                    0%, 100% { opacity: 0.3; }
+                    50% { opacity: 0.6; }
+                }
+            `}</style>
         </div>
     );
 };

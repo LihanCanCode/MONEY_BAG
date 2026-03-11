@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FiPlus, FiMinus, FiRefreshCw, FiSearch, FiFilter, FiDownload, FiTrash2, FiEdit2,
-  FiCheck, FiX, FiAlertCircle, FiTrendingUp, FiTrendingDown, FiPieChart, FiActivity,
-  FiDollarSign, FiCalendar, FiClock, FiArrowUpRight, FiArrowDownLeft, FiSmile, FiZap,
-  FiCamera, FiList, FiPlusCircle, FiMinusCircle, FiChevronDown, FiRefreshCcw,
-  FiArrowUp, FiArrowDown, FiBriefcase, FiTarget
-} from 'react-icons/fi';
+  FaPlus, FaMinus, FaSync, FaSearch, FaFilter, FaDownload, FaTrash, FaEdit,
+  FaCheck, FaTimes, FaExclamationTriangle, FaArrowUp, FaArrowDown, FaChartPie, FaChartLine,
+  FaDollarSign, FaCalendarAlt, FaClock, FaArrowRight, FaArrowLeft, FaSmile, FaBolt,
+  FaCamera, FaList, FaPlusCircle, FaMinusCircle, FaChevronDown, FaRedoAlt,
+  FaBriefcase, FaBullseye
+} from 'react-icons/fa';
 import AnimatedCounter from '../components/AnimatedCounter';
 import DashboardSkeleton from '../components/LoadingSkeleton';
 import SpendingChart from '../components/SpendingChart';
@@ -480,455 +480,1171 @@ const Dashboard = () => {
   const recentTransactions = wallet?.transactions || [];
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-cyan-500/30 pb-24 relative overflow-x-hidden w-full flex justify-center">
-
-      {/* Background Gradients */}
-      <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-900/20 to-transparent pointer-events-none" />
-      <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse" />
-      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/10 blur-[100px] rounded-full pointer-events-none" />
+    <div className="dashboard-root">
       {showConfetti && (
-        <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={400} colors={['#22d3ee', '#e879f9', '#ffffff']} />
+        <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={400} colors={['#10B981', '#3B82F6', '#A855F7']} />
       )}
 
       <Toaster position="bottom-center" toastOptions={{
-        style: { background: '#0f172a', color: '#e2e8f0', border: '1px solid #1e293b' },
+        style: { background: '#1E293B', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' },
       }} />
 
-      {/* Main Content Container */}
-      <div className="w-full max-w-7xl px-8 md:px-12 lg:px-16">
-        {/* Hero Header Space */}
-        <div className="h-6 w-full" />
+      <div className="dashboard-container">
 
-        <div className="py-12">
-
-          {/* HERO SECTION - Cockpit Style */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-24">
-            {/* Net Worth Display */}
-            <div className="lg:col-span-8 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-10 group-hover:opacity-20 transition-opacity duration-1000"></div>
-              <div className="relative bg-[#0B1121] border border-white/10 rounded-2xl p-10 h-full flex flex-col justify-center overflow-hidden shadow-2xl">
-                {/* Background texture */}
-                <div className="absolute top-0 right-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 70% 20%, rgba(34, 211, 238, 0.15), transparent 40%)' }}></div>
-
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                      <span className="text-cyan-400 font-mono text-[10px] uppercase tracking-[0.2em] font-bold">Live Balance</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl md:text-7xl font-black text-white tracking-tighter shadow-sm">
-                        $<AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
-                      </span>
-                      <span className="text-slate-400 text-xs font-medium ml-3 font-bold opacity-30 uppercase tracking-widest">Digital Assets</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 self-end md:self-center">
-                    <button
-                      onClick={() => setShowSaveToGoalModal(true)}
-                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 hover:from-cyan-500/30 hover:to-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-xl font-bold text-xs transition-all active:scale-95 group shadow-lg shadow-cyan-500/10"
-                    >
-                      <FiTarget className="group-hover:rotate-12 transition-transform" />
-                      Move to Savings
-                    </button>
-                    <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-xl hover:bg-white/10 transition-colors shadow-xl group/refresh cursor-pointer" onClick={handleResetWallet}>
-                      <FiRefreshCcw className="text-slate-400 group-hover/refresh:text-white transition-colors group-hover/refresh:rotate-180 duration-700" size={20} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative z-10 mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300">
-                    <div className="w-14 h-14 bg-emerald-500/10 rounded-xl text-emerald-400 flex items-center justify-center shadow-inner"><FiTrendingUp size={28} /></div>
-                    <div>
-                      <span className="text-slate-300 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-60">Inflow Growth</span>
-                      <div className="text-2xl font-black text-white tracking-tight">
-                        +$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300">
-                    <div className="w-14 h-14 bg-rose-500/10 rounded-xl text-rose-400 flex items-center justify-center shadow-inner"><FiTrendingDown size={28} /></div>
-                    <div>
-                      <span className="text-slate-300 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-60">Outflow Velocity</span>
-                      <div className="text-2xl font-black text-white tracking-tight">
-                        -$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        {/* Balance Card */}
+        <div className="balance-card">
+          <div className="balance-header">
+            <div>
+              <span className="balance-label"><span className="live-dot"></span> Current Balance</span>
+              <div className="balance-value">
+                <span className="currency-sign">$</span><AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
               </div>
             </div>
-
-            {/* Quick Actions Panel */}
-            <div className="lg:col-span-4 flex flex-col gap-4">
-              <div className="flex-1 bg-[#0B1121] border border-white/10 rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:bg-[#161e31] transition-all cursor-pointer shadow-xl active:scale-[0.98]" onClick={() => setShowTransactionModal(true)}>
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 border border-emerald-500/20 mb-4 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
-                  <FiPlus size={32} />
-                </div>
-                <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>Manual Entry</h3>
-                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">Precision Ledger Tracking</p>
-              </div>
-
-              <div className="flex-1 bg-[#0B1121] border border-white/10 rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:bg-[#161e31] transition-all cursor-pointer shadow-xl active:scale-[0.98]" onClick={() => setShowAIInput(true)}>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                <div className="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 border border-purple-500/20 mb-4 group-hover:scale-110 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
-                  <FiZap size={32} />
-                </div>
-                <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>AI Quick Add</h3>
-                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">Cognitive Pattern Auto-fill</p>
-              </div>
-
-              <div className="flex-1 bg-[#0B1121] border border-white/10 rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:bg-[#161e31] transition-all cursor-pointer shadow-xl active:scale-[0.98]" onClick={() => setShowReceiptScanner(true)}>
-                <div className="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                <div className="w-14 h-14 bg-sky-500/10 rounded-2xl flex items-center justify-center text-sky-400 border border-sky-500/20 mb-4 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
-                  <FiCamera size={32} />
-                </div>
-                <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>Scan Receipt</h3>
-                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">OCR Computer Vision Engine</p>
-              </div>
+            <div className="balance-actions">
+              <button className="btn-outline" onClick={() => setShowSaveToGoalModal(true)}>
+                <FaBullseye /> Move to Savings
+              </button>
+              <button className="btn-icon" onClick={handleResetWallet} title="Reset Wallet">
+                <FaRedoAlt />
+              </button>
             </div>
           </div>
 
-          {/* SECTION DIVIDER */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/5 to-transparent mb-24 opacity-30 mt-24"></div>
-
-          {/* GRAPHS SECTION */}
-          <div className="mb-24 px-4">
-            <SpendingChart wallet={wallet} />
-          </div>
-
-          {/* FINANCIAL HEALTH GAUGE */}
-          <div className="max-w-6xl mx-auto mb-24">
-            <div className="bg-[#0B1121] border border-white/5 rounded-2xl p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-black mb-1 tracking-tight" style={{ color: '#ffffff' }}>Financial Health Gauge</h3>
-                <p className="text-slate-300 font-medium">{health.message}</p>
+          <div className="stats-row">
+            <div className="stat-item">
+              <div className="stat-icon income-icon"><FaArrowUp /></div>
+              <div>
+                <span className="stat-label">Total Income</span>
+                <span className="stat-value income">+$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} /></span>
               </div>
-              <div className="relative z-10 flex items-center gap-6">
-                <div className="text-right">
-                  <span className="text-slate-300 text-[10px] font-bold uppercase tracking-widest block mb-1 font-mono">Efficiency Score</span>
-                  <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{health.score}%</div>
-                </div>
-                <div className="w-16 h-16 rounded-full border-2 border-white/5 flex items-center justify-center relative shadow-inner">
-                  <div className="absolute inset-0 bg-cyan-400 rounded-full scale-[0.1] blur-md opacity-30"></div>
-                  <FiTrendingUp className="text-cyan-400" size={24} />
-                </div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-icon expense-icon"><FaArrowDown /></div>
+              <div>
+                <span className="stat-label">Total Expenses</span>
+                <span className="stat-value expense">-$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} /></span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* MODALS SECTION - Re-styled for Elite Perfection */}
-        <AnimatePresence>
-          {showTransactionModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#020617]/95 backdrop-blur-2xl" onClick={() => setShowTransactionModal(false)} />
-              <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-[#0f172a] border border-white/10 rounded-xl w-full max-w-xl relative z-10 shadow-[0_0_80px_rgba(0,0,0,0.6)]">
+        {/* Quick Actions */}
+        <div className="quick-actions">
+          <div className="action-card" onClick={() => setShowTransactionModal(true)}>
+            <div className="action-icon green"><FaPlus /></div>
+            <h3>Manual Entry</h3>
+            <p>Add income or expense</p>
+          </div>
+          <div className="action-card" onClick={() => setShowAIInput(true)}>
+            <div className="action-icon purple"><FaBolt /></div>
+            <h3>AI Quick Add</h3>
+            <p>Describe your transaction</p>
+          </div>
+          <div className="action-card" onClick={() => setShowReceiptScanner(true)}>
+            <div className="action-icon blue"><FaCamera /></div>
+            <h3>Scan Receipt</h3>
+            <p>Upload receipt image</p>
+          </div>
+        </div>
 
-                <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02] relative rounded-t-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
-                  <div>
-                    <h3 className="text-3xl font-bold text-white tracking-tight">Add Ledger Entry</h3>
-                    <p className="text-slate-300 text-[10px] font-bold uppercase tracking-widest mt-2">Manual Financial Transaction Log</p>
-                  </div>
-                  <button onClick={() => setShowTransactionModal(false)} className="w-12 h-12 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
-                    <FiX size={24} />
-                  </button>
-                </div>
+        {/* Charts */}
+        <SpendingChart wallet={wallet} />
 
-                <div className="p-12">
-                  <form onSubmit={handleTransactionSubmit} className="space-y-12">
-                    {/* Type Toggle - Obsidian Style */}
-                    <div className="flex p-2 bg-[#020617] rounded-lg border border-white/5 shadow-inner">
-                      <button
-                        type="button"
-                        onClick={() => setTransactionType('expense')}
-                        className={`flex-1 py-4 rounded text-xs font-bold transition-all duration-300 ${transactionType === 'expense'
-                          ? 'bg-white text-[#020617] shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                          : 'text-slate-300 hover:text-white'
-                          }`}
-                      >
-                        EXPENSE
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTransactionType('income')}
-                        className={`flex-1 py-4 rounded text-xs font-bold transition-all duration-300 ${transactionType === 'income'
-                          ? 'bg-white text-[#020617] shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                          : 'text-slate-300 hover:text-white'
-                          }`}
-                      >
-                        INCOME
-                      </button>
-                    </div>
-
-                    <div className="space-y-10">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Value Amount ($)</label>
-                        <div className="relative group">
-                          <div className="absolute inset-0 bg-white/5 rounded-lg blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-                          <input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0.00"
-                            className="relative w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-500 transition-all text-center"
-                            autoFocus
-                          />
-                        </div>
-                      </div>
-
-                      {transactionType === 'expense' && (
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                          <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Classification Category</label>
-                          <div className="relative">
-                            <select
-                              value={category}
-                              onChange={(e) => setCategory(e.target.value)}
-                              className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-lg focus:border-white/30 outline-none appearance-none font-semibold cursor-pointer hover:bg-white/5 transition-all text-base"
-                            >
-                              {categories.map(cat => <option key={cat.value} value={cat.value} className="bg-[#0f172a]">{cat.label}</option>)}
-                            </select>
-                            <FiChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={20} />
-                          </div>
-                        </motion.div>
-                      )}
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Detailed Description</label>
-                        <textarea
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Provide transaction context..."
-                          className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-lg focus:border-white/30 outline-none resize-none placeholder-slate-500 min-h-[140px] font-medium text-base transition-all leading-relaxed"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-6 rounded-lg font-bold text-[#020617] bg-white hover:bg-slate-200 shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-[0.98] transition-all text-xl tracking-wide uppercase mt-6"
-                    >
-                      {isSubmitting ? 'PROCESSING...' : `COMMIT ${transactionType.toUpperCase()} ENTRY`}
-                    </button>
-                  </form>
-                </div>
-              </motion.div>
+        {/* Financial Health */}
+        <div className="health-card">
+          <div className="health-top">
+            <div className="health-info">
+              <h3>Financial Health</h3>
+              <p>{health.message}</p>
             </div>
-          )}
-        </AnimatePresence >
+            <div className="health-score">
+              <span className="health-label">Score</span>
+              <span className="health-value">{health.score}%</span>
+            </div>
+          </div>
+          <div className="health-bar-container">
+            <div className="health-bar-track">
+              <div
+                className="health-bar-fill"
+                style={{ width: `${Math.min(health.score, 100)}%` }}
+              />
+            </div>
+            <div className="health-bar-labels">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <AnimatePresence>
-          {showFancyPopup && (
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-8 right-8 z-50 max-w-sm w-full">
-              <div className="bg-[#1E293B]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-400 to-purple-500"></div>
-                <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-3 rounded-xl text-white shadow-lg">
-                    <FiZap size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white mb-1">AI Insight</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">"{fancyMessage}"</p>
-                  </div>
-                  <button onClick={() => setShowFancyPopup(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white">
-                    <FiX size={16} />
+      {/* Transaction Modal */}
+      <AnimatePresence>
+        {showTransactionModal && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowTransactionModal(false)} />
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
+              <div className="modal-header">
+                <h3>Add Transaction</h3>
+                <button className="modal-close" onClick={() => setShowTransactionModal(false)}><FaTimes /></button>
+              </div>
+
+              <form onSubmit={handleTransactionSubmit} className="modal-body">
+                {/* Type Toggle */}
+                <div className="type-toggle">
+                  <button
+                    type="button"
+                    onClick={() => setTransactionType('expense')}
+                    className={`toggle-btn ${transactionType === 'expense' ? 'active expense' : ''}`}
+                  >
+                    <FaArrowDown /> Expense
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTransactionType('income')}
+                    className={`toggle-btn ${transactionType === 'income' ? 'active income' : ''}`}
+                  >
+                    <FaArrowUp /> Income
                   </button>
                 </div>
+
+                <div className="form-group">
+                  <label>Amount ($)</label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    autoFocus
+                  />
+                </div>
+
+                {transactionType === 'expense' && (
+                  <div className="form-group">
+                    <label>Category</label>
+                    <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                      {categories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="What was this transaction for?"
+                    rows={3}
+                  />
+                </div>
+
+                <button type="submit" disabled={isSubmitting} className="btn-primary full">
+                  {isSubmitting ? 'Processing...' : `Add ${transactionType === 'income' ? 'Income' : 'Expense'}`}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Fancy AI Popup */}
+      <AnimatePresence>
+        {showFancyPopup && (
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fancy-popup">
+            <div className="fancy-popup-inner">
+              <div className="fancy-icon"><FaBolt /></div>
+              <div className="fancy-content">
+                <h4>AI Insight</h4>
+                <p>"{fancyMessage}"</p>
+              </div>
+              <button onClick={() => setShowFancyPopup(false)} className="fancy-close"><FaTimes /></button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* AI Input Modal */}
+      <AnimatePresence>
+        {showAIInput && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowAIInput(false)} />
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
+              <div className="modal-header">
+                <div className="modal-header-row">
+                  <div className="modal-header-icon purple"><FaBolt /></div>
+                  <div>
+                    <h3>AI Quick Add</h3>
+                    <p className="modal-subtitle">Describe your transaction naturally</p>
+                  </div>
+                </div>
+                <button className="modal-close" onClick={() => setShowAIInput(false)}><FaTimes /></button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  value={aiText}
+                  onChange={(e) => setAiText(e.target.value)}
+                  placeholder="e.g., 'Spent $45 on groceries today'..."
+                  className="ai-textarea"
+                  disabled={aiLoading}
+                  rows={5}
+                />
+                <button
+                  onClick={handleAIProcessing}
+                  disabled={aiLoading || !aiText.trim()}
+                  className="btn-primary full"
+                >
+                  {aiLoading ? <><FaSync className="spin-icon" /> Processing...</> : <><FaBolt /> Add Transaction</>}
+                </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
 
-        <AnimatePresence>
-          {showAIInput && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#020617]/95 backdrop-blur-2xl" onClick={() => setShowAIInput(false)} />
-              <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-[#0f172a] border border-purple-500/20 rounded-xl w-full max-w-xl relative z-10 shadow-[0_0_80px_rgba(168,85,247,0.2)]">
-                <div className="p-10 border-b border-white/5 flex justify-between items-center bg-purple-500/[0.03] relative rounded-t-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400">
-                      <FiZap size={28} />
-                    </div>
-                    <div>
-                      <h3 className="text-3xl font-bold text-white tracking-tight">AI Wisdom Engine</h3>
-                      <p className="text-purple-400/60 text-[10px] font-bold uppercase tracking-widest mt-2">Natural Language Cognitive Processing</p>
-                    </div>
+      {/* Receipt Scanner Modal */}
+      <AnimatePresence>
+        {showReceiptScanner && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowReceiptScanner(false)} />
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content wide">
+              <div className="modal-header">
+                <div className="modal-header-row">
+                  <div className="modal-header-icon blue"><FaCamera /></div>
+                  <div>
+                    <h3>Scan Receipt</h3>
+                    <p className="modal-subtitle">Upload a receipt to auto-extract data</p>
                   </div>
-                  <button onClick={() => setShowAIInput(false)} className="w-12 h-12 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
-                    <FiX size={24} />
-                  </button>
                 </div>
-                <div className="p-12">
-                  <textarea
-                    value={aiText}
-                    onChange={(e) => setAiText(e.target.value)}
-                    placeholder="e.g., 'Spent $45 on organic groceries today'..."
-                    className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-purple-500/40 outline-none resize-none min-h-[220px] text-xl font-medium placeholder-slate-500 transition-all leading-relaxed"
-                    disabled={aiLoading}
-                  />
-                  <button
-                    onClick={handleAIProcessing}
-                    disabled={aiLoading || !aiText.trim()}
-                    className="w-full mt-10 py-6 rounded-lg font-bold text-[#020617] bg-white hover:bg-slate-200 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all flex items-center justify-center gap-4 uppercase tracking-wide text-xl"
-                  >
-                    {aiLoading ? <FiRefreshCw className="animate-spin" /> : <FiZap />}
-                    {aiLoading ? 'TRANSCRIBING...' : 'DECODER & COMMIT TO LEDGER'}
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {showReceiptScanner && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#020617]/95 backdrop-blur-2xl" onClick={() => setShowReceiptScanner(false)} />
-              <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-[#0f172a] border border-sky-500/20 rounded-xl w-full max-w-2xl relative z-10 shadow-[0_0_80px_rgba(14,165,233,0.2)]">
-                <div className="p-10 border-b border-white/5 flex justify-between items-center bg-sky-500/[0.03] relative rounded-t-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-sky-500/20 rounded-lg flex items-center justify-center text-sky-400">
-                      <FiCamera size={28} />
+                <button className="modal-close" onClick={() => setShowReceiptScanner(false)}><FaTimes /></button>
+              </div>
+              <div className="modal-body">
+                {!receiptPreview ? (
+                  <label className="upload-zone">
+                    <div className="upload-icon"><FaDownload /></div>
+                    <p className="upload-title">Upload Receipt</p>
+                    <p className="upload-subtitle">JPG, PNG or PDF</p>
+                    <input type="file" className="hidden-input" accept="image/*" onChange={handleFileSelect} />
+                  </label>
+                ) : (
+                  <div className="receipt-preview-area">
+                    <div className="receipt-image-wrap">
+                      <img src={receiptPreview} alt="Receipt Preview" />
+                      <button onClick={() => { setReceiptPreview(null); setSelectedReceipt(null); }} className="remove-receipt"><FaTrash /></button>
                     </div>
-                    <div>
-                      <h3 className="text-3xl font-bold text-white tracking-tight">Vision Scanner</h3>
-                      <p className="text-sky-400/60 text-[10px] font-bold uppercase tracking-widest mt-2">Precision OCR Data Extraction</p>
-                    </div>
+                    <button
+                      onClick={handleReceiptScan}
+                      disabled={receiptLoading}
+                      className="btn-primary full"
+                    >
+                      {receiptLoading ? <><FaSync className="spin-icon" /> Analyzing...</> : <><FaBolt /> Scan & Record</>}
+                    </button>
                   </div>
-                  <button onClick={() => setShowReceiptScanner(false)} className="w-12 h-12 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
-                    <FiX size={24} />
-                  </button>
-                </div>
-                <div className="p-12">
-                  {!receiptPreview ? (
-                    <label className="border-2 border-dashed border-white/10 rounded-lg p-20 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 hover:border-sky-500/40 transition-all group">
-                      <div className="w-24 h-24 bg-sky-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                        <FiDownload className="text-sky-400" size={40} />
-                      </div>
-                      <p className="text-white font-bold text-2xl mb-3">Upload Financial Receipt</p>
-                      <p className="text-slate-300 text-base font-semibold">Securely analyze JPG, PNG or high-res PDF</p>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
-                    </label>
-                  ) : (
-                    <div className="space-y-12">
-                      <div className="relative rounded-lg overflow-hidden border border-white/10 aspect-video bg-[#020617] group">
-                        <img src={receiptPreview} alt="Receipt Preview" className="w-full h-full object-contain" />
-                        <button onClick={() => { setReceiptPreview(null); setSelectedReceipt(null); }} className="absolute top-6 right-6 bg-rose-500 text-white p-4 rounded-lg hover:bg-rose-600 transition-all shadow-2xl opacity-0 group-hover:opacity-100">
-                          <FiTrash2 size={20} />
-                        </button>
-                      </div>
-                      <button
-                        onClick={handleReceiptScan}
-                        disabled={receiptLoading}
-                        className="w-full py-6 rounded-lg font-bold text-[#020617] bg-white hover:bg-slate-200 shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-all flex items-center justify-center gap-4 uppercase tracking-wide text-xl"
-                      >
-                        {receiptLoading ? <FiRefreshCw className="animate-spin" /> : <FiZap />}
-                        {receiptLoading ? 'ANALYZING DOCUMENT...' : 'EXECUTE VISION SCAN'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
-        <AnimatePresence>
-          {showSaveToGoalModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#020617]/95 backdrop-blur-2xl" onClick={() => setShowSaveToGoalModal(false)} />
-              <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-[#0f172a] border border-cyan-500/20 rounded-xl w-full max-w-xl relative z-10 shadow-[0_0_80px_rgba(34,211,238,0.2)]">
-                <div className="p-10 border-b border-white/5 flex justify-between items-center bg-cyan-500/[0.03] relative rounded-t-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-cyan-500/20 rounded-lg flex items-center justify-center text-cyan-400">
-                      <FiTarget size={28} />
-                    </div>
-                    <div>
-                      <h3 className="text-3xl font-bold text-white tracking-tight">Smart Transfer</h3>
-                      <p className="text-cyan-400/60 text-[10px] font-bold uppercase tracking-widest mt-2">Strategic Savings Injection Pipeline</p>
-                    </div>
+      {/* Save to Goal Modal */}
+      <AnimatePresence>
+        {showSaveToGoalModal && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowSaveToGoalModal(false)} />
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
+              <div className="modal-header">
+                <div className="modal-header-row">
+                  <div className="modal-header-icon cyan"><FaBullseye /></div>
+                  <div>
+                    <h3>Move to Savings</h3>
+                    <p className="modal-subtitle">Transfer funds to a financial goal</p>
                   </div>
-                  <button onClick={() => setShowSaveToGoalModal(false)} className="w-12 h-12 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
-                    <FiX size={24} />
-                  </button>
                 </div>
+                <button className="modal-close" onClick={() => setShowSaveToGoalModal(false)}><FaTimes /></button>
+              </div>
 
-                <div className="p-12">
-                  {goals.length === 0 ? (
-                    <div className="text-center py-16">
-                      <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                        <FiTarget className="text-slate-600" size={40} />
-                      </div>
-                      <p className="text-white font-bold text-2xl mb-3">No Active Targets</p>
-                      <p className="text-slate-300 text-lg mb-10 font-semibold">Initialize a financial milestone before allocating funds.</p>
-                      <button
-                        onClick={() => setShowSaveToGoalModal(false)}
-                        className="px-10 py-4 bg-white text-[#020617] rounded-lg font-bold uppercase tracking-wide text-lg shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                      >
-                        NAVIGATE TO GOALS
-                      </button>
+              <div className="modal-body">
+                {goals.length === 0 ? (
+                  <div className="empty-state">
+                    <FaBullseye className="empty-icon" />
+                    <p className="empty-title">No Active Goals</p>
+                    <p className="empty-subtitle">Create a financial goal first before transferring funds.</p>
+                    <button onClick={() => setShowSaveToGoalModal(false)} className="btn-secondary">
+                      Close
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSaveToGoal}>
+                    <div className="form-group">
+                      <label>Select Goal</label>
+                      <select value={selectedGoalId} onChange={(e) => setSelectedGoalId(e.target.value)} required>
+                        <option value="">Choose a goal...</option>
+                        {goals.map(goal => (
+                          <option key={goal._id} value={goal._id}>
+                            {goal.name} (${goal.targetAmount.toLocaleString()})
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  ) : (
-                    <form onSubmit={handleSaveToGoal} className="space-y-12">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Destination Milestone</label>
-                        <div className="relative">
-                          <select
-                            value={selectedGoalId}
-                            onChange={(e) => setSelectedGoalId(e.target.value)}
-                            className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-lg focus:border-white/30 outline-none appearance-none font-semibold cursor-pointer hover:bg-white/5 transition-all text-base"
-                            required
-                          >
-                            <option value="" className="bg-[#0f172a]">Select Financial Destination...</option>
-                            {goals.map(goal => (
-                              <option key={goal._id} value={goal._id} className="bg-[#0f172a] text-white">
-                                {goal.name} (${goal.targetAmount.toLocaleString()})
-                              </option>
-                            ))}
-                          </select>
-                          <FiChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={20} />
-                        </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Allocated Capital ($)</label>
-                        <input
-                          type="number"
-                          value={saveAmount}
-                          onChange={(e) => setSaveAmount(e.target.value)}
-                          placeholder="0.00"
-                          className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-500 transition-all text-center"
-                          required
-                          min="0.01"
-                          step="0.01"
-                        />
-                        <div className="mt-6 flex items-center justify-between px-2">
-                          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Liquid Assets Pool</span>
-                          <span className="text-lg font-bold text-cyan-400">${wallet?.currentBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</span>
-                        </div>
-                      </div>
+                    <div className="form-group">
+                      <label>Amount ($)</label>
+                      <input
+                        type="number"
+                        value={saveAmount}
+                        onChange={(e) => setSaveAmount(e.target.value)}
+                        placeholder="0.00"
+                        required
+                        min="0.01"
+                        step="0.01"
+                      />
+                      <span className="form-hint">
+                        Available: ${wallet?.currentBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                      </span>
+                    </div>
 
-                      <button type="submit" disabled={isSubmitting} className="w-full py-6 rounded-lg font-bold text-[#020617] bg-white hover:bg-slate-200 shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all flex items-center justify-center gap-4 uppercase tracking-wide text-xl mt-6">
-                        {isSubmitting ? 'TRANSFERRING...' : 'EXECUTE CAPITAL MIGRATION'}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div >
+                    <button type="submit" disabled={isSubmitting} className="btn-primary full">
+                      {isSubmitting ? 'Transferring...' : 'Transfer to Goal'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <style>{`
+        .dashboard-root {
+          min-height: 100vh;
+          background: #0B0F1A;
+          color: white;
+          padding-bottom: 4rem;
+        }
+
+        .dashboard-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        /* Balance Card */
+        .balance-card {
+          background: #1E293B;
+          border-radius: 16px;
+          padding: 2rem;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .balance-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1.5rem;
+        }
+
+        .balance-label {
+          color: #9CA3AF;
+          font-size: 0.875rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .live-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #10B981;
+          display: inline-block;
+          animation: livePulse 2s ease-in-out infinite;
+          box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+        }
+
+        @keyframes livePulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .balance-value {
+          font-size: 3rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #10B981, #34D399, #6EE7B7);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: -0.03em;
+          line-height: 1.1;
+        }
+
+        .currency-sign {
+          background: linear-gradient(135deg, #10B981, #34D399);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .balance-actions {
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+        }
+
+        .btn-outline {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.625rem 1.25rem;
+          background: rgba(255,255,255,0.05);
+          color: #10B981;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.875rem;
+          transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+          background: rgba(16, 185, 129, 0.1);
+        }
+
+        .btn-icon {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          color: #9CA3AF;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+
+        .stats-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        .stat-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          background: rgba(255,255,255,0.03);
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .stat-icon.income-icon {
+          background: rgba(16, 185, 129, 0.15);
+          color: #10B981;
+        }
+
+        .stat-icon.expense-icon {
+          background: rgba(239, 68, 68, 0.15);
+          color: #EF4444;
+        }
+
+        .stat-label {
+          display: block;
+          color: #9CA3AF;
+          font-size: 0.8rem;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+          display: block;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: white;
+          letter-spacing: -0.02em;
+        }
+
+        .stat-value.income {
+          color: #10B981;
+        }
+
+        .stat-value.expense {
+          color: #EF4444;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+        }
+
+        .action-card {
+          background: #1E293B;
+          border-radius: 16px;
+          padding: 1.5rem;
+          border: 1px solid rgba(255,255,255,0.05);
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .action-card:hover {
+          border-color: rgba(255,255,255,0.15);
+          transform: translateY(-2px);
+        }
+
+        .action-card h3 {
+          color: white;
+          font-size: 1.05rem;
+          font-weight: 700;
+          margin: 0 0 0.375rem;
+          transition: color 0.2s;
+        }
+
+        .action-card:hover h3 {
+          color: #E2E8F0;
+        }
+
+        .action-card p {
+          color: #64748B;
+          font-size: 0.8rem;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .action-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1rem;
+          font-size: 1.25rem;
+          transition: all 0.2s;
+        }
+
+        .action-card:hover .action-icon {
+          transform: scale(1.1);
+        }
+
+        .action-icon.green {
+          background: rgba(16, 185, 129, 0.15);
+          color: #10B981;
+        }
+
+        .action-icon.purple {
+          background: rgba(168, 85, 247, 0.15);
+          color: #A855F7;
+        }
+
+        .action-icon.blue {
+          background: rgba(59, 130, 246, 0.15);
+          color: #3B82F6;
+        }
+
+        /* Health Card */
+        .health-card {
+          background: #1E293B;
+          border-radius: 16px;
+          padding: 2rem;
+          border: 1px solid rgba(255,255,255,0.05);
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .health-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .health-info h3 {
+          color: white;
+          font-size: 1.375rem;
+          font-weight: 700;
+          margin: 0 0 0.375rem;
+        }
+
+        .health-info p {
+          color: #9CA3AF;
+          font-size: 0.9rem;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .health-score {
+          text-align: right;
+          padding: 0.75rem 1.25rem;
+          background: rgba(16, 185, 129, 0.08);
+          border-radius: 12px;
+          border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+
+        .health-label {
+          display: block;
+          color: #64748B;
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 0.25rem;
+        }
+
+        .health-value {
+          font-size: 2.25rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #10B981, #34D399);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+        }
+
+        .health-bar-container {
+          width: 100%;
+        }
+
+        .health-bar-track {
+          width: 100%;
+          height: 12px;
+          background: rgba(255,255,255,0.06);
+          border-radius: 999px;
+          overflow: hidden;
+        }
+
+        .health-bar-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #EF4444 0%, #F59E0B 35%, #10B981 65%, #10B981 100%);
+          transition: width 1s ease;
+          position: relative;
+          box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .health-bar-labels {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 0.5rem;
+          font-size: 0.7rem;
+          color: #475569;
+          font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+        }
+
+        .modal-backdrop {
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+          background: #1E293B;
+          border-radius: 16px;
+          width: 100%;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
+          position: relative;
+          z-index: 10;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-content.wide {
+          max-width: 600px;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 2rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .modal-header h3 {
+          color: white;
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin: 0;
+        }
+
+        .modal-header-row {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .modal-header-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .modal-header-icon.purple {
+          background: rgba(168, 85, 247, 0.2);
+          color: #A855F7;
+        }
+
+        .modal-header-icon.blue {
+          background: rgba(59, 130, 246, 0.2);
+          color: #3B82F6;
+        }
+
+        .modal-header-icon.cyan {
+          background: rgba(6, 182, 212, 0.2);
+          color: #06B6D4;
+        }
+
+        .modal-subtitle {
+          color: #64748B;
+          font-size: 0.8rem;
+          margin: 0.25rem 0 0;
+        }
+
+        .modal-close {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255,255,255,0.05);
+          border: none;
+          border-radius: 8px;
+          color: #9CA3AF;
+          cursor: pointer;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+
+        .modal-body {
+          padding: 2rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+          margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+          display: block;
+          color: #9CA3AF;
+          font-size: 0.875rem;
+          font-weight: 500;
+          margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          background: #0F172A;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          color: white;
+          font-size: 1rem;
+          transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #10B981;
+        }
+
+        .form-group textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        .form-hint {
+          display: block;
+          color: #64748B;
+          font-size: 0.8rem;
+          margin-top: 0.5rem;
+        }
+
+        /* Type Toggle */
+        .type-toggle {
+          display: flex;
+          gap: 0.5rem;
+          background: #0F172A;
+          padding: 0.375rem;
+          border-radius: 8px;
+          margin-bottom: 1.5rem;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .toggle-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.75rem;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.9rem;
+          background: transparent;
+          color: #64748B;
+          transition: all 0.2s;
+        }
+
+        .toggle-btn.active.expense {
+          background: rgba(239, 68, 68, 0.15);
+          color: #EF4444;
+        }
+
+        .toggle-btn.active.income {
+          background: rgba(16, 185, 129, 0.15);
+          color: #10B981;
+        }
+
+        /* Buttons */
+        .btn-primary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.875rem 1.5rem;
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+          opacity: 0.9;
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .btn-primary.full {
+          width: 100%;
+          margin-top: 0.5rem;
+        }
+
+        .btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          background: rgba(255,255,255,0.05);
+          color: #9CA3AF;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+
+        /* AI Textarea */
+        .ai-textarea {
+          width: 100%;
+          padding: 1rem;
+          background: #0F172A;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          color: white;
+          font-size: 1rem;
+          resize: vertical;
+          min-height: 140px;
+          margin-bottom: 1rem;
+          transition: border-color 0.2s;
+        }
+
+        .ai-textarea:focus {
+          outline: none;
+          border-color: #A855F7;
+        }
+
+        .spin-icon {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3rem;
+          border: 2px dashed rgba(255,255,255,0.1);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+          border-color: #3B82F6;
+          background: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-icon {
+          font-size: 2.5rem;
+          color: #3B82F6;
+          margin-bottom: 1rem;
+        }
+
+        .upload-title {
+          color: white;
+          font-weight: 700;
+          font-size: 1.125rem;
+          margin: 0 0 0.25rem;
+        }
+
+        .upload-subtitle {
+          color: #64748B;
+          font-size: 0.875rem;
+          margin: 0;
+        }
+
+        .hidden-input {
+          display: none;
+        }
+
+        .receipt-preview-area {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .receipt-image-wrap {
+          position: relative;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: #0F172A;
+        }
+
+        .receipt-image-wrap img {
+          width: 100%;
+          max-height: 300px;
+          object-fit: contain;
+        }
+
+        .remove-receipt {
+          position: absolute;
+          top: 0.75rem;
+          right: 0.75rem;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #EF4444;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        .receipt-image-wrap:hover .remove-receipt {
+          opacity: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+          text-align: center;
+          padding: 2rem 0;
+        }
+
+        .empty-icon {
+          font-size: 3rem;
+          color: #64748B;
+          margin-bottom: 1rem;
+          opacity: 0.5;
+        }
+
+        .empty-title {
+          color: white;
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin: 0 0 0.5rem;
+        }
+
+        .empty-subtitle {
+          color: #9CA3AF;
+          font-size: 0.9rem;
+          margin: 0 0 1.5rem;
+        }
+
+        /* Fancy Popup */
+        .fancy-popup {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          z-index: 50;
+          max-width: 360px;
+          width: 100%;
+        }
+
+        .fancy-popup-inner {
+          background: #1E293B;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 16px;
+          padding: 1.25rem;
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          position: relative;
+        }
+
+        .fancy-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .fancy-content h4 {
+          color: white;
+          font-weight: 700;
+          margin: 0 0 0.25rem;
+          font-size: 0.9rem;
+        }
+
+        .fancy-content p {
+          color: #9CA3AF;
+          font-size: 0.85rem;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .fancy-close {
+          position: absolute;
+          top: 0.75rem;
+          right: 0.75rem;
+          background: none;
+          border: none;
+          color: #64748B;
+          cursor: pointer;
+        }
+
+        .fancy-close:hover {
+          color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+          .quick-actions {
+            grid-template-columns: 1fr;
+          }
+
+          .balance-header {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .balance-actions {
+            align-self: flex-start;
+          }
+
+          .stats-row {
+            grid-template-columns: 1fr;
+          }
+
+          .health-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+
+          .health-score {
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dashboard-container {
+            padding: 1rem;
+          }
+
+          .balance-value {
+            font-size: 2rem;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 
