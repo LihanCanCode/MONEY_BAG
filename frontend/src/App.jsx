@@ -4,6 +4,7 @@
  */
 
 import { Outlet } from "react-router-dom"
+import { Toaster } from "react-hot-toast"
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 
@@ -30,6 +31,9 @@ function App() {
 
       {/* Footer - Fixed footer across all pages */}
       <Footer />
+
+      {/* Global Toast Notifications */}
+      <Toaster position="bottom-center" />
     </>
   )
 }

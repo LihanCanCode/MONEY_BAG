@@ -542,7 +542,7 @@ const Dashboard = () => {
                   <div className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300">
                     <div className="w-14 h-14 bg-emerald-500/10 rounded-xl text-emerald-400 flex items-center justify-center shadow-inner"><FiTrendingUp size={28} /></div>
                     <div>
-                      <span className="text-slate-500 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-40">Inflow Growth</span>
+                      <span className="text-slate-300 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-60">Inflow Growth</span>
                       <div className="text-2xl font-black text-white tracking-tight">
                         +$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} />
                       </div>
@@ -551,7 +551,7 @@ const Dashboard = () => {
                   <div className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl p-6 flex items-center gap-5 transition-all duration-300">
                     <div className="w-14 h-14 bg-rose-500/10 rounded-xl text-rose-400 flex items-center justify-center shadow-inner"><FiTrendingDown size={28} /></div>
                     <div>
-                      <span className="text-slate-500 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-40">Outflow Velocity</span>
+                      <span className="text-slate-300 font-mono text-[10px] uppercase tracking-widest block mb-1 font-black opacity-60">Outflow Velocity</span>
                       <div className="text-2xl font-black text-white tracking-tight">
                         -$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} />
                       </div>
@@ -569,7 +569,7 @@ const Dashboard = () => {
                   <FiPlus size={32} />
                 </div>
                 <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>Manual Entry</h3>
-                <p className="text-slate-500 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-40">Precision Ledger Tracking</p>
+                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">Precision Ledger Tracking</p>
               </div>
 
               <div className="flex-1 bg-[#0B1121] border border-white/10 rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:bg-[#161e31] transition-all cursor-pointer shadow-xl active:scale-[0.98]" onClick={() => setShowAIInput(true)}>
@@ -578,7 +578,7 @@ const Dashboard = () => {
                   <FiZap size={32} />
                 </div>
                 <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>AI Quick Add</h3>
-                <p className="text-slate-500 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-40">Cognitive Pattern Auto-fill</p>
+                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">Cognitive Pattern Auto-fill</p>
               </div>
 
               <div className="flex-1 bg-[#0B1121] border border-white/10 rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group hover:bg-[#161e31] transition-all cursor-pointer shadow-xl active:scale-[0.98]" onClick={() => setShowReceiptScanner(true)}>
@@ -587,7 +587,7 @@ const Dashboard = () => {
                   <FiCamera size={32} />
                 </div>
                 <h3 className="text-xl font-black mb-2 relative z-10" style={{ color: '#ffffff' }}>Scan Receipt</h3>
-                <p className="text-slate-500 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-40">OCR Computer Vision Engine</p>
+                <p className="text-slate-300 text-[10px] relative z-10 font-black tracking-widest uppercase opacity-60">OCR Computer Vision Engine</p>
               </div>
             </div>
           </div>
@@ -606,11 +606,11 @@ const Dashboard = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative z-10">
                 <h3 className="text-2xl font-black mb-1 tracking-tight" style={{ color: '#ffffff' }}>Financial Health Gauge</h3>
-                <p className="text-slate-500 font-medium">{health.message}</p>
+                <p className="text-slate-300 font-medium">{health.message}</p>
               </div>
               <div className="relative z-10 flex items-center gap-6">
                 <div className="text-right">
-                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1 font-mono">Efficiency Score</span>
+                  <span className="text-slate-300 text-[10px] font-bold uppercase tracking-widest block mb-1 font-mono">Efficiency Score</span>
                   <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{health.score}%</div>
                 </div>
                 <div className="w-16 h-16 rounded-full border-2 border-white/5 flex items-center justify-center relative shadow-inner">
@@ -633,7 +633,7 @@ const Dashboard = () => {
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
                   <div>
                     <h3 className="text-3xl font-bold text-white tracking-tight">Add Ledger Entry</h3>
-                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">Manual Financial Transaction Log</p>
+                    <p className="text-slate-300 text-[10px] font-bold uppercase tracking-widest mt-2">Manual Financial Transaction Log</p>
                   </div>
                   <button onClick={() => setShowTransactionModal(false)} className="w-12 h-12 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
                     <FiX size={24} />
@@ -649,7 +649,7 @@ const Dashboard = () => {
                         onClick={() => setTransactionType('expense')}
                         className={`flex-1 py-4 rounded text-xs font-bold transition-all duration-300 ${transactionType === 'expense'
                           ? 'bg-white text-[#020617] shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                          : 'text-slate-500 hover:text-slate-300'
+                          : 'text-slate-300 hover:text-white'
                           }`}
                       >
                         EXPENSE
@@ -659,7 +659,7 @@ const Dashboard = () => {
                         onClick={() => setTransactionType('income')}
                         className={`flex-1 py-4 rounded text-xs font-bold transition-all duration-300 ${transactionType === 'income'
                           ? 'bg-white text-[#020617] shadow-[0_0_30px_rgba(255,255,255,0.2)]'
-                          : 'text-slate-500 hover:text-slate-300'
+                          : 'text-slate-300 hover:text-white'
                           }`}
                       >
                         INCOME
@@ -668,7 +668,7 @@ const Dashboard = () => {
 
                     <div className="space-y-10">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">Value Amount ($)</label>
+                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Value Amount ($)</label>
                         <div className="relative group">
                           <div className="absolute inset-0 bg-white/5 rounded-lg blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                           <input
@@ -676,7 +676,7 @@ const Dashboard = () => {
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className="relative w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-800 transition-all text-center"
+                            className="relative w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-500 transition-all text-center"
                             autoFocus
                           />
                         </div>
@@ -684,7 +684,7 @@ const Dashboard = () => {
 
                       {transactionType === 'expense' && (
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">Classification Category</label>
+                          <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Classification Category</label>
                           <div className="relative">
                             <select
                               value={category}
@@ -699,12 +699,12 @@ const Dashboard = () => {
                       )}
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">Detailed Description</label>
+                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Detailed Description</label>
                         <textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           placeholder="Provide transaction context..."
-                          className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-lg focus:border-white/30 outline-none resize-none placeholder-slate-700 min-h-[140px] font-medium text-base transition-all leading-relaxed"
+                          className="w-full bg-[#020617] border border-white/10 text-white p-6 rounded-lg focus:border-white/30 outline-none resize-none placeholder-slate-500 min-h-[140px] font-medium text-base transition-all leading-relaxed"
                         />
                       </div>
                     </div>
@@ -770,7 +770,7 @@ const Dashboard = () => {
                     value={aiText}
                     onChange={(e) => setAiText(e.target.value)}
                     placeholder="e.g., 'Spent $45 on organic groceries today'..."
-                    className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-purple-500/40 outline-none resize-none min-h-[220px] text-xl font-medium placeholder-slate-700 transition-all leading-relaxed"
+                    className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-purple-500/40 outline-none resize-none min-h-[220px] text-xl font-medium placeholder-slate-500 transition-all leading-relaxed"
                     disabled={aiLoading}
                   />
                   <button
@@ -814,7 +814,7 @@ const Dashboard = () => {
                         <FiDownload className="text-sky-400" size={40} />
                       </div>
                       <p className="text-white font-bold text-2xl mb-3">Upload Financial Receipt</p>
-                      <p className="text-slate-500 text-base font-semibold">Securely analyze JPG, PNG or high-res PDF</p>
+                      <p className="text-slate-300 text-base font-semibold">Securely analyze JPG, PNG or high-res PDF</p>
                       <input type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
                     </label>
                   ) : (
@@ -869,7 +869,7 @@ const Dashboard = () => {
                         <FiTarget className="text-slate-600" size={40} />
                       </div>
                       <p className="text-white font-bold text-2xl mb-3">No Active Targets</p>
-                      <p className="text-slate-500 text-lg mb-10 font-semibold">Initialize a financial milestone before allocating funds.</p>
+                      <p className="text-slate-300 text-lg mb-10 font-semibold">Initialize a financial milestone before allocating funds.</p>
                       <button
                         onClick={() => setShowSaveToGoalModal(false)}
                         className="px-10 py-4 bg-white text-[#020617] rounded-lg font-bold uppercase tracking-wide text-lg shadow-[0_0_30px_rgba(255,255,255,0.2)]"
@@ -880,7 +880,7 @@ const Dashboard = () => {
                   ) : (
                     <form onSubmit={handleSaveToGoal} className="space-y-12">
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">Destination Milestone</label>
+                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Destination Milestone</label>
                         <div className="relative">
                           <select
                             value={selectedGoalId}
@@ -900,19 +900,19 @@ const Dashboard = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-1">Allocated Capital ($)</label>
+                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">Allocated Capital ($)</label>
                         <input
                           type="number"
                           value={saveAmount}
                           onChange={(e) => setSaveAmount(e.target.value)}
                           placeholder="0.00"
-                          className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-800 transition-all text-center"
+                          className="w-full bg-[#020617] border border-white/10 text-white p-8 rounded-lg focus:border-white/30 outline-none text-6xl font-bold placeholder-slate-500 transition-all text-center"
                           required
                           min="0.01"
                           step="0.01"
                         />
                         <div className="mt-6 flex items-center justify-between px-2">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Liquid Assets Pool</span>
+                          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Liquid Assets Pool</span>
                           <span className="text-lg font-bold text-cyan-400">${wallet?.currentBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</span>
                         </div>
                       </div>

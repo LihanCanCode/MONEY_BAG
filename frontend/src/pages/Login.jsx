@@ -26,6 +26,21 @@ import toast from 'react-hot-toast';
  * 
  * @returns {JSX.Element} Login page component
  */
+const getFirebaseErrorMessage = (code) => {
+  const messages = {
+    'auth/user-not-found': 'No account found with this email. Please sign up first.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/invalid-credential': 'Invalid email or password. Please check your credentials.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many failed attempts. Please wait a moment and try again.',
+    'auth/network-request-failed': 'Network error. Please check your internet connection.',
+    'auth/user-disabled': 'This account has been disabled. Contact support.',
+    'auth/missing-password': 'Please enter your password.',
+    'auth/missing-email': 'Please enter your email address.',
+  };
+  return messages[code] || 'Login failed. Please try again.';
+};
+
 const Login = () => {
   // Form state management
   const [email, setEmail] = useState('');
@@ -55,8 +70,8 @@ const Login = () => {
       });
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Login failed: " + (error.message || "Please try again"), {
-        duration: 4000,
+      toast.error(getFirebaseErrorMessage(error.code), {
+        duration: 5000,
         style: {
           background: '#7F1D1D',
           color: '#FEF2F2',
@@ -84,8 +99,8 @@ const Login = () => {
       });
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Google sign-in failed", {
-        duration: 4000,
+      toast.error(getFirebaseErrorMessage(error.code), {
+        duration: 5000,
         style: {
           background: '#7F1D1D',
           color: '#FEF2F2',

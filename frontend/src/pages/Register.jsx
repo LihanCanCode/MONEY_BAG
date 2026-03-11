@@ -28,6 +28,20 @@ import toast from 'react-hot-toast';
  * 
  * @returns {JSX.Element} Registration page component
  */
+const getFirebaseErrorMessage = (code) => {
+  const messages = {
+    'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/weak-password': 'Password is too weak. Use at least 6 characters with a mix of letters and numbers.',
+    'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
+    'auth/network-request-failed': 'Network error. Please check your internet connection.',
+    'auth/operation-not-allowed': 'This sign-in method is not enabled.',
+    'auth/missing-password': 'Please enter your password.',
+    'auth/missing-email': 'Please enter your email address.',
+  };
+  return messages[code] || 'Registration failed. Please try again.';
+};
+
 const Register = () => {
   // Form state management
   const [email, setEmail] = useState('');
@@ -108,8 +122,8 @@ const Register = () => {
       });
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Registration failed: " + (error.message || "Please check your details"), {
-        duration: 4000,
+      toast.error(getFirebaseErrorMessage(error.code), {
+        duration: 5000,
         style: {
           background: '#7F1D1D',
           color: '#FEF2F2',
@@ -137,8 +151,8 @@ const Register = () => {
       });
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Google sign-up failed", {
-        duration: 4000,
+      toast.error(getFirebaseErrorMessage(error.code), {
+        duration: 5000,
         style: {
           background: '#7F1D1D',
           color: '#FEF2F2',

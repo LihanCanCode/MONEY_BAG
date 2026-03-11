@@ -22,7 +22,7 @@ import { createTheme } from '@mui/material/styles';
  */
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     
     // Primary color - Used for main actions and important UI elements
     primary: {
@@ -38,8 +38,13 @@ const theme = createTheme({
     
     // Background colors for different surfaces
     background: {
-      default: '#f8fafc', // Soft gray - Easy on the eyes
-      paper: '#fff', // Pure white for cards and elevated surfaces
+      default: '#0f172a', // Dark navy
+      paper: '#1e293b', // Elevated dark surface
+    },
+    
+    text: {
+      primary: '#ffffff',
+      secondary: '#e2e8f0',
     },
     
     // Semantic colors for user feedback

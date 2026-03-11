@@ -102,6 +102,13 @@ export const API_ENDPOINTS = {
   DEBT_DRAMATIC_MESSAGE: `${API_BASE_URL}/api/debts/dramatic-message`,
 
   // ==========================================
+  // FINANCIAL CALENDAR ENDPOINTS
+  // ==========================================
+  // Aggregated calendar view of all financial events
+
+  CALENDAR_EVENTS: `${API_BASE_URL}/api/calendar/events`, // Get all calendar events for a date range
+
+  // ==========================================
   // USER MANAGEMENT ENDPOINTS
   // ==========================================
   // Handle user accounts and profiles

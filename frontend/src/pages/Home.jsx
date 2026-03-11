@@ -7,6 +7,25 @@ import { FcGoogle } from 'react-icons/fc';
 import { GiTwoCoins, GiWallet, GiMoneyStack, GiPiggyBank } from 'react-icons/gi';
 import toast from 'react-hot-toast';
 
+const getFirebaseErrorMessage = (code) => {
+  const messages = {
+    'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/weak-password': 'Password is too weak. Use at least 6 characters with a mix of letters and numbers.',
+    'auth/user-not-found': 'No account found with this email. Please sign up first.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/invalid-credential': 'Invalid email or password. Please check your credentials.',
+    'auth/too-many-requests': 'Too many failed attempts. Please wait a moment and try again.',
+    'auth/network-request-failed': 'Network error. Please check your internet connection.',
+    'auth/popup-closed-by-user': 'Google sign-in was cancelled.',
+    'auth/user-disabled': 'This account has been disabled. Contact support.',
+    'auth/operation-not-allowed': 'This sign-in method is not enabled.',
+    'auth/missing-password': 'Please enter your password.',
+    'auth/missing-email': 'Please enter your email address.',
+  };
+  return messages[code] || 'Authentication failed. Please try again.';
+};
+
 const Home = () => {
   const [activeTab, setActiveTab] = useState('signin');
   const [email, setEmail] = useState('');
@@ -65,7 +84,9 @@ const Home = () => {
       }
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error.message || "Authentication failed. Please try again.", { id: toastId });
+      console.error("Auth error details:", error.code, error.message);
+      const msg = getFirebaseErrorMessage(error.code);
+      toast.error(msg, { id: toastId, duration: 5000 });
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +96,7 @@ const Home = () => {
     const toastId = toast.loading('Connecting to Google...');
     try {
       await signInWithGoogle();
-      toast.success("Signed in with Google! 🎉", { id: toastId });
+      toast.success("Signed in with Google! 🎉", { id: toastId, duration: 3000 });
       navigate("/dashboard");
     } catch (error) {
       toast.error("Google sign-in failed", { id: toastId });

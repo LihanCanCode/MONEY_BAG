@@ -35,6 +35,7 @@ const FinancialGoals = () => {
     const [editingGoal, setEditingGoal] = useState(null);
     const [showContributeModal, setShowContributeModal] = useState(null);
     const [contributeAmount, setContributeAmount] = useState('');
+    const [walletBalance, setWalletBalance] = useState(null);
     const [showConfetti, setShowConfetti] = useState(false);
 
     // Form state
@@ -50,8 +51,24 @@ const FinancialGoals = () => {
     useEffect(() => {
         if (currentUser) {
             fetchGoals();
+            fetchWalletBalance();
         }
     }, [currentUser]);
+
+    const fetchWalletBalance = async () => {
+        try {
+            const token = await currentUser.getIdToken();
+            const response = await fetch(API_ENDPOINTS.WALLET, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setWalletBalance(data.wallet?.currentBalance || 0);
+            }
+        } catch (error) {
+            console.error('Error fetching wallet:', error);
+        }
+    };
 
     const fetchGoals = async () => {
         try {
@@ -151,8 +168,30 @@ const FinancialGoals = () => {
     };
 
     const handleContribute = async (goalId) => {
-        if (!contributeAmount || parseFloat(contributeAmount) <= 0) {
-            alert('Please enter a valid amount');
+        const amount = parseFloat(contributeAmount);
+        if (!contributeAmount || amount <= 0) {
+            toast.error('Please enter a valid amount');
+            return;
+        }
+
+        // Fetch latest wallet balance before contributing
+        let currentBalance = walletBalance;
+        try {
+            const token = await currentUser.getIdToken();
+            const walletRes = await fetch(API_ENDPOINTS.WALLET, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (walletRes.ok) {
+                const walletData = await walletRes.json();
+                currentBalance = walletData.wallet?.currentBalance ?? 0;
+                setWalletBalance(currentBalance);
+            }
+        } catch (err) {
+            // Continue — backend will still reject if balance is insufficient
+        }
+
+        if (currentBalance !== null && amount > currentBalance) {
+            toast.error(`Insufficient balance! Your wallet has ₹${currentBalance.toLocaleString()}. You cannot contribute more than your available balance.`, { duration: 5000 });
             return;
         }
 
