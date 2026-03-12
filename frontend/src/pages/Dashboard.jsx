@@ -754,7 +754,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Amount ($)</label>
+                  <label>Amount (৳)</label>
                   <input
                     type="number"
                     value={amount}
@@ -926,14 +926,14 @@ const Dashboard = () => {
                         <option value="">Choose a goal...</option>
                         {goals.map(goal => (
                           <option key={goal._id} value={goal._id}>
-                            {goal.name} (${goal.targetAmount.toLocaleString()})
+                            {goal.name} (৳{goal.targetAmount.toLocaleString()})
                           </option>
                         ))}
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label>Amount ($)</label>
+                      <label>Amount (৳)</label>
                       <input
                         type="number"
                         value={saveAmount}
@@ -944,7 +944,7 @@ const Dashboard = () => {
                         step="0.01"
                       />
                       <span className="form-hint">
-                        Available: ${wallet?.currentBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                        Available: ৳{wallet?.currentBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
                       </span>
                     </div>
 
