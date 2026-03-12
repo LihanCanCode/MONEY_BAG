@@ -243,7 +243,7 @@ const SpendingChart = ({ wallet }) => {
 
             <div className="chart-card">
                 <h3 className="chart-title">
-                    <FaChartPie className="chart-icon blue" />
+                    <FiPieChart className="chart-icon blue" />
                     Financial Overview
                 </h3>
                 <div className="chart-wrapper doughnut-chart">

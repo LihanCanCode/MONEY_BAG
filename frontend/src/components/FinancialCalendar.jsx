@@ -55,12 +55,12 @@ import {
  * Used for rendering event cards and filter chips.
  */
 const EVENT_CONFIG = {
-  transaction: { icon: FiCreditCard, label: 'Transaction' },
-  recurring: { icon: FiRepeat, label: 'Recurring' },
-  recurring_projected: { icon: FiRepeat, label: 'Upcoming Recurring' },
-  debt: { icon: FiUsers, label: 'Debt Due' },
-  goal: { icon: FiTarget, label: 'Goal Deadline' },
-  budget_reset: { icon: FiDollarSign, label: 'Budget Reset' },
+  transaction: { icon: FaCreditCard, label: 'Transaction' },
+  recurring: { icon: FaSync, label: 'Recurring' },
+  recurring_projected: { icon: FaSync, label: 'Upcoming Recurring' },
+  debt: { icon: FaUsers, label: 'Debt Due' },
+  goal: { icon: FaBullseye, label: 'Goal Deadline' },
+  budget_reset: { icon: FaDollarSign, label: 'Budget Reset' },
 };
 
 /** Full month names for display in the calendar header */
@@ -1034,13 +1034,7 @@ const FinancialCalendar = () => {
  * @returns {JSX.Element}
  */
 
-const SummaryCard = ({ icon, label, value, color }) => {
-  const colors = {
-    emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    red: 'bg-red-500/10 text-red-400 border-red-500/20',
-    orange: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  };
+const SummaryCard = ({ icon, label, value, colorClass }) => {
   return (
     <motion.div
       className={`summary-card-item ${colorClass}`}

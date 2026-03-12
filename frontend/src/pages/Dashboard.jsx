@@ -646,24 +646,24 @@ const Dashboard = () => {
             </div>
             <div className="balance-actions">
               <button className="btn-outline" onClick={() => setShowSaveToGoalModal(true)}>
-                <FaBullseye /> Move to Savings
+                <FiTarget /> Move to Savings
               </button>
               <button className="btn-icon" onClick={handleResetWallet} title="Reset Wallet">
-                <FaRedoAlt />
+                <FiRefreshCcw />
               </button>
             </div>
           </div>
 
           <div className="stats-row">
             <div className="stat-item">
-              <div className="stat-icon income-icon"><FaArrowUp /></div>
+              <div className="stat-icon income-icon"><FiArrowUp /></div>
               <div>
                 <span className="stat-label">Total Income</span>
                 <span className="stat-value income">+$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} /></span>
               </div>
             </div>
             <div className="stat-item">
-              <div className="stat-icon expense-icon"><FaArrowDown /></div>
+              <div className="stat-icon expense-icon"><FiArrowDown /></div>
               <div>
                 <span className="stat-label">Total Expenses</span>
                 <span className="stat-value expense">-$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} /></span>
@@ -675,17 +675,17 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="quick-actions">
           <div className="action-card" onClick={() => setShowTransactionModal(true)}>
-            <div className="action-icon green"><FaPlus /></div>
+            <div className="action-icon green"><FiPlus /></div>
             <h3>Manual Entry</h3>
             <p>Add income or expense</p>
           </div>
           <div className="action-card" onClick={() => setShowAIInput(true)}>
-            <div className="action-icon purple"><FaBolt /></div>
+            <div className="action-icon purple"><FiZap /></div>
             <h3>AI Quick Add</h3>
             <p>Describe your transaction</p>
           </div>
           <div className="action-card" onClick={() => setShowReceiptScanner(true)}>
-            <div className="action-icon blue"><FaCamera /></div>
+            <div className="action-icon blue"><FiCamera /></div>
             <h3>Scan Receipt</h3>
             <p>Upload receipt image</p>
           </div>
@@ -730,7 +730,7 @@ const Dashboard = () => {
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
               <div className="modal-header">
                 <h3>Add Transaction</h3>
-                <button className="modal-close" onClick={() => setShowTransactionModal(false)}><FaTimes /></button>
+                <button className="modal-close" onClick={() => setShowTransactionModal(false)}><FiX /></button>
               </div>
 
               <form onSubmit={handleTransactionSubmit} className="modal-body">
@@ -741,14 +741,14 @@ const Dashboard = () => {
                     onClick={() => setTransactionType('expense')}
                     className={`toggle-btn ${transactionType === 'expense' ? 'active expense' : ''}`}
                   >
-                    <FaArrowDown /> Expense
+                    <FiArrowDown /> Expense
                   </button>
                   <button
                     type="button"
                     onClick={() => setTransactionType('income')}
                     className={`toggle-btn ${transactionType === 'income' ? 'active income' : ''}`}
                   >
-                    <FaArrowUp /> Income
+                    <FiArrowUp /> Income
                   </button>
                 </div>
 
@@ -796,12 +796,12 @@ const Dashboard = () => {
         {showFancyPopup && (
           <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fancy-popup">
             <div className="fancy-popup-inner">
-              <div className="fancy-icon"><FaBolt /></div>
+              <div className="fancy-icon"><FiZap /></div>
               <div className="fancy-content">
                 <h4>AI Insight</h4>
                 <p>"{fancyMessage}"</p>
               </div>
-              <button onClick={() => setShowFancyPopup(false)} className="fancy-close"><FaTimes /></button>
+              <button onClick={() => setShowFancyPopup(false)} className="fancy-close"><FiX /></button>
             </div>
           </motion.div>
         )}
@@ -815,13 +815,13 @@ const Dashboard = () => {
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
               <div className="modal-header">
                 <div className="modal-header-row">
-                  <div className="modal-header-icon purple"><FaBolt /></div>
+                  <div className="modal-header-icon purple"><FiZap /></div>
                   <div>
                     <h3>AI Quick Add</h3>
                     <p className="modal-subtitle">Describe your transaction naturally</p>
                   </div>
                 </div>
-                <button className="modal-close" onClick={() => setShowAIInput(false)}><FaTimes /></button>
+                <button className="modal-close" onClick={() => setShowAIInput(false)}><FiX /></button>
               </div>
               <div className="modal-body">
                 <textarea
@@ -837,7 +837,7 @@ const Dashboard = () => {
                   disabled={aiLoading || !aiText.trim()}
                   className="btn-primary full"
                 >
-                  {aiLoading ? <><FaSync className="spin-icon" /> Processing...</> : <><FaBolt /> Add Transaction</>}
+                  {aiLoading ? <><FiRefreshCw className="spin-icon" /> Processing...</> : <><FiZap /> Add Transaction</>}
                 </button>
               </div>
             </motion.div>
@@ -853,18 +853,18 @@ const Dashboard = () => {
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content wide">
               <div className="modal-header">
                 <div className="modal-header-row">
-                  <div className="modal-header-icon blue"><FaCamera /></div>
+                  <div className="modal-header-icon blue"><FiCamera /></div>
                   <div>
                     <h3>Scan Receipt</h3>
                     <p className="modal-subtitle">Upload a receipt to auto-extract data</p>
                   </div>
                 </div>
-                <button className="modal-close" onClick={() => setShowReceiptScanner(false)}><FaTimes /></button>
+                <button className="modal-close" onClick={() => setShowReceiptScanner(false)}><FiX /></button>
               </div>
               <div className="modal-body">
                 {!receiptPreview ? (
                   <label className="upload-zone">
-                    <div className="upload-icon"><FaDownload /></div>
+                    <div className="upload-icon"><FiDownload /></div>
                     <p className="upload-title">Upload Receipt</p>
                     <p className="upload-subtitle">JPG, PNG or PDF</p>
                     <input type="file" className="hidden-input" accept="image/*" onChange={handleFileSelect} />
@@ -873,14 +873,14 @@ const Dashboard = () => {
                   <div className="receipt-preview-area">
                     <div className="receipt-image-wrap">
                       <img src={receiptPreview} alt="Receipt Preview" />
-                      <button onClick={() => { setReceiptPreview(null); setSelectedReceipt(null); }} className="remove-receipt"><FaTrash /></button>
+                      <button onClick={() => { setReceiptPreview(null); setSelectedReceipt(null); }} className="remove-receipt"><FiTrash2 /></button>
                     </div>
                     <button
                       onClick={handleReceiptScan}
                       disabled={receiptLoading}
                       className="btn-primary full"
                     >
-                      {receiptLoading ? <><FaSync className="spin-icon" /> Analyzing...</> : <><FaBolt /> Scan & Record</>}
+                      {receiptLoading ? <><FiRefreshCw className="spin-icon" /> Analyzing...</> : <><FiZap /> Scan & Record</>}
                     </button>
                   </div>
                 )}
@@ -898,19 +898,19 @@ const Dashboard = () => {
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="modal-content">
               <div className="modal-header">
                 <div className="modal-header-row">
-                  <div className="modal-header-icon cyan"><FaBullseye /></div>
+                  <div className="modal-header-icon cyan"><FiTarget /></div>
                   <div>
                     <h3>Move to Savings</h3>
                     <p className="modal-subtitle">Transfer funds to a financial goal</p>
                   </div>
                 </div>
-                <button className="modal-close" onClick={() => setShowSaveToGoalModal(false)}><FaTimes /></button>
+                <button className="modal-close" onClick={() => setShowSaveToGoalModal(false)}><FiX /></button>
               </div>
 
               <div className="modal-body">
                 {goals.length === 0 ? (
                   <div className="empty-state">
-                    <FaBullseye className="empty-icon" />
+                    <FiTarget className="empty-icon" />
                     <p className="empty-title">No Active Goals</p>
                     <p className="empty-subtitle">Create a financial goal first before transferring funds.</p>
                     <button onClick={() => setShowSaveToGoalModal(false)} className="btn-secondary">
