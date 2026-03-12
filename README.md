@@ -26,6 +26,10 @@ MoneyBag is an end-to-end personal finance platform that combines real-time mone
 - Interactive dashboards surface real-time balances, cash flow, and category spending heatmaps.
 - Enhanced dashboard tabs bundle core workflows (budgets, goals, recurring, analytics, exports, transactions).
 
+### AI Financial Assistant (Ask AI)
+- A floating chat panel powered by Gemini 2.5 Flash, available anywhere on the dashboard.
+- Grounded in your real data—ask about spending habits, goal progress, or debt status and get context-aware answers.
+
 ### Transaction Management
 - Capture spend or income manually with rich metadata and satisfaction scoring.
 - Process CSV and PDF exports for comprehensive record keeping.
@@ -53,6 +57,15 @@ MoneyBag is an end-to-end personal finance platform that combines real-time mone
 ### Analytics & Reporting
 - Generate category breakdowns, trend charts, and spending heatmaps across day and time dimensions.
 - Export branded PDF or CSV transaction reports, including summaries and detailed itemization.
+
+### Split Bills
+- Divide shared expenses equally or by custom amounts among participants.
+- Track who has paid and who was "treated" (covered for free).
+- Generate theatrical, herald-style AI announcements for split creations and settlements via Gemini.
+
+### Financial Calendar
+- Aggregate view of all financial events in one interactive calendar.
+- See past transactions alongside upcoming recurring dues, debt deadlines, budget resets, and goal target dates.
 
 ### Security & Access
 - Enforce Firebase Authentication across the SPA and verify ID tokens in the API layer.
@@ -206,6 +219,10 @@ Commit the `.env` files to version control only if they contain non-sensitive pl
 | Recurring | POST | `/api/recurring/process` | Trigger processing of due recurring transactions. |
 | Budgets | GET | `/api/budgets/analytics` | Compare budget targets against actual spending. |
 | Goals | POST | `/api/goals/:id/contribute` | Contribute toward a financial goal. |
+| Debts | CRUD | `/api/debts` | Track money owed to/by the user, plus dramatic AI messages. |
+| Splits | CRUD | `/api/splits` | Manage shared bills and generate theatrical AI announcements. |
+| Calendar | GET | `/api/calendar/events` | Aggregate transactions, dues, and deadlines into a unified view. |
+| Ask AI | POST | `/api/coach/chat` | Send queries to the Gemini-powered financial assistant. |
 | Analytics | GET | `/api/analytics/heatmap` | Return day/time-based spending heatmap data. |
 | Reports | GET | `/api/analytics/export/csv` | Download transactions as CSV or PDF documents. |
 
@@ -215,6 +232,7 @@ All endpoints require a valid Firebase ID token via the `Authorization: Bearer <
 
 ## Frontend Highlights
 
+- **Ask AI** floating chat panel providing an on-demand, context-aware financial advisor.
 - **Enhanced dashboard** with tabbed navigation for budgets, goals, recurring transactions, analytics, exports, and transaction management.
 - **Responsive design** leveraging Tailwind CSS, custom theming, and dark-first styling.
 - **Data visualizations** powered by Chart.js, Recharts, and bespoke components such as `BudgetChart`, `SpendingHeatmap`, and `AnimatedCounter`.

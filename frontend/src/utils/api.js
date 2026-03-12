@@ -121,6 +121,13 @@ export const API_ENDPOINTS = {
   CALENDAR_EVENTS: `${API_BASE_URL}/api/calendar/events`, // Get all calendar events for a date range
 
   // ==========================================
+  // MONEY COACH (AI CHAT) ENDPOINTS
+  // ==========================================
+  // Context-aware Gemini-powered financial advisor chat
+
+  COACH_CHAT: `${API_BASE_URL}/api/coach/chat`, // Send a message to the AI Money Coach
+
+  // ==========================================
   // USER MANAGEMENT ENDPOINTS
   // ==========================================
   // Handle user accounts and profiles

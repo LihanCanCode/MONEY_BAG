@@ -34,6 +34,7 @@ const goalRoutes = require('./src/goals/goal.route')
 const debtRoutes = require('./src/debts/debt.route')
 const calendarRoutes = require('./src/calendar/calendar.route')
 const splitRoutes = require('./src/splits/split.route')
+const coachRoutes = require('./src/coach/coach.route')
 
 app.use("/api/users", userRoutes)
 app.use("/api/transactions", transactionRoutes)
@@ -45,6 +46,7 @@ app.use("/api/goals", goalRoutes)
 app.use("/api/debts", debtRoutes)
 app.use("/api/calendar", calendarRoutes)
 app.use("/api/splits", splitRoutes)
+app.use("/api/coach", coachRoutes)
 
 async function main() {
   await mongoose.connect(process.env.DB_URL);

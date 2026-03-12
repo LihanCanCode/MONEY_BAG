@@ -40,6 +40,7 @@ import AnimatedCounter from '../components/AnimatedCounter';
 import DashboardSkeleton from '../components/LoadingSkeleton';
 import SpendingChart from '../components/SpendingChart';
 import SearchAndFilters from '../components/SearchAndFilters';
+import MoneyCoach from '../components/MoneyCoach';
 
 // ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import toast, { Toaster } from 'react-hot-toast';
@@ -1788,6 +1789,8 @@ const Dashboard = () => {
           }
         }
       `}</style>
+      {/* ── Money Coach floating chat bubble ── */}
+      <MoneyCoach />
     </div>
   );
 };
