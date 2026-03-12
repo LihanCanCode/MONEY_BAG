@@ -95,8 +95,8 @@ const Navbar = () => {
       style={{ padding: '1rem 3rem' }}
     >
       <div className="flex items-center justify-between">
-        {/* Logo/Brand - New Logo Image + Text */}
-        <Link to="/" className="flex items-center gap-3 group">
+        {/* Logo/Brand - New Logo Image + Text (Points to Dashboard) */}
+        <Link to="/dashboard" className="flex items-center gap-3 group">
           <motion.img 
             src={logoImg} 
             alt="MoneyBag Logo" 

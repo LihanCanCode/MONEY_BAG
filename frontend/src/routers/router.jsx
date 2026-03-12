@@ -26,6 +26,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import EnhancedDashboard from "../pages/EnhancedDashboard";
 import Transactions from "../pages/Transactions";
+import About from "../pages/About";
 
 /**
  * Application route definitions
@@ -60,6 +61,11 @@ const router = createBrowserRouter([
                 // Enhanced Dashboard — tabbed shell containing all financial modules
                 path: "dashboard",
                 element: <EnhancedDashboard />
+            },
+            {
+                // About Us page
+                path: "about",
+                element: <About />
             }
         ]
     },
