@@ -48,7 +48,12 @@ import {
   FaExclamationTriangle
 } from 'react-icons/fa';
 
-// ─── Event type config ───
+/**
+ * Event type configuration map
+ *
+ * Maps each event type key to its display icon component and human-readable label.
+ * Used for rendering event cards and filter chips.
+ */
 const EVENT_CONFIG = {
   transaction: { icon: FiCreditCard, label: 'Transaction' },
   recurring: { icon: FiRepeat, label: 'Recurring' },
