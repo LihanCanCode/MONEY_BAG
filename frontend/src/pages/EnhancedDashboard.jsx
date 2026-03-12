@@ -38,7 +38,7 @@ import SplitBills from '../components/SplitBills';
 import Transactions from './Transactions';
 
 // ── Icon Library (Feather Icons) ─────────────────────────────────────────────
-import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar } from 'react-icons/fi';
+import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar, FiBriefcase } from 'react-icons/fi';
 
 /**
  * Tab configuration array
@@ -54,7 +54,8 @@ const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: FiHome },
   { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
   { id: 'goals', label: 'Goals', icon: FiTarget },
-  { id: 'debts', label: 'Debts', icon: FiUsers },
+  { id: 'debts', label: 'Debts', icon: FiBriefcase },
+  { id: 'splits', label: 'Split Bills', icon: FiUsers },
   { id: 'recurring', label: 'Recurring', icon: FiRepeat },
   { id: 'calendar', label: 'Calendar', icon: FiCalendar },
   { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },

@@ -50,6 +50,11 @@ MoneyBag is an end-to-end personal finance platform that combines real-time mone
 - Capture dramatic persona tags (best friend, suspicious, sworn enemy) to add context to each lender or borrower.
 - Adjust balances with add/subtract actions, resolve settled debts, and review running history with celebratory feedback.
 
+### Split Bills
+- Split shared expenses with friends using equal or custom amount distribution.
+- Track unpaid, partially paid, fully paid, or treated shares with real-time summaries of what others owe you.
+- Manage each split with inline settlement actions, edit/delete controls, and celebratory feedback when everything is settled.
+
 ### Analytics & Reporting
 - Generate category breakdowns, trend charts, and spending heatmaps across day and time dimensions.
 - Export branded PDF or CSV transaction reports, including summaries and detailed itemization.
