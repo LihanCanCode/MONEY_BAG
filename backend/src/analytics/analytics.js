@@ -1,6 +1,7 @@
 const Transaction = require('../transactions/transaction.model');
 const PDFDocument = require('pdfkit');
 const { Parser } = require('json2csv');
+const path = require('path');
 
 // Get transaction analytics for a user
 exports.getTransactionAnalytics = async (req, res) => {
@@ -161,9 +162,9 @@ exports.exportTransactionsPDF = async (req, res) => {
         });
 
         // Create PDF
-        // Use Nirmala UI font for Bengali character (৳) support
+        // Use bundled Nirmala UI font for Bengali character (৳) support (ensures portability)
         const doc = new PDFDocument({ margin: 50 });
-        const fontPath = 'C:\\Windows\\Fonts\\Nirmala.ttf';
+        const fontPath = path.join(__dirname, '../../assets/fonts/Nirmala.ttf');
         doc.font(fontPath);
 
         res.setHeader('Content-Type', 'application/pdf');
