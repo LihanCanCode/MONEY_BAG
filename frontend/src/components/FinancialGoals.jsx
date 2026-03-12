@@ -1,15 +1,53 @@
+/**
+ * @fileoverview Financial Goals Component
+ *
+ * Provides full CRUD management for financial savings goals.
+ * Users can create goals with a target amount, deadline, category, and
+ * priority level, then contribute funds from their wallet over time.
+ *
+ * Key features:
+ *  - Create, edit, and delete savings goals
+ *  - Contribute wallet funds toward a goal
+ *  - Circular progress indicator per goal
+ *  - Priority-based color coding (High = Red, Medium = Yellow, Low = Green)
+ *  - AI-powered predictions: required monthly savings, on-track status,
+ *    and estimated completion date
+ *  - Overdue detection for goals past their deadline
+ *  - Confetti celebration when a goal reaches 100%
+ *  - Empty-state placeholder encouraging goal creation
+ *
+ * @module components/FinancialGoals
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Reusable Components ──────────────────────────────────────────────────────
 import CircularProgress from './CircularProgress';
+
+// ── Icon Library (Font Awesome) ──────────────────────────────────────────────
 import {
     FaPlus, FaEdit, FaTrash, FaCheck, FaTimes, FaFlag,
     FaTrophy, FaCalendar, FaDollarSign, FaChartLine, FaMoneyBillWave
 } from 'react-icons/fa';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import Confetti from 'react-confetti';
 import toast from 'react-hot-toast';
 
+/**
+ * Available goal categories
+ *
+ * Each category has a value key, human-readable label, and emoji icon
+ * used in the form dropdown and displayed on goal cards.
+ */
 const GOAL_CATEGORIES = [
     { value: 'vacation', label: 'Vacation', icon: '✈️' },
     { value: 'emergency', label: 'Emergency Fund', icon: '🆘' },
@@ -21,33 +59,56 @@ const GOAL_CATEGORIES = [
     { value: 'other', label: 'Other', icon: '🎯' }
 ];
 
+/**
+ * Priority-to-color mapping
+ *
+ * Used for the goal card left border, circular progress ring,
+ * and the animated progress bar fill.
+ */
 const PRIORITY_COLORS = {
-    high: '#F44336',
-    medium: '#FFC107',
-    low: '#4CAF50'
+    high: '#F44336',    // Red — urgent goals
+    medium: '#FFC107',  // Yellow — normal priority
+    low: '#4CAF50'      // Green — low priority / aspirational
 };
 
+/**
+ * FinancialGoals Component
+ *
+ * Full lifecycle management for financial savings goals.
+ * Supports create, edit, delete, contribute, and mark-complete flows.
+ * Displays prediction data (monthly savings needed, on-track status,
+ * predicted completion date) from the backend.
+ *
+ * @returns {JSX.Element} The rendered goals management page
+ */
 const FinancialGoals = () => {
+    // ── Authentication ────────────────────────────────────────────────────
     const { currentUser } = useAuth();
-    const [goals, setGoals] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingGoal, setEditingGoal] = useState(null);
-    const [showContributeModal, setShowContributeModal] = useState(null);
-    const [contributeAmount, setContributeAmount] = useState('');
-    const [walletBalance, setWalletBalance] = useState(null);
-    const [showConfetti, setShowConfetti] = useState(false);
 
-    // Form state
+    // ── Goals Data & UI State ─────────────────────────────────────────────
+    const [goals, setGoals] = useState([]);                // Array of goal objects from API
+    const [loading, setLoading] = useState(true);          // Initial fetch loading flag
+    const [showCreateForm, setShowCreateForm] = useState(false);   // Toggle create/edit form
+    const [editingGoal, setEditingGoal] = useState(null);          // Goal being edited (or null)
+    const [showContributeModal, setShowContributeModal] = useState(null); // Goal ID for contribution modal
+    const [contributeAmount, setContributeAmount] = useState('');  // Dollar amount to contribute
+    const [walletBalance, setWalletBalance] = useState(null);      // User's current wallet balance
+    const [showConfetti, setShowConfetti] = useState(false);       // Celebration animation toggle
+
+    // ── Create / Edit Form State ──────────────────────────────────────────
     const [formData, setFormData] = useState({
-        name: '',
-        targetAmount: '',
-        currentAmount: '',
-        deadline: '',
-        category: 'other',
-        priority: 'medium'
+        name: '',           // Goal display name
+        targetAmount: '',   // Target savings amount ($)
+        currentAmount: '',  // Amount already saved ($)
+        deadline: '',       // Target completion date (YYYY-MM-DD)
+        category: 'other',  // Goal category key (from GOAL_CATEGORIES)
+        priority: 'medium'  // Priority level: 'high' | 'medium' | 'low'
     });
 
+    /**
+     * Effect: Fetch goals and wallet balance on component mount
+     * Re-runs when the authenticated user changes.
+     */
     useEffect(() => {
         if (currentUser) {
             fetchGoals();
@@ -55,6 +116,12 @@ const FinancialGoals = () => {
         }
     }, [currentUser]);
 
+    /**
+     * Fetch the user's current wallet balance
+     *
+     * Used to validate that the user has sufficient funds
+     * before making a goal contribution.
+     */
     const fetchWalletBalance = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -70,6 +137,12 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Fetch all financial goals from the backend
+     *
+     * Retrieves both active and completed goals.
+     * Each goal includes server-computed prediction data.
+     */
     const fetchGoals = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -90,6 +163,14 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Create a new financial goal
+     *
+     * Posts the form data to the goals API endpoint.
+     * On success, hides the form, resets fields, and refreshes the goals list.
+     *
+     * @param {Event} e - Form submit event
+     */
     const handleCreateGoal = async (e) => {
         e.preventDefault();
 
@@ -118,6 +199,15 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Update an existing goal with new form values
+     *
+     * Sends a PUT request to the goal endpoint. If the update causes
+     * the goal to become completed (currentAmount >= targetAmount),
+     * triggers a confetti celebration.
+     *
+     * @param {Event} e - Form submit event
+     */
     const handleUpdateGoal = async (e) => {
         e.preventDefault();
 
@@ -138,6 +228,7 @@ const FinancialGoals = () => {
 
             if (response.ok) {
                 const data = await response.json();
+                // Trigger celebration if the goal just got completed via edit
                 if (data.goal.isCompleted && !editingGoal.isCompleted) {
                     triggerConfetti();
                 }
@@ -150,6 +241,14 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Delete a financial goal permanently
+     *
+     * Prompts the user for confirmation before sending a DELETE request.
+     * Refreshes the goals list on success.
+     *
+     * @param {string} goalId - MongoDB ObjectId of the goal to delete
+     */
     const handleDeleteGoal = async (goalId) => {
         if (!confirm('Are you sure you want to delete this goal?')) return;
 
@@ -167,6 +266,15 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Contribute wallet funds toward a savings goal
+     *
+     * Validates the amount, fetches the latest wallet balance for a
+     * client-side sufficiency check, then posts the contribution.
+     * Triggers confetti if the contribution completes the goal.
+     *
+     * @param {string} goalId - MongoDB ObjectId of the target goal
+     */
     const handleContribute = async (goalId) => {
         const amount = parseFloat(contributeAmount);
         if (!contributeAmount || amount <= 0) {
@@ -174,7 +282,7 @@ const FinancialGoals = () => {
             return;
         }
 
-        // Fetch latest wallet balance before contributing
+        // Re-fetch the latest wallet balance for accurate client-side validation
         let currentBalance = walletBalance;
         try {
             const token = await currentUser.getIdToken();
@@ -190,6 +298,7 @@ const FinancialGoals = () => {
             // Continue — backend will still reject if balance is insufficient
         }
 
+        // Client-side insufficient balance guard
         if (currentBalance !== null && amount > currentBalance) {
             toast.error(`Insufficient balance! Your wallet has ₹${currentBalance.toLocaleString()}. You cannot contribute more than your available balance.`, { duration: 5000 });
             return;
@@ -208,6 +317,7 @@ const FinancialGoals = () => {
 
             if (response.ok) {
                 const data = await response.json();
+                // Trigger celebration if the goal reached 100%
                 if (data.goal.isCompleted) {
                     triggerConfetti();
                 }
@@ -225,6 +335,14 @@ const FinancialGoals = () => {
         }
     };
 
+    /**
+     * Manually mark a goal as completed
+     *
+     * Called when the user clicks "Mark Complete" on a goal that has
+     * reached or exceeded its target amount.
+     *
+     * @param {string} goalId - MongoDB ObjectId of the goal
+     */
     const handleCompleteGoal = async (goalId) => {
         try {
             const token = await currentUser.getIdToken();
@@ -241,11 +359,17 @@ const FinancialGoals = () => {
         }
     };
 
+    /** Show confetti animation for 5 seconds to celebrate a milestone */
     const triggerConfetti = () => {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
     };
 
+    /**
+     * Populate the form with an existing goal's data for editing
+     *
+     * @param {Object} goal - The goal object to edit
+     */
     const startEditGoal = (goal) => {
         setEditingGoal(goal);
         setFormData({
@@ -259,6 +383,7 @@ const FinancialGoals = () => {
         setShowCreateForm(true);
     };
 
+    /** Reset the form fields and close the create/edit form */
     const resetForm = () => {
         setFormData({
             name: '',
@@ -272,10 +397,22 @@ const FinancialGoals = () => {
         setEditingGoal(null);
     };
 
+    /**
+     * Look up category display info (icon + label) by value key
+     *
+     * @param {string} category - Category value key
+     * @returns {Object} Category object with value, label, and icon
+     */
     const getCategoryInfo = (category) => {
         return GOAL_CATEGORIES.find(c => c.value === category) || GOAL_CATEGORIES[GOAL_CATEGORIES.length - 1];
     };
 
+    /**
+     * Format an ISO date string into a human-readable short date
+     *
+     * @param {string} dateString - ISO date string (e.g. "2026-06-15T00:00:00Z")
+     * @returns {string} Formatted date (e.g. "Jun 15, 2026")
+     */
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -605,4 +742,5 @@ const FinancialGoals = () => {
     );
 };
 
+/* Export the FinancialGoals component as the default module export */
 export default FinancialGoals;

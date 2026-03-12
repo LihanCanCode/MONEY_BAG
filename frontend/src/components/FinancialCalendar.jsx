@@ -1,8 +1,39 @@
+/**
+ * @fileoverview Financial Calendar Component
+ *
+ * Interactive monthly calendar that aggregates and displays all financial events
+ * in a unified timeline view. Event types include:
+ *  - Transactions (income / expense)
+ *  - Recurring payments (active & projected)
+ *  - Debt due dates
+ *  - Goal deadlines
+ *  - Budget reset dates
+ *
+ * Features:
+ *  - Month navigation with "Today" shortcut
+ *  - Summary cards for monthly income, expenses, debts, and goals
+ *  - Filterable event chips by type
+ *  - Color-coded day dots indicating event presence
+ *  - Detail panel showing all events for a selected day
+ *  - Color legend for quick reference
+ *
+ * @module components/FinancialCalendar
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect, useMemo, useCallback } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import toast from 'react-hot-toast';
+
+// ── Icon Library (Feather Icons) ─────────────────────────────────────────────
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -19,27 +50,42 @@ import {
 
 // ─── Event type config ───
 const EVENT_CONFIG = {
-  transaction:          { icon: FaCreditCard,   label: 'Transaction' },
-  recurring:            { icon: FaSync,         label: 'Recurring' },
-  recurring_projected:  { icon: FaSync,         label: 'Upcoming Recurring' },
-  debt:                 { icon: FaUsers,        label: 'Debt Due' },
-  goal:                 { icon: FaBullseye,     label: 'Goal Deadline' },
-  budget_reset:         { icon: FaDollarSign,   label: 'Budget Reset' },
+  transaction: { icon: FiCreditCard, label: 'Transaction' },
+  recurring: { icon: FiRepeat, label: 'Recurring' },
+  recurring_projected: { icon: FiRepeat, label: 'Upcoming Recurring' },
+  debt: { icon: FiUsers, label: 'Debt Due' },
+  goal: { icon: FiTarget, label: 'Goal Deadline' },
+  budget_reset: { icon: FiDollarSign, label: 'Budget Reset' },
 };
 
-// ─── Helpers ───
+/** Full month names for display in the calendar header */
 const monthNames = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
-const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+/** Abbreviated day-of-week labels for the calendar grid header row */
+const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/**
+ * FinancialCalendar Component
+ *
+ * Renders an interactive monthly calendar with financial events overlaid.
+ * Fetches events from the backend whenever the displayed month changes.
+ *
+ * @returns {JSX.Element} The rendered calendar with summary, grid, and detail panel
+ */
 const FinancialCalendar = () => {
+  // ── Authentication ──────────────────────────────────────────────────────
   const { currentUser } = useAuth();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null);
+
+  // ── Component State ─────────────────────────────────────────────────────
+  const [events, setEvents] = useState([]);          // All events for the current month
+  const [loading, setLoading] = useState(true);      // Data fetch loading indicator
+  const [currentDate, setCurrentDate] = useState(new Date()); // Controls which month is displayed
+  const [selectedDay, setSelectedDay] = useState(null);       // Day number clicked by user
+
+  // Event type visibility filters (all enabled by default)
   const [filterTypes, setFilterTypes] = useState({
     transaction: true,
     recurring: true,
@@ -49,13 +95,22 @@ const FinancialCalendar = () => {
     budget_reset: true,
   });
 
+  // Derived values: current year and month index (0-based)
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
+  /**
+   * Fetch calendar events from the backend for the currently displayed month
+   *
+   * Queries the /api/calendar/events endpoint with start/end date range.
+   * Parses date strings into JS Date objects for easier day-grouping.
+   */
   const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       const token = await currentUser.getIdToken();
+
+      // Build date range covering the entire displayed month
       const startDate = new Date(year, month, 1).toISOString();
       const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999).toISOString();
       const params = new URLSearchParams({ startDate, endDate });
@@ -66,6 +121,7 @@ const FinancialCalendar = () => {
 
       if (response.ok) {
         const result = await response.json();
+        // Convert date strings to Date objects for local comparison
         setEvents((result.data || []).map(e => ({ ...e, date: new Date(e.date) })));
       } else {
         toast.error('Failed to load calendar events');
@@ -78,29 +134,42 @@ const FinancialCalendar = () => {
     }
   }, [currentUser, year, month]);
 
-  // Fetch events whenever month changes
+  // Re-fetch events whenever the displayed month or auth changes
   useEffect(() => {
     if (currentUser) fetchEvents();
   }, [currentUser, fetchEvents]);
 
-  // ─── Build calendar grid ───
+  /**
+   * Build the calendar grid array for the current month
+   *
+   * Returns an array where leading `null` entries represent blank cells
+   * before the 1st of the month, followed by day numbers 1..N.
+   */
   const calendarDays = useMemo(() => {
-    const firstDay = new Date(year, month, 1).getDay();
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun … 6=Sat
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const days = [];
 
-    // leading blanks
+    // Insert leading blank cells for alignment
     for (let i = 0; i < firstDay; i++) days.push(null);
+    // Insert actual day numbers
     for (let d = 1; d <= daysInMonth; d++) days.push(d);
 
     return days;
   }, [year, month]);
 
-  // Group events by day number
+  /**
+   * Group visible events by their day-of-month number
+   *
+   * Respects the current filter toggles so hidden event types
+   * are excluded from the grouping.
+   *
+   * @returns {Object.<number, Array>} Map of day number → events array
+   */
   const eventsByDay = useMemo(() => {
     const map = {};
     for (const e of events) {
-      if (!filterTypes[e.type]) continue;
+      if (!filterTypes[e.type]) continue; // Skip filtered-out types
       const day = e.date.getDate();
       if (!map[day]) map[day] = [];
       map[day].push(e);
@@ -108,22 +177,28 @@ const FinancialCalendar = () => {
     return map;
   }, [events, filterTypes]);
 
-  // Events for the selected day
+  /** Events for the currently selected day (empty array if no day selected) */
   const selectedDayEvents = useMemo(() => {
     if (selectedDay == null) return [];
     return (eventsByDay[selectedDay] || []);
   }, [selectedDay, eventsByDay]);
 
-  // ─── Navigation ───
+  // ── Month Navigation Handlers ──────────────────────────────────────────
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
-  const goToday   = () => { setCurrentDate(new Date()); setSelectedDay(new Date().getDate()); };
+  const goToday = () => { setCurrentDate(new Date()); setSelectedDay(new Date().getDate()); };
 
+  /** Check whether a given day number is today's date */
   const today = new Date();
   const isToday = (day) =>
     day && today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
 
-  // ─── Summary stats for the month ───
+  /**
+   * Compute aggregate summary stats for the displayed month
+   *
+   * Iterates over all (unfiltered) events once to tally:
+   *  - Total income, total expenses, count of debt due dates, count of goal deadlines
+   */
   const monthSummary = useMemo(() => {
     let income = 0, expenses = 0, debtsDue = 0, goalsCount = 0;
     for (const e of events) {
@@ -135,12 +210,20 @@ const FinancialCalendar = () => {
     return { income, expenses, debtsDue, goalsCount };
   }, [events]);
 
-  // ─── Toggle filter ───
+  /** Toggle visibility of a specific event type in the calendar grid */
   const toggleFilter = (type) => {
     setFilterTypes(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  // Unique color dots for a day
+  /**
+   * Get unique color dots for a calendar day cell
+   *
+   * Extracts distinct event colors for the given day, capped at 4 dots
+   * to avoid visual clutter in small calendar cells.
+   *
+   * @param {number} day - Day of the month
+   * @returns {string[]} Array of hex color strings (max 4)
+   */
   const getDayDots = (day) => {
     const dayEvents = eventsByDay[day] || [];
     const colors = [...new Set(dayEvents.map(e => e.color))];
@@ -217,7 +300,10 @@ const FinancialCalendar = () => {
           <button
             key={key}
             onClick={() => toggleFilter(key)}
-            className={`filter-chip ${filterTypes[key] ? 'active' : ''}`}
+            className={`px-3 py-1.5 text-xs font-medium rounded-full transition border ${filterTypes[key]
+              ? 'bg-white/10 border-white/20 text-white'
+              : 'bg-transparent border-white/5 text-gray-500'
+              }`}
           >
             {label}
           </button>
@@ -268,17 +354,25 @@ const FinancialCalendar = () => {
               const count = (eventsByDay[day] || []).length;
               const selected = selectedDay === day;
 
-              return (
-                <motion.button
-                  key={day}
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedDay(day)}
-                  className={`day-cell ${selected ? 'selected' : ''} ${isToday(day) ? 'today' : ''}`}
-                >
-                  <span className={`day-number ${isToday(day) ? 'today-num' : ''} ${selected ? 'selected-num' : ''}`}>
-                    {day}
-                  </span>
+                return (
+                  <motion.button
+                    key={day}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedDay(day)}
+                    className={`
+                      relative flex flex-col items-center justify-center rounded-xl p-2 min-h-15 transition-all
+                      ${selected
+                        ? 'bg-emerald-500/20 border border-emerald-500/50 ring-1 ring-emerald-500/30'
+                        : 'hover:bg-white/5 border border-transparent'}
+                      ${isToday(day) && !selected ? 'border border-emerald-500/30' : ''}
+                    `}
+                  >
+                    <span className={`text-sm font-medium ${isToday(day) ? 'text-emerald-400' :
+                      selected ? 'text-white' : 'text-gray-300'
+                      }`}>
+                      {day}
+                    </span>
 
                   {/* Event dots */}
                   {dots.length > 0 && (
@@ -920,9 +1014,28 @@ const FinancialCalendar = () => {
   );
 };
 
-// ─── Sub-components ───
+// ══════════════════════════════════════════════════════════════════════════════
+// SUB-COMPONENTS
+// ══════════════════════════════════════════════════════════════════════════════
 
-const SummaryCard = ({ icon, label, value, colorClass }) => {
+/**
+ * SummaryCard - Compact stat card for the monthly summary row
+ *
+ * @param {Object}  props
+ * @param {JSX.Element} props.icon  - Icon element to display
+ * @param {string}  props.label    - Metric label (e.g. "Income")
+ * @param {string|number} props.value - Metric value
+ * @param {string}  props.color    - Color scheme key (emerald | red | orange | blue)
+ * @returns {JSX.Element}
+ */
+
+const SummaryCard = ({ icon, label, value, color }) => {
+  const colors = {
+    emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    red: 'bg-red-500/10 text-red-400 border-red-500/20',
+    orange: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  };
   return (
     <motion.div
       className={`summary-card-item ${colorClass}`}
@@ -937,6 +1050,28 @@ const SummaryCard = ({ icon, label, value, colorClass }) => {
     </motion.div>
   );
 };
+
+/**
+ * EventCard - Displays a single financial event in the day detail panel
+ *
+ * Shows the event icon, title, type label, amount (if applicable),
+ * overdue badge, and frequency label for recurring events.
+ *
+ * @param {Object} props
+ * @param {Object} props.event - Event data object from the API
+ * @returns {JSX.Element}
+ */
+
+/**
+ * EventCard - Displays a single financial event in the day detail panel
+ *
+ * Shows the event icon, title, type label, amount (if applicable),
+ * overdue badge, and frequency label for recurring events.
+ *
+ * @param {Object} props
+ * @param {Object} props.event - Event data object from the API
+ * @returns {JSX.Element}
+ */
 
 const EventCard = ({ event }) => {
   const cfg = EVENT_CONFIG[event.type] || EVENT_CONFIG.transaction;
@@ -981,6 +1116,14 @@ const EventCard = ({ event }) => {
   );
 };
 
+/**
+ * LegendItem - Small color-swatch dot + label for the calendar legend row
+ *
+ * @param {Object} props
+ * @param {string} props.color - CSS color for the dot swatch
+ * @param {string} props.label - Legend text
+ * @returns {JSX.Element}
+ */
 const LegendItem = ({ color, label }) => (
   <div className="legend-item">
     <span className="legend-dot" style={{ backgroundColor: color }} />
@@ -988,4 +1131,5 @@ const LegendItem = ({ color, label }) => (
   </div>
 );
 
+/* Export the FinancialCalendar component as the default module export */
 export default FinancialCalendar;

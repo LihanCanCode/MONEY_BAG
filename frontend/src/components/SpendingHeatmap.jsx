@@ -1,30 +1,57 @@
+/**
+ * @fileoverview Spending Heatmap & Analytics Component
+ *
+ * Visual analytics dashboard featuring:
+ *  - Summary cards (Total Income, Expenses, Net Balance)
+ *  - Day-of-week spending bar chart with insight text
+ *  - 90-day calendar heatmap grid (GitHub-style)
+ *  - Period selector (30 Days, 3 Months, 6 Months, 1 Year)
+ *
+ * @module components/SpendingHeatmap
+ */
+
+// ── Core React Hooks ─────────────────────────────────────────
 import { useState, useEffect } from 'react';
+// ── Animation ───────────────────────────────────────────────
 import { motion } from 'framer-motion';
+// ── Auth & API ──────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+// ── Utilities & Icons ───────────────────────────────────────
 import toast from 'react-hot-toast';
 import { FaFire, FaCalendar, FaSync, FaArrowUp, FaArrowDown, FaWallet } from 'react-icons/fa';
 
+/** Day-of-week labels for the bar chart X-axis */
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+/**
+ * SpendingHeatmap Component
+ *
+ * Analytics dashboard with summary cards, day-of-week bars,
+ * and a calendar heatmap grid.
+ *
+ * @returns {JSX.Element}
+ */
 const SpendingHeatmap = () => {
   const { currentUser } = useAuth();
-  const [heatmapData, setHeatmapData] = useState(null);
-  const [summaryData, setSummaryData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('3months'); // last30days, 3months, 6months, year
+  const [heatmapData, setHeatmapData] = useState(null);         // Calendar + day-of-week data
+  const [summaryData, setSummaryData] = useState(null);         // Income/expense/balance totals
+  const [isLoading, setIsLoading] = useState(true);             // Loading flag
+  const [selectedPeriod, setSelectedPeriod] = useState('3months'); // Time range selector
 
+  /** Effect: Re-fetch data when the selected period changes */
   useEffect(() => {
     fetchData();
   }, [selectedPeriod]);
 
+  /** Fetch both heatmap and summary data in parallel */
   const fetchData = async () => {
     setIsLoading(true);
     await Promise.all([fetchHeatmapData(), fetchSummaryData()]);
     setIsLoading(false);
   };
 
-  // Helper to get local YYYY-MM-DD string
+  /** Convert Date to local YYYY-MM-DD (avoids timezone offset issues) */
   const getLocalDateString = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -32,6 +59,7 @@ const SpendingHeatmap = () => {
     return `${year}-${month}-${day}`;
   };
 
+  /** Calculate start/end Date objects based on selectedPeriod */
   const getDateRange = () => {
     const endDate = new Date();
     const startDate = new Date();
@@ -46,6 +74,7 @@ const SpendingHeatmap = () => {
     return { startDate, endDate };
   };
 
+  /** Fetch income/expense/balance summary from the analytics API */
   const fetchSummaryData = async () => {
     try {
       const token = await currentUser.getIdToken();
@@ -69,6 +98,7 @@ const SpendingHeatmap = () => {
     }
   };
 
+  /** Fetch per-day spending data for the heatmap calendar grid */
   const fetchHeatmapData = async () => {
     try {
       const token = await currentUser.getIdToken();
@@ -96,6 +126,10 @@ const SpendingHeatmap = () => {
     }
   };
 
+  /**
+   * Map a spending amount to a heatmap color intensity
+   * Darker blue = higher relative spending
+   */
   const getHeatmapColor = (amount, maxAmount) => {
     if (!amount || amount === 0) return '#f1f5f9';
     const intensity = amount / maxAmount;
@@ -106,6 +140,7 @@ const SpendingHeatmap = () => {
     return '#1e40af';
   };
 
+  /** Generate 90 days of calendar data for the heatmap grid */
   const generateCalendarDays = () => {
     if (!heatmapData) return [];
     const days = [];
@@ -374,4 +409,5 @@ const SpendingHeatmap = () => {
   );
 };
 
+/* Export the SpendingHeatmap component as the default module export */
 export default SpendingHeatmap;

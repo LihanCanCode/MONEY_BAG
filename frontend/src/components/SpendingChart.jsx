@@ -1,4 +1,20 @@
+/**
+ * @fileoverview Spending Chart Component
+ *
+ * Dual-panel financial visualization dashboard displaying:
+ *  - Line chart: Income vs Expense trend over the last 6 months
+ *  - Doughnut chart: Expense-to-remaining-balance ratio
+ *
+ * Uses Chart.js via react-chartjs-2 for rendering. Falls back to
+ * sample data when no real transactions exist for a better initial UX.
+ *
+ * @module components/SpendingChart
+ */
+
+// ── Core React ─────────────────────────────────────────────────────────────────
 import React from 'react';
+
+// ── Chart.js Modules & react-chartjs-2 Wrappers ────────────────────────────────
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -12,25 +28,45 @@ import {
     Filler
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
-import { FaChartLine, FaChartPie } from 'react-icons/fa';
 
+// ── Icon Libraries ─────────────────────────────────────────────────────────────
+import { FiActivity, FiPieChart } from 'react-icons/fi';
+
+/**
+ * Register required Chart.js components globally.
+ * Must be called once before any Chart.js renderings.
+ */
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement,
-    Filler
+    CategoryScale,   // X-axis category labels
+    LinearScale,     // Y-axis numeric scale
+    PointElement,    // Data points on line chart
+    LineElement,     // Lines connecting data points
+    Title,           // Chart title plugin
+    Tooltip,         // Hover tooltips
+    Legend,          // Legend labels
+    ArcElement,      // Doughnut/Pie arcs
+    Filler           // Area fill under line
 );
 
+/**
+ * SpendingChart Component
+ *
+ * Renders two side-by-side chart panels:
+ *  - "Income vs Expense" line chart with filled areas
+ *  - "Financial Overview" doughnut showing expense/balance split
+ *
+ * @param {Object} props
+ * @param {Object} props.wallet - Wallet data including totalIncome, totalExpense,
+ *                                currentBalance, and transactions array
+ * @returns {JSX.Element}
+ */
 const SpendingChart = ({ wallet }) => {
+    // ── Safely extract wallet totals (default to 0 if missing) ──────
     const income = wallet?.totalIncome || 0;
     const expense = wallet?.totalExpense || 0;
     const balance = wallet?.currentBalance || 0;
 
+    /** Doughnut chart data — compares expenses vs remaining balance */
     const doughnutData = {
         labels: ['Expenses', 'Remaining Balance'],
         datasets: [
@@ -43,6 +79,15 @@ const SpendingChart = ({ wallet }) => {
         ],
     };
 
+    /**
+     * Process wallet transactions into monthly income/expense aggregates
+     *
+     * Buckets transactions from the last 6 months (inclusive) into
+     * per-month totals. If no real data exists, returns sample data
+     * so the chart UI looks populated on first load.
+     *
+     * @returns {{ labels: string[], income: number[], expense: number[] }}
+     */
     const processMonthlyData = () => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -181,10 +226,14 @@ const SpendingChart = ({ wallet }) => {
     };
 
     return (
-        <div className="spending-charts">
-            <div className="chart-card">
-                <h3 className="chart-title">
-                    <FaChartLine className="chart-icon green" />
+        <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            style={{ paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}
+        >
+            <div className="bg-[#0B1121] p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
+                <h3 className="text-xl font-bold mb-8 flex items-center gap-2" style={{ color: '#ffffff' }}>
+                    <FiActivity className="text-emerald-400" />
                     Income vs Expense
                 </h3>
                 <div className="chart-wrapper line-chart">
@@ -273,4 +322,5 @@ const SpendingChart = ({ wallet }) => {
     );
 };
 
+/* Export the SpendingChart component as the default module export */
 export default SpendingChart;

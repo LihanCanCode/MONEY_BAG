@@ -1,40 +1,94 @@
+/**
+ * @fileoverview Transaction History (Ledger) Page Component
+ *
+ * Dedicated page for viewing, searching, and filtering the complete list
+ * of financial transactions. Features include:
+ *  - Full transaction list with staggered entrance animations
+ *  - Search & filter bar (by keyword, category, type, amount range, date range)
+ *  - Responsive transaction cards showing amount, category, date, and time
+ *  - Color-coded income (green) vs expense (red) visual indicators
+ *  - Total record count badge and CSV download button
+ *  - Empty-state placeholder with a one-click filter reset
+ *
+ * @module pages/Transactions
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Icon Library (Feather Icons) ─────────────────────────────────────────────
 import {
     FiSearch, FiFilter, FiDownload, FiArrowUpRight, FiArrowDownLeft,
     FiCalendar, FiChevronDown, FiActivity, FiArrowLeft, FiTag, FiClock, FiDollarSign
 } from 'react-icons/fi';
+
+// ── Reusable Components ──────────────────────────────────────────────────────
 import SearchAndFilters from '../components/SearchAndFilters';
 import DashboardSkeleton from '../components/LoadingSkeleton';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import toast, { Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
+/**
+ * Transactions Component
+ *
+ * Renders the full transaction history page with search, filtering, and
+ * a responsive card list. Automatically refetches data when filters change.
+ *
+ * @returns {JSX.Element} The rendered transaction ledger page
+ */
 const Transactions = () => {
+    // ── Authentication ────────────────────────────────────────────────────
     const { currentUser } = useAuth();
-    const [transactions, setTransactions] = useState([]);
-    const [loading, setLoading] = useState(true);
+
+    // ── Transaction Data & Loading ────────────────────────────────────────
+    const [transactions, setTransactions] = useState([]); // Array of transaction objects
+    const [loading, setLoading] = useState(true);         // Initial fetch loading flag
+
+    // ── Search & Filter State ─────────────────────────────────────────────
+    // Each property maps to a query parameter sent to the API
     const [filters, setFilters] = useState({
-        search: '',
-        category: '',
-        type: '',
-        minAmount: '',
-        maxAmount: '',
-        startDate: '',
-        endDate: ''
+        search: '',      // Free-text keyword search
+        category: '',    // Filter by spending category
+        type: '',        // Filter by transaction type (income/expense)
+        minAmount: '',   // Minimum amount threshold
+        maxAmount: '',   // Maximum amount threshold
+        startDate: '',   // Date range start (ISO string)
+        endDate: ''      // Date range end (ISO string)
     });
 
+    /**
+     * Effect: Refetch transactions whenever the user or filters change
+     *
+     * Ensures the displayed list always reflects the latest filter state.
+     */
     useEffect(() => {
         if (currentUser) {
             fetchTransactions();
         }
     }, [currentUser, filters]);
 
+    /**
+     * Fetch filtered transactions from the backend API
+     *
+     * Builds query parameters from the current filter state and sends
+     * a GET request to /api/transactions. Only non-empty filter values
+     * are appended to avoid unnecessary server-side processing.
+     */
     const fetchTransactions = async () => {
         try {
             setLoading(true);
             const token = await currentUser.getIdToken();
+
+            // Build query params — skip empty filter values
             const params = new URLSearchParams();
             Object.entries(filters).forEach(([key, value]) => {
                 if (value) params.append(key, value);
@@ -60,17 +114,25 @@ const Transactions = () => {
         }
     };
 
+    // Show skeleton loader during the initial data fetch
     if (loading && transactions.length === 0) {
         return <DashboardSkeleton />;
     }
 
+    // ══════════════════════════════════════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════════════════════════════════════
+
     return (
         <div className="text-slate-200 font-sans pb-12 relative pt-8 w-full min-h-screen flex justify-center">
+            {/* Global toast notification container */}
             <Toaster position="bottom-center" />
 
             <div className="w-full max-w-7xl px-8 md:px-16 lg:px-24">
-                {/* Header Section */}
+
+                {/* ─── Page Header Section ─── */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                    {/* Title and subtitle */}
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-2" style={{ color: '#ffffff' }}>
                             Transaction <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Ledger</span>
@@ -78,6 +140,7 @@ const Transactions = () => {
                         <p className="text-slate-500 font-medium">Audit every digital footprint and financial movement</p>
                     </div>
 
+                    {/* Record count badge and download button */}
                     <div className="flex items-center gap-3">
                         <div className="px-5 py-3 bg-white/5 border border-white/10 rounded-2xl">
                             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Total Records</span>
@@ -89,14 +152,14 @@ const Transactions = () => {
                     </div>
                 </div>
 
-                {/* Filters Section */}
+                {/* ─── Search & Filters Section ─── */}
                 <div className="mb-12">
                     <div className="bg-[#0B1121] border border-white/5 rounded-3xl p-6 shadow-2xl">
                         <SearchAndFilters onFilterChange={setFilters} activeFilters={filters} />
                     </div>
                 </div>
 
-                {/* Transactions list */}
+                {/* ─── Transaction List ─── */}
                 <div className="space-y-4">
                     {transactions.length > 0 ? (
                         <div className="grid grid-cols-1 gap-4">
@@ -108,22 +171,29 @@ const Transactions = () => {
                                     key={tx._id || idx}
                                     className="bg-[#0B1121] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between hover:bg-[#161e31] hover:border-white/10 transition-all duration-300 shadow-xl group"
                                 >
+                                    {/* Left side: Icon + Transaction details */}
                                     <div className="flex items-center gap-6 mb-4 md:mb-0">
+                                        {/* Color-coded direction icon (green = income, red = expense) */}
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${(tx.type === 'income' || tx.type === 'ADD')
                                             ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]'
                                             : 'bg-rose-500/10 text-rose-400 shadow-[inset_0_0_20px_rgba(244,63,94,0.1)]'}`}>
                                             {(tx.type === 'income' || tx.type === 'ADD') ? <FiArrowDownLeft size={28} /> : <FiArrowUpRight size={28} />}
                                         </div>
+
+                                        {/* Transaction message, category badge, date and time */}
                                         <div>
                                             <p className="font-extrabold text-xl text-slate-100 group-hover:text-white transition-colors mb-1">{tx.message || tx.category}</p>
                                             <div className="flex flex-wrap items-center gap-4">
+                                                {/* Category tag */}
                                                 <span className={`px-2 py-0.5 rounded-md border text-[10px] uppercase tracking-widest font-black flex items-center gap-1.5 ${(tx.type === 'income' || tx.type === 'ADD') ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/5 border-rose-500/20 text-rose-400'}`}>
                                                     <FiTag size={10} /> {tx.category}
                                                 </span>
+                                                {/* Date stamp */}
                                                 <span className="text-xs text-slate-500 font-mono flex items-center gap-1.5 italic">
                                                     <FiCalendar size={12} />
                                                     {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Today'}
                                                 </span>
+                                                {/* Time stamp */}
                                                 <span className="text-xs text-slate-500 font-mono flex items-center gap-1.5 italic">
                                                     <FiClock size={12} />
                                                     {tx.createdAt ? new Date(tx.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}
@@ -131,6 +201,8 @@ const Transactions = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Right side: Transaction amount (color-coded) */}
                                     <div className="flex items-center justify-between md:justify-end gap-8">
                                         <div className={`font-mono font-black text-3xl tracking-tighter ${(tx.type === 'income' || tx.type === 'ADD') ? 'text-emerald-400' : 'text-rose-400'}`}>
                                             {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -140,12 +212,14 @@ const Transactions = () => {
                             ))}
                         </div>
                     ) : (
+                        /* ─── Empty State Placeholder ─── */
                         <div className="bg-[#0B1121] border border-white/5 border-dashed rounded-[3rem] p-24 flex flex-col items-center justify-center text-slate-500">
                             <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-8">
                                 <FiSearch size={48} className="opacity-20" />
                             </div>
                             <p className="text-2xl font-bold text-slate-400">No transactions found</p>
                             <p className="text-sm text-slate-600 mt-2 max-w-sm text-center">Try adjusting your filters or search terms to find what you're looking for.</p>
+                            {/* One-click reset button clears all active filters */}
                             <button
                                 onClick={() => setFilters({ search: '', category: '', type: '', minAmount: '', maxAmount: '', startDate: '', endDate: '' })}
                                 className="mt-8 px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10 font-bold"
@@ -160,4 +234,5 @@ const Transactions = () => {
     );
 };
 
+/* Export the Transactions component as the default module export */
 export default Transactions;

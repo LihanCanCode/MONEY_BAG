@@ -1,11 +1,38 @@
 /**
- * DebtTracker Component
+ * @fileoverview Debt Tracker Component
+ *
  * Track money owed to/by the user with DRAMATIC FLAIR! 🎭💰
+ *
+ * A full-featured debt management system that organizes financial obligations
+ * into two categories:
+ *  - "They Owe Me" (owed_to_me) — money others owe the user
+ *  - "I Owe Them" (i_owe) — money the user owes others
+ *
+ * Key features:
+ *  - Create debts with person name, amount, due date, and "drama label"
+ *  - Add to or subtract from existing debt balances with audit notes
+ *  - Resolve (delete) a debt with confetti celebration
+ *  - View debt history timeline (created, added, subtracted, resolved)
+ *  - Overdue detection with pulsing warning badges
+ *  - Summary cards showing totals and overdue count
+ *  - Drama labels for classifying trust level (😇 Trustworthy to 😈 Sworn Enemy)
+ *  - Dramatic AI-generated toast messages on create
+ *  - Wallet balance deduction for "I Owe" debts
+ *
+ * @module components/DebtTracker
  */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Icon Libraries ───────────────────────────────────────────────────────────
 import {
     FaPlus, FaMinus, FaCheck, FaTimes, FaHandHoldingUsd,
     FaMoneyBillWave, FaUserFriends, FaExclamationTriangle,
@@ -13,10 +40,20 @@ import {
     FaUsers, FaQuestionCircle, FaClock, FaUserSecret
 } from 'react-icons/fa';
 import { GiReceiveMoney, GiPayMoney, GiDramaMasks } from 'react-icons/gi';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import Confetti from 'react-confetti';
 import toast, { Toaster } from 'react-hot-toast';
 
-// Drama label configurations with emojis and colors
+/**
+ * Drama label configurations
+ *
+ * Each label classifies the trustworthiness of the person involved
+ * in the debt. Includes an emoji, display color, and background color
+ * used for badges on debt cards.
+ *
+ * Ordered from most trustworthy to least trustworthy.
+ */
 const DRAMA_LABELS = [
     { value: 'trustworthy', label: 'Trustworthy', emoji: '😇', color: '#10B981', bgColor: 'rgba(16, 185, 129, 0.2)' },
     { value: 'best_friend', label: 'Best Friend', emoji: '🤝', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.2)' },
@@ -28,34 +65,54 @@ const DRAMA_LABELS = [
     { value: 'sworn_enemy', label: 'Sworn Enemy', emoji: '😈', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.2)' }
 ];
 
+/** Look up a drama label config by its value key, defaulting to 'trustworthy' */
 const getDramaLabel = (value) => {
     return DRAMA_LABELS.find(l => l.value === value) || DRAMA_LABELS[0];
 };
 
+/**
+ * DebtTracker Component
+ *
+ * Two-panel debt management dashboard split into "They Owe Me" and
+ * "I Owe Them" sections. Each section lists individual debt cards
+ * with add/subtract/resolve actions and transaction history.
+ *
+ * @returns {JSX.Element} The rendered debt tracker page
+ */
 const DebtTracker = () => {
+    // ── Authentication ────────────────────────────────────────────────────
     const { currentUser } = useAuth();
-    const [debts, setDebts] = useState([]);
-    const [summary, setSummary] = useState({ totalOwedToMe: 0, totalIOwe: 0, overdueCount: 0 });
-    const [loading, setLoading] = useState(true);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [createType, setCreateType] = useState('owed_to_me');
-    const [showAmountModal, setShowAmountModal] = useState(null);
-    const [amountModalType, setAmountModalType] = useState('add');
-    const [showConfetti, setShowConfetti] = useState(false);
-    const [showHistoryModal, setShowHistoryModal] = useState(null);
 
-    // Form state
+    // ── Debt Data & UI State ─────────────────────────────────────────────
+    const [debts, setDebts] = useState([]);                    // All debt records from API
+    const [summary, setSummary] = useState({                   // Aggregated summary stats
+        totalOwedToMe: 0, totalIOwe: 0, overdueCount: 0
+    });
+    const [loading, setLoading] = useState(true);              // Initial fetch loading flag
+    const [showCreateModal, setShowCreateModal] = useState(false); // Create debt modal toggle
+    const [createType, setCreateType] = useState('owed_to_me');    // Type for new debt
+    const [showAmountModal, setShowAmountModal] = useState(null);  // Debt obj for add/subtract modal
+    const [amountModalType, setAmountModalType] = useState('add'); // 'add' or 'subtract' mode
+    const [showConfetti, setShowConfetti] = useState(false);       // Celebration animation
+    const [showHistoryModal, setShowHistoryModal] = useState(null); // Debt obj for history modal
+
+    // ── Create Debt Form State ───────────────────────────────────────────
     const [formData, setFormData] = useState({
-        personName: '',
-        amount: '',
-        description: '',
-        dueDate: '',
-        dramaLabel: 'trustworthy'
+        personName: '',         // Name of the person involved
+        amount: '',             // Initial debt amount ($)
+        description: '',        // Optional backstory for the debt
+        dueDate: '',            // Optional due date (YYYY-MM-DD)
+        dramaLabel: 'trustworthy' // Trust classification (see DRAMA_LABELS)
     });
 
-    const [amountInput, setAmountInput] = useState('');
-    const [amountNote, setAmountNote] = useState('');
+    // ── Add/Subtract Amount Modal Inputs ────────────────────────────────
+    const [amountInput, setAmountInput] = useState('');  // Dollar amount to add/subtract
+    const [amountNote, setAmountNote] = useState('');    // Optional note for the transaction
 
+    /**
+     * Effect: Fetch debts and summary on component mount
+     * Re-runs when the authenticated user changes.
+     */
     useEffect(() => {
         if (currentUser) {
             fetchDebts();
@@ -63,6 +120,12 @@ const DebtTracker = () => {
         }
     }, [currentUser]);
 
+    /**
+     * Fetch all debt records from the backend
+     *
+     * Returns both "owed_to_me" and "i_owe" debts in a single array.
+     * Each debt includes history entries for the audit trail.
+     */
     const fetchDebts = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -81,6 +144,12 @@ const DebtTracker = () => {
         }
     };
 
+    /**
+     * Fetch aggregated debt summary statistics
+     *
+     * Returns totals for money owed to the user, money the user owes,
+     * counts of people in each category, and overdue debt count.
+     */
     const fetchSummary = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -96,6 +165,16 @@ const DebtTracker = () => {
         }
     };
 
+    /**
+     * Create a new debt record
+     *
+     * Posts form data including person name, amount, type, due date,
+     * drama label, and description. The backend may deduct from the
+     * user's wallet for "i_owe" type debts and returns a dramatic
+     * AI-generated message on success.
+     *
+     * @param {Event} e - Form submit event
+     */
     const handleCreateDebt = async (e) => {
         e.preventDefault();
         try {
@@ -115,8 +194,9 @@ const DebtTracker = () => {
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
+                // Show the dramatic AI-generated success message
                 toast.success(data.message, {
                     duration: 4000,
                     icon: '📜',
@@ -130,7 +210,7 @@ const DebtTracker = () => {
                 fetchDebts();
                 fetchSummary();
             } else {
-                // Show dramatic error toast for insufficient balance
+                // Show dramatic error toast for insufficient balance or other errors
                 toast.error(data.error || 'Failed to create debt', {
                     duration: 5000,
                     icon: '🚫',
@@ -160,6 +240,14 @@ const DebtTracker = () => {
         }
     };
 
+    /**
+     * Increase an existing debt amount
+     *
+     * Validates the input, then sends a PATCH request to add funds
+     * to the specified debt. Records the change in the debt's history.
+     *
+     * @param {string} debtId - MongoDB ObjectId of the debt to increase
+     */
     const handleAddToDebt = async (debtId) => {
         if (!amountInput || parseFloat(amountInput) <= 0) {
             toast.error('Please enter a valid amount');
@@ -199,6 +287,15 @@ const DebtTracker = () => {
         }
     };
 
+    /**
+     * Decrease an existing debt amount (record a payment)
+     *
+     * Validates the input, then sends a PATCH request to subtract funds
+     * from the specified debt. The backend prevents subtracting more
+     * than the current debt balance.
+     *
+     * @param {string} debtId - MongoDB ObjectId of the debt to decrease
+     */
     const handleSubtractFromDebt = async (debtId) => {
         if (!amountInput || parseFloat(amountInput) <= 0) {
             toast.error('Please enter a valid amount');
@@ -241,6 +338,16 @@ const DebtTracker = () => {
         }
     };
 
+    /**
+     * Fully resolve (delete) a debt record
+     *
+     * ⚠️ DESTRUCTIVE ACTION: Prompts the user for confirmation before deleting.
+     * On success, triggers confetti celebration and shows the AI-generated
+     * dramatic resolution message.
+     *
+     * @param {string} debtId     - MongoDB ObjectId of the debt
+     * @param {string} personName - Name used in the confirmation prompt
+     */
     const handleResolveDebt = async (debtId, personName) => {
         if (!confirm(`Are you sure you want to resolve the debt with ${personName}? This will mark it as fully paid.`)) {
             return;
@@ -275,6 +382,11 @@ const DebtTracker = () => {
         }
     };
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // UTILITY / HELPER FUNCTIONS
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /** Reset the create-debt form fields and close the modal */
     const resetForm = () => {
         setFormData({
             personName: '',
@@ -286,11 +398,21 @@ const DebtTracker = () => {
         setShowCreateModal(false);
     };
 
+    /**
+     * Open the create-debt modal pre-configured for a specific type
+     * @param {'owed_to_me' | 'i_owe'} type - The debt direction
+     */
     const openCreateModal = (type) => {
         setCreateType(type);
         setShowCreateModal(true);
     };
 
+    /**
+     * Open the add/subtract amount modal for a specific debt
+     *
+     * @param {Object} debt          - The debt object to modify
+     * @param {'add' | 'subtract'} type - Whether to increase or decrease the balance
+     */
     const openAmountModal = (debt, type) => {
         setShowAmountModal(debt);
         setAmountModalType(type);
@@ -298,6 +420,12 @@ const DebtTracker = () => {
         setAmountNote('');
     };
 
+    /**
+     * Format an ISO date string into a human-readable short date
+     *
+     * @param {string|null} dateString - ISO date string or null
+     * @returns {string|null} Formatted date (e.g. "Mar 15, 2026") or null
+     */
     const formatDate = (dateString) => {
         if (!dateString) return null;
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -307,6 +435,7 @@ const DebtTracker = () => {
         });
     };
 
+    // Split debts into the two display categories
     const owedToMe = debts.filter(d => d.type === 'owed_to_me');
     const iOwe = debts.filter(d => d.type === 'i_owe');
 
@@ -343,9 +472,9 @@ const DebtTracker = () => {
     return (
         <div className="debt-tracker">
             {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
-            
+
             {/* Toast container with high z-index to appear above modals */}
-            <Toaster 
+            <Toaster
                 position="top-center"
                 containerStyle={{
                     zIndex: 99999
@@ -370,7 +499,7 @@ const DebtTracker = () => {
 
             {/* Summary Cards */}
             <div className="summary-cards">
-                <motion.div 
+                <motion.div
                     className="summary-card owed-to-me"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
@@ -385,7 +514,7 @@ const DebtTracker = () => {
                     </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     className="summary-card i-owe"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
@@ -401,7 +530,7 @@ const DebtTracker = () => {
                 </motion.div>
 
                 {summary.overdueCount > 0 && (
-                    <motion.div 
+                    <motion.div
                         className="summary-card overdue-alert"
                         initial={{ scale: 1 }}
                         animate={{ scale: [1, 1.02, 1] }}
@@ -707,7 +836,7 @@ const DebtTracker = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <h3><FaHistory /> Debt History with {showHistoryModal.personName}</h3>
-                            
+
                             <div className="history-list">
                                 {showHistoryModal.history && showHistoryModal.history.length > 0 ? (
                                     showHistoryModal.history.map((entry, index) => (
@@ -1245,7 +1374,22 @@ const DebtTracker = () => {
     );
 };
 
-// Debt Card Component
+/**
+ * DebtCard Sub-Component
+ *
+ * Renders an individual debt entry card showing the person's name,
+ * drama label badge, current balance, optional description, due date,
+ * overdue status, and action buttons (add, subtract, resolve).
+ *
+ * @param {Object}   props
+ * @param {Object}   props.debt        - Debt data object from the API
+ * @param {Function} props.onAdd       - Handler to open "add to debt" modal
+ * @param {Function} props.onSubtract  - Handler to open "subtract from debt" modal
+ * @param {Function} props.onResolve   - Handler to resolve (delete) the debt
+ * @param {Function} props.onShowHistory - Handler to open the history modal
+ * @param {Function} props.formatDate  - Date formatting utility
+ * @returns {JSX.Element}
+ */
 const DebtCard = ({ debt, onAdd, onSubtract, onResolve, onShowHistory, formatDate }) => {
     const dramaLabel = getDramaLabel(debt.dramaLabel);
     const isOverdue = debt.isOverdue;
@@ -1270,10 +1414,10 @@ const DebtCard = ({ debt, onAdd, onSubtract, onResolve, onShowHistory, formatDat
             <div className="card-header">
                 <div className="person-info">
                     <span className="person-name">{debt.personName}</span>
-                    <span 
+                    <span
                         className="drama-badge"
-                        style={{ 
-                            background: dramaLabel.bgColor, 
+                        style={{
+                            background: dramaLabel.bgColor,
                             color: dramaLabel.color,
                             border: `1px solid ${dramaLabel.color}`
                         }}
@@ -1541,4 +1685,5 @@ const DebtCard = ({ debt, onAdd, onSubtract, onResolve, onShowHistory, formatDat
     );
 };
 
+/* Export the DebtTracker component as the default module export */
 export default DebtTracker;

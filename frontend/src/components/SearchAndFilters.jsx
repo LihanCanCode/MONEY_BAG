@@ -1,216 +1,261 @@
+/**
+ * @fileoverview Search & Filters Component
+ *
+ * Reusable advanced search and filtering toolbar for the Transactions page.
+ * Provides:
+ *  - Real-time text search (filters as-you-type)
+ *  - Expandable advanced filters panel with:
+ *    • Category dropdown
+ *    • Transaction type (Income / Expense)
+ *    • Min / Max amount range
+ *    • Start / End date range
+ *  - Active filter badge count
+ *  - Apply / Clear all filter actions
+ *  - Responsive layout for mobile
+ *
+ * @module components/SearchAndFilters
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Icon Libraries ─────────────────────────────────────────────────────────────
 import { FaSearch, FaFilter, FaTimes, FaCalendar, FaDollarSign } from 'react-icons/fa';
 
+/**
+ * Transaction category options for the filter dropdown.
+ * Each entry maps an internal value to a user-friendly emoji label.
+ */
 const CATEGORIES = [
-    { value: '', label: 'All Categories' },
-    { value: 'food', label: '🍔 Food & Dining' },
-    { value: 'transport', label: '🚗 Transportation' },
-    { value: 'shopping', label: '🛍️ Shopping' },
-    { value: 'entertainment', label: '🎬 Entertainment' },
-    { value: 'bills', label: '💡 Bills & Utilities' },
-    { value: 'health', label: '💊 Health & Fitness' },
-    { value: 'education', label: '📚 Education' },
-    { value: 'salary', label: '💰 Salary' },
-    { value: 'other', label: '📦 Other' }
+  { value: '', label: 'All Categories' },
+  { value: 'food', label: '🍔 Food & Dining' },
+  { value: 'transport', label: '🚗 Transportation' },
+  { value: 'shopping', label: '🛒️ Shopping' },
+  { value: 'entertainment', label: '🎬 Entertainment' },
+  { value: 'bills', label: '💡 Bills & Utilities' },
+  { value: 'health', label: '💊 Health & Fitness' },
+  { value: 'education', label: '📚 Education' },
+  { value: 'salary', label: '💰 Salary' },
+  { value: 'other', label: '📦 Other' }
 ];
 
+/**
+ * SearchAndFilters Component
+ *
+ * Provides a search bar with an expandable advanced-filter panel.
+ * All filter state is managed locally and pushed to the parent via
+ * the onFilterChange callback.
+ *
+ * @param {Object}   props
+ * @param {Function} props.onFilterChange  - Callback invoked with the current filter object
+ * @param {Object}   [props.activeFilters] - Optional initial filter values
+ * @returns {JSX.Element}
+ */
 const SearchAndFilters = ({ onFilterChange, activeFilters }) => {
-    const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState(activeFilters || {
-        search: '',
-        category: '',
-        type: '',
-        minAmount: '',
-        maxAmount: '',
-        startDate: '',
-        endDate: ''
-    });
+  // ── Local Filter State ──────────────────────────────────────────────
+  const [showFilters, setShowFilters] = useState(false);  // Advanced panel visibility
+  const [filters, setFilters] = useState(activeFilters || {
+    search: '',      // Free-text search term
+    category: '',    // Category filter key
+    type: '',        // Transaction type ('ADD' | 'SPEND' | '')
+    minAmount: '',   // Minimum amount (inclusive)
+    maxAmount: '',   // Maximum amount (inclusive)
+    startDate: '',   // Start date (YYYY-MM-DD)
+    endDate: ''      // End date (YYYY-MM-DD)
+  });
 
-    const handleSearchChange = (value) => {
-        const newFilters = { ...filters, search: value };
-        setFilters(newFilters);
-        onFilterChange(newFilters);
+  /** Update search text and immediately notify parent (live search) */
+  const handleSearchChange = (value) => {
+    const newFilters = { ...filters, search: value };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  /** Update a specific filter field locally (deferred until "Apply") */
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+  };
+
+  /** Apply all current filters and close the panel */
+  const applyFilters = () => {
+    onFilterChange(filters);
+    setShowFilters(false);
+  };
+
+  /** Reset all filters to empty and notify parent */
+  const clearFilters = () => {
+    const emptyFilters = {
+      search: '',
+      category: '',
+      type: '',
+      minAmount: '',
+      maxAmount: '',
+      startDate: '',
+      endDate: ''
     };
+    setFilters(emptyFilters);
+    onFilterChange(emptyFilters);
+    setShowFilters(false);
+  };
 
-    const handleFilterChange = (key, value) => {
-        const newFilters = { ...filters, [key]: value };
-        setFilters(newFilters);
-    };
+  /** Count non-empty filter fields for the badge indicator */
+  const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
 
-    const applyFilters = () => {
-        onFilterChange(filters);
-        setShowFilters(false);
-    };
+  return (
+    <div className="search-and-filters">
+      {/* Search Bar */}
+      <div className="search-bar-container">
+        <div className="search-input-wrapper">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search transactions... (e.g., Starbucks, Uber, Netflix)"
+            value={filters.search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="search-input"
+          />
+          {filters.search && (
+            <button
+              onClick={() => handleSearchChange('')}
+              className="clear-search-btn"
+            >
+              <FaTimes />
+            </button>
+          )}
+        </div>
 
-    const clearFilters = () => {
-        const emptyFilters = {
-            search: '',
-            category: '',
-            type: '',
-            minAmount: '',
-            maxAmount: '',
-            startDate: '',
-            endDate: ''
-        };
-        setFilters(emptyFilters);
-        onFilterChange(emptyFilters);
-        setShowFilters(false);
-    };
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={`filter-toggle-btn ${activeFilterCount > 0 ? 'has-filters' : ''}`}
+        >
+          <FaFilter className="mr-2" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="filter-badge">{activeFilterCount}</span>
+          )}
+        </button>
+      </div>
 
-    const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
-
-    return (
-        <div className="search-and-filters">
-            {/* Search Bar */}
-            <div className="search-bar-container">
-                <div className="search-input-wrapper">
-                    <FaSearch className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="Search transactions... (e.g., Starbucks, Uber, Netflix)"
-                        value={filters.search}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        className="search-input"
-                    />
-                    {filters.search && (
-                        <button
-                            onClick={() => handleSearchChange('')}
-                            className="clear-search-btn"
-                        >
-                            <FaTimes />
-                        </button>
-                    )}
-                </div>
-
-                <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`filter-toggle-btn ${activeFilterCount > 0 ? 'has-filters' : ''}`}
+      {/* Advanced Filters Panel */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="filters-panel"
+          >
+            <div className="filters-grid">
+              {/* Category Filter */}
+              <div className="filter-group">
+                <label>Category</label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                  className="filter-select"
                 >
-                    <FaFilter className="mr-2" />
-                    Filters
-                    {activeFilterCount > 0 && (
-                        <span className="filter-badge">{activeFilterCount}</span>
-                    )}
-                </button>
+                  {CATEGORIES.map(cat => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Type Filter */}
+              <div className="filter-group">
+                <label>Transaction Type</label>
+                <select
+                  value={filters.type}
+                  onChange={(e) => handleFilterChange('type', e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="">All Types</option>
+                  <option value="ADD">💰 Income</option>
+                  <option value="SPEND">💸 Expenses</option>
+                </select>
+              </div>
+
+              {/* Amount Range */}
+              <div className="filter-group">
+                <label>
+                  <FaDollarSign className="inline mr-1" />
+                  Min Amount
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={filters.minAmount}
+                  onChange={(e) => handleFilterChange('minAmount', e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+
+              <div className="filter-group">
+                <label>
+                  <FaDollarSign className="inline mr-1" />
+                  Max Amount
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="999999"
+                  value={filters.maxAmount}
+                  onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+
+              {/* Date Range */}
+              <div className="filter-group">
+                <label>
+                  <FaCalendar className="inline mr-1" />
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={filters.startDate}
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+
+              <div className="filter-group">
+                <label>
+                  <FaCalendar className="inline mr-1" />
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={filters.endDate}
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                  className="filter-input"
+                  min={filters.startDate}
+                />
+              </div>
             </div>
 
-            {/* Advanced Filters Panel */}
-            <AnimatePresence>
-                {showFilters && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="filters-panel"
-                    >
-                        <div className="filters-grid">
-                            {/* Category Filter */}
-                            <div className="filter-group">
-                                <label>Category</label>
-                                <select
-                                    value={filters.category}
-                                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                                    className="filter-select"
-                                >
-                                    {CATEGORIES.map(cat => (
-                                        <option key={cat.value} value={cat.value}>
-                                            {cat.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+            <div className="filters-actions">
+              <button onClick={clearFilters} className="btn-clear">
+                Clear All Filters
+              </button>
+              <button onClick={applyFilters} className="btn-apply">
+                Apply Filters
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                            {/* Type Filter */}
-                            <div className="filter-group">
-                                <label>Transaction Type</label>
-                                <select
-                                    value={filters.type}
-                                    onChange={(e) => handleFilterChange('type', e.target.value)}
-                                    className="filter-select"
-                                >
-                                    <option value="">All Types</option>
-                                    <option value="ADD">💰 Income</option>
-                                    <option value="SPEND">💸 Expenses</option>
-                                </select>
-                            </div>
-
-                            {/* Amount Range */}
-                            <div className="filter-group">
-                                <label>
-                                    <FaDollarSign className="inline mr-1" />
-                                    Min Amount
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={filters.minAmount}
-                                    onChange={(e) => handleFilterChange('minAmount', e.target.value)}
-                                    className="filter-input"
-                                />
-                            </div>
-
-                            <div className="filter-group">
-                                <label>
-                                    <FaDollarSign className="inline mr-1" />
-                                    Max Amount
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="999999"
-                                    value={filters.maxAmount}
-                                    onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
-                                    className="filter-input"
-                                />
-                            </div>
-
-                            {/* Date Range */}
-                            <div className="filter-group">
-                                <label>
-                                    <FaCalendar className="inline mr-1" />
-                                    Start Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={filters.startDate}
-                                    onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                                    className="filter-input"
-                                />
-                            </div>
-
-                            <div className="filter-group">
-                                <label>
-                                    <FaCalendar className="inline mr-1" />
-                                    End Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={filters.endDate}
-                                    onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                                    className="filter-input"
-                                    min={filters.startDate}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="filters-actions">
-                            <button onClick={clearFilters} className="btn-clear">
-                                Clear All Filters
-                            </button>
-                            <button onClick={applyFilters} className="btn-apply">
-                                Apply Filters
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <style>{`
+      <style>{`
         .search-and-filters {
           margin-bottom: 2rem;
         }
@@ -397,8 +442,9 @@ const SearchAndFilters = ({ onFilterChange, activeFilters }) => {
           }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
+/* Export the SearchAndFilters component as the default module export */
 export default SearchAndFilters;

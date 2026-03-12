@@ -1,5 +1,29 @@
+/**
+ * @fileoverview Circular Progress Indicator Component
+ *
+ * Renders an SVG-based circular progress ring with:
+ *  - Animated stroke transition from 0 → target percentage
+ *  - Color-coded thresholds (green → yellow → red) for budget status
+ *  - Optional centered percentage text label
+ *  - Configurable size, stroke width, and colors
+ *
+ * @module components/CircularProgress
+ */
 import { motion } from 'framer-motion';
 
+/**
+ * CircularProgress Component
+ *
+ * @param {Object}  props
+ * @param {number}  props.percentage    - Progress value (0–100+; capped visually at 100)
+ * @param {number}  [props.size=120]    - Diameter of the SVG in pixels
+ * @param {number}  [props.strokeWidth=8] - Width of the progress ring stroke
+ * @param {string}  [props.color='#4CAF50']        - Default (good) color
+ * @param {string}  [props.warningColor='#FFC107']  - Color when percentage ≥ 80%
+ * @param {string}  [props.dangerColor='#F44336']   - Color when percentage ≥ 100%
+ * @param {boolean} [props.showPercentage=true]     - Whether to show the % label in center
+ * @returns {JSX.Element}
+ */
 const CircularProgress = ({
     percentage,
     size = 120,
@@ -9,11 +33,17 @@ const CircularProgress = ({
     dangerColor = '#F44336',
     showPercentage = true
 }) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
+    // ── SVG Circle Math ──────────────────────────────────────────────
+    const radius = (size - strokeWidth) / 2;                   // Inner radius
+    const circumference = radius * 2 * Math.PI;                 // Full circle length
+    const offset = circumference - (Math.min(percentage, 100) / 100) * circumference; // Unfilled portion
 
-    // Determine color based on percentage
+    /**
+     * Determine ring color based on percentage thresholds:
+     *  ≥ 100% → danger (red)   – over budget
+     *  ≥  80% → warning (yellow) – approaching limit
+     *  <  80% → default (green) – on track
+     */
     const getColor = () => {
         if (percentage >= 100) return dangerColor;
         if (percentage >= 80) return warningColor;
@@ -71,4 +101,5 @@ const CircularProgress = ({
     );
 };
 
+/* Export the CircularProgress component as the default module export */
 export default CircularProgress;

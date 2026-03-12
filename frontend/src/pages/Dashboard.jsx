@@ -1,23 +1,57 @@
+/**
+ * @fileoverview Dashboard Page Component
+ *
+ * The primary financial dashboard that serves as the user's command center.
+ * Provides a comprehensive overview of the user's financial state including:
+ *  - Live wallet balance with animated counter
+ *  - Income / Expense summary cards
+ *  - Quick-action buttons for Manual Entry, AI Quick-Add, and Receipt Scanning
+ *  - Spending chart analytics
+ *  - Financial health gauge (savings rate based score)
+ *  - Save-to-goal modal for transferring wallet funds to savings goals
+ *  - AI-powered transaction parsing via natural language
+ *  - Receipt OCR scanning for automatic expense logging
+ *  - Confetti celebration on income additions
+ *
+ * @module pages/Dashboard
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Icon Library (Feather Icons) ─────────────────────────────────────────────
 import {
-  FaPlus, FaMinus, FaSync, FaSearch, FaFilter, FaDownload, FaTrash, FaEdit,
-  FaCheck, FaTimes, FaExclamationTriangle, FaArrowUp, FaArrowDown, FaChartPie, FaChartLine,
-  FaDollarSign, FaCalendarAlt, FaClock, FaArrowRight, FaArrowLeft, FaSmile, FaBolt,
-  FaCamera, FaList, FaPlusCircle, FaMinusCircle, FaChevronDown, FaRedoAlt,
-  FaBriefcase, FaBullseye
-} from 'react-icons/fa';
+  FiPlus, FiMinus, FiRefreshCw, FiSearch, FiFilter, FiDownload, FiTrash2, FiEdit2,
+  FiCheck, FiX, FiAlertCircle, FiTrendingUp, FiTrendingDown, FiPieChart, FiActivity,
+  FiDollarSign, FiCalendar, FiClock, FiArrowUpRight, FiArrowDownLeft, FiSmile, FiZap,
+  FiCamera, FiList, FiPlusCircle, FiMinusCircle, FiChevronDown, FiRefreshCcw,
+  FiArrowUp, FiArrowDown, FiBriefcase, FiTarget
+} from 'react-icons/fi';
+
+// ── Reusable Components ──────────────────────────────────────────────────────
 import AnimatedCounter from '../components/AnimatedCounter';
 import DashboardSkeleton from '../components/LoadingSkeleton';
 import SpendingChart from '../components/SpendingChart';
 import SearchAndFilters from '../components/SearchAndFilters';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import toast, { Toaster } from 'react-hot-toast';
 import Confetti from 'react-confetti';
 import { Link } from 'react-router-dom';
 
-// Categories available for spending
+/**
+ * Spending category options
+ *
+ * Used in the transaction form dropdown to classify expenses.
+ * Each entry maps an internal value key to a human-readable label.
+ */
 const categories = [
   { value: 'food', label: 'Food & Dining' },
   { value: 'transport', label: 'Transportation' },
@@ -30,50 +64,74 @@ const categories = [
   { value: 'other', label: 'Other' }
 ];
 
+/**
+ * Dashboard Component
+ *
+ * Main financial dashboard that displays wallet data, spending analytics,
+ * and provides quick-action modals for adding transactions manually,
+ * via AI natural-language parsing, or receipt OCR scanning.
+ *
+ * @returns {JSX.Element} The rendered dashboard page
+ */
 const Dashboard = () => {
+  // ── Authentication ──────────────────────────────────────────────────────
   const { currentUser } = useAuth();
-  const [wallet, setWallet] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // Transaction Form State
-  const [transactionType, setTransactionType] = useState('expense'); // 'expense' or 'income'
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('food');
-  const [description, setDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // ── Wallet Data & Loading ───────────────────────────────────────────────
+  const [wallet, setWallet] = useState(null);    // Full wallet object from API
+  const [loading, setLoading] = useState(true);  // Initial data fetch indicator
 
-  // Fancy AI Message State
-  const [showFancyPopup, setShowFancyPopup] = useState(false);
-  const [fancyMessage, setFancyMessage] = useState('');
-  const [fancyLoading, setFancyLoading] = useState(false);
+  // ── Transaction Form State ──────────────────────────────────────────────
+  const [transactionType, setTransactionType] = useState('expense'); // 'expense' | 'income'
+  const [amount, setAmount] = useState('');           // Dollar amount input
+  const [category, setCategory] = useState('food');   // Expense classification
+  const [description, setDescription] = useState(''); // Optional transaction note
+  const [isSubmitting, setIsSubmitting] = useState(false); // Submit-in-progress flag
 
-  // Confetti State
+  // ── AI Fancy Popup State (post-expense AI insight) ──────────────────────
+  const [showFancyPopup, setShowFancyPopup] = useState(false); // Visibility toggle
+  const [fancyMessage, setFancyMessage] = useState('');        // AI-generated message
+  const [fancyLoading, setFancyLoading] = useState(false);     // Loading indicator
+
+  // ── Confetti Celebration State ──────────────────────────────────────────
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-  // Modals for Advanced Features
-  const [showAIInput, setShowAIInput] = useState(false);
-  const [aiText, setAiText] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
+  // ── AI Quick-Add Modal State ────────────────────────────────────────────
+  const [showAIInput, setShowAIInput] = useState(false); // Modal visibility
+  const [aiText, setAiText] = useState('');               // Natural-language input
+  const [aiLoading, setAiLoading] = useState(false);      // AI processing flag
 
-  const [showReceiptScanner, setShowReceiptScanner] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
-  const [receiptPreview, setReceiptPreview] = useState(null);
-  const [receiptLoading, setReceiptLoading] = useState(false);
+  // ── Receipt Scanner Modal State ─────────────────────────────────────────
+  const [showReceiptScanner, setShowReceiptScanner] = useState(false); // Modal visibility
+  const [selectedReceipt, setSelectedReceipt] = useState(null);        // File object
+  const [receiptPreview, setReceiptPreview] = useState(null);          // Base64 preview URL
+  const [receiptLoading, setReceiptLoading] = useState(false);         // OCR processing flag
 
-  const [showAllTransactions, setShowAllTransactions] = useState(false);
-  const [showTransactionModal, setShowTransactionModal] = useState(false);
-  const [showSaveToGoalModal, setShowSaveToGoalModal] = useState(false);
-  const [goals, setGoals] = useState([]);
-  const [selectedGoalId, setSelectedGoalId] = useState('');
-  const [saveAmount, setSaveAmount] = useState('');
+  // ── Transaction List & Save-to-Goal Modal State ─────────────────────────
+  const [showAllTransactions, setShowAllTransactions] = useState(false);   // Expand transactions
+  const [showTransactionModal, setShowTransactionModal] = useState(false); // Manual entry modal
+  const [showSaveToGoalModal, setShowSaveToGoalModal] = useState(false);   // Goal transfer modal
+  const [goals, setGoals] = useState([]);            // Active (non-completed) goals list
+  const [selectedGoalId, setSelectedGoalId] = useState(''); // Target goal for transfer
+  const [saveAmount, setSaveAmount] = useState('');         // Amount to transfer to goal
 
+  /**
+   * Calculate the user's financial health score (0-100)
+   *
+   * Score is derived from the savings rate:
+   *   savingsRate = (totalIncome - totalExpense) / totalIncome × 100
+   * A higher score indicates healthier spending habits.
+   *
+   * @returns {{ score: number, message: string }} Score and descriptive message
+   */
   const calculateFinancialHealth = () => {
     if (!wallet || wallet.totalIncome === 0) return { score: 0, message: 'Add income to calculate' };
 
     const savingsRate = ((wallet.totalIncome - wallet.totalExpense) / wallet.totalIncome) * 100;
     const score = Math.max(0, Math.min(100, Math.round(savingsRate)));
 
+    // Map score ranges to user-friendly advice
     let message = 'Keep tracking to see insights';
     if (score >= 80) message = 'Excellent! Your spending is well optimized.';
     else if (score >= 60) message = 'Great! You are maintaining a healthy balance.';
@@ -114,6 +172,12 @@ const Dashboard = () => {
     }
   }, [currentUser, filters]);
 
+  /**
+   * Fetch the user's active (non-completed) financial goals
+   *
+   * Populates the goals dropdown inside the Save-to-Goal modal.
+   * Silently logs errors since goal loading is non-critical.
+   */
   const fetchGoals = async () => {
     try {
       const token = await currentUser.getIdToken();
@@ -125,7 +189,7 @@ const Dashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Only show active goals
+        // Only show active (not yet completed) goals
         setGoals(data.filter(g => !g.isCompleted));
       }
     } catch (error) {
@@ -133,17 +197,27 @@ const Dashboard = () => {
     }
   };
 
+  /**
+   * Fetch wallet summary AND filtered transactions from the backend
+   *
+   * Makes two parallel API calls:
+   *  1. GET /api/wallet          → balance, totalIncome, totalExpense
+   *  2. GET /api/transactions?…  → list of transactions matching current filters
+   *
+   * The results are merged into a single `wallet` state object so the UI
+   * can display both summary stats and the transaction list.
+   */
   const fetchWallet = async () => {
     try {
       const token = await currentUser.getIdToken();
 
-      // Build query params for filtering
+      // Build query params from active search/filter state
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
 
-      // Fetch wallet summary
+      // 1) Fetch wallet summary (balance, totals)
       const walletResponse = await fetch(API_ENDPOINTS.WALLET, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -153,7 +227,7 @@ const Dashboard = () => {
 
       const walletData = await walletResponse.json();
 
-      // Fetch filtered transactions
+      // 2) Fetch filtered transactions list
       const transactionsResponse = await fetch(
         `${API_ENDPOINTS.TRANSACTIONS}?${params}`,
         {
@@ -167,7 +241,7 @@ const Dashboard = () => {
       const transactionsData = await transactionsResponse.json();
 
       if (walletResponse.ok && transactionsResponse.ok) {
-        // Combine wallet data with filtered transactions
+        // Merge wallet summary with transaction list into unified state
         setWallet({
           ...walletData.wallet,
           transactions: transactionsData.transactions || []
@@ -182,6 +256,15 @@ const Dashboard = () => {
     }
   };
 
+  /**
+   * Fetch an AI-generated "fancy" insight message after an expense is recorded
+   *
+   * Shows a toast-style popup in the bottom-right with a witty or helpful
+   * comment about the expense. Auto-dismisses after 8 seconds.
+   *
+   * @param {number} amount  - The expense amount
+   * @param {string} cat     - The expense category
+   */
   const fetchFancyMessage = async (amount, cat) => {
     setFancyLoading(true);
     setFancyMessage('');
@@ -201,6 +284,7 @@ const Dashboard = () => {
       const data = await response.json();
       if (response.ok && data.message) {
         setFancyMessage(data.message);
+        // Auto-dismiss the popup after 8 seconds
         setTimeout(() => setShowFancyPopup(false), 8000);
       } else {
         setShowFancyPopup(false);
@@ -213,8 +297,20 @@ const Dashboard = () => {
     }
   };
 
-  // Transaction Handlers
+  // ══════════════════════════════════════════════════════════════════════════
+  // TRANSACTION HANDLER FUNCTIONS
+  // ══════════════════════════════════════════════════════════════════════════
 
+  /**
+   * Handle manual transaction form submission (income or expense)
+   *
+   * Validates the amount, checks sufficient balance for expenses,
+   * posts the transaction to the API, and triggers:
+   *  - Confetti animation on income
+   *  - AI fancy popup message on expense
+   *
+   * @param {Event} e - Form submit event
+   */
   const handleTransactionSubmit = async (e) => {
     e.preventDefault();
 
@@ -276,6 +372,16 @@ const Dashboard = () => {
     }
   };
 
+  /**
+   * Handle transferring wallet funds to a savings goal
+   *
+   * Validates the amount and selected goal, calls the goal contribution
+   * endpoint, and optimistically updates the wallet state for instant UI
+   * feedback. Falls back to a full wallet refetch if the API response
+   * doesn't include the transaction data.
+   *
+   * @param {Event} e - Form submit event
+   */
   const handleSaveToGoal = async (e) => {
     e.preventDefault();
 
@@ -352,6 +458,14 @@ const Dashboard = () => {
     }
   };
 
+  /**
+   * Reset the entire wallet — clears all transactions and sets balance to zero
+   *
+   * ⚠️ DESTRUCTIVE ACTION: Prompts the user for confirmation before proceeding.
+   * Performs two sequential API calls:
+   *  1. DELETE /api/transactions  → wipe transaction history
+   *  2. POST  /api/wallet/reset   → reset wallet balance to $0.00
+   */
   const handleResetWallet = async () => {
     if (!window.confirm('WARNING: This will PERMANENTLY DELETE all your transactions and reset your balance to zero. This action cannot be undone. Are you sure?')) {
       return;
@@ -395,7 +509,13 @@ const Dashboard = () => {
     }
   };
 
-  // AI Quick Add Processing
+  /**
+   * Process natural-language text input through the AI transaction parser
+   *
+   * Sends a free-text description (e.g. "Spent $45 on groceries") to the
+   * backend AI endpoint, which extracts the amount, category, and type,
+   * then creates the transaction automatically.
+   */
   const handleAIProcessing = async () => {
     if (!aiText.trim()) return;
     setAiLoading(true);
@@ -429,7 +549,18 @@ const Dashboard = () => {
     }
   };
 
-  // Receipt Scanner Processing
+  // ══════════════════════════════════════════════════════════════════════════
+  // RECEIPT SCANNER HANDLERS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Handle receipt image file selection
+   *
+   * Reads the selected image and generates a base64 preview URL
+   * for display inside the scanner modal.
+   *
+   * @param {Event} e - File input change event
+   */
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -440,6 +571,13 @@ const Dashboard = () => {
     }
   };
 
+  /**
+   * Upload the selected receipt image for OCR processing
+   *
+   * Sends the receipt as multipart/form-data to the backend OCR endpoint.
+   * On success, the backend extracts the amount and category and creates
+   * a transaction automatically.
+   */
   const handleReceiptScan = async () => {
     if (!selectedReceipt) return;
     setReceiptLoading(true);
@@ -473,10 +611,16 @@ const Dashboard = () => {
     }
   };
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // Show skeleton loader while initial data is being fetched
   if (loading) {
     return <DashboardSkeleton />;
   }
 
+  // Extract transactions array for the list view (default to empty)
   const recentTransactions = wallet?.transactions || [];
 
   return (
@@ -1648,4 +1792,5 @@ const Dashboard = () => {
   );
 };
 
+/* Export the Dashboard component as the default module export */
 export default Dashboard;

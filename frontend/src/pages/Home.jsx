@@ -1,12 +1,49 @@
+/**
+ * @fileoverview Home / Landing Page Component
+ *
+ * The public-facing entry point of the MoneyBag application.
+ * Provides a unified Sign-In / Sign-Up interface in a dark-themed,
+ * animated card layout with:
+ *  - Tab-based toggle between Sign In and Sign Up forms
+ *  - Email / password authentication via Firebase
+ *  - Google OAuth one-click sign-in
+ *  - Real-time password strength meter (Sign Up only)
+ *  - Password match indicator for confirmation field
+ *  - Floating decorative icons with motion animations
+ *  - Top navigation bar with brand logo
+ *  - Security badge footer
+ *  - Responsive design for mobile viewports
+ *
+ * @module pages/Home
+ */
+
+// ── Core React & Router ────────────────────────────────────────────────────────
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+
+// ── Auth Context ───────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
+
+// ── Animation Libraries ────────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Icon Libraries ─────────────────────────────────────────────────────────────
 import { FiEye, FiEyeOff, FiArrowRight, FiUserPlus, FiLogIn, FiDollarSign } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { GiTwoCoins, GiWallet, GiMoneyStack, GiPiggyBank } from 'react-icons/gi';
+
+// ── Third-Party UI Utilities ───────────────────────────────────────────────────
 import toast from 'react-hot-toast';
 
+/**
+ * Map Firebase auth error codes to user-friendly messages
+ *
+ * Translates cryptic Firebase error codes into clear, actionable
+ * messages displayed via toast notifications.
+ *
+ * @param {string} code - Firebase auth error code (e.g. 'auth/weak-password')
+ * @returns {string} Human-readable error message
+ */
 const getFirebaseErrorMessage = (code) => {
   const messages = {
     'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
@@ -26,39 +63,75 @@ const getFirebaseErrorMessage = (code) => {
   return messages[code] || 'Authentication failed. Please try again.';
 };
 
+/**
+ * Home Component
+ *
+ * Landing page with a dual-purpose auth card that supports both
+ * sign-in and sign-up via a tab toggle. The card animates between
+ * the two modes with smooth transitions.
+ *
+ * @returns {JSX.Element} The rendered Home / landing page
+ */
 const Home = () => {
-  const [activeTab, setActiveTab] = useState('signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // ── Form State ─────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState('signin');       // 'signin' | 'signup'
+  const [email, setEmail] = useState('');                     // User email
+  const [password, setPassword] = useState('');               // Password input
+  const [confirmPassword, setConfirmPassword] = useState(''); // Confirm (signup only)
+  const [showPassword, setShowPassword] = useState(false);           // Password reveal toggle
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Confirm reveal toggle
+  const [isLoading, setIsLoading] = useState(false);          // Submission loading flag
+
+  // ── Auth & Navigation ──────────────────────────────────────────────
   const { loginUser, registerUser, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  // Password strength checker
+  /**
+   * Password Strength Checker
+   *
+   * Evaluates password quality using 4 independent criteria:
+   *  1. Length ≥ 8 characters
+   *  2. Contains both lowercase AND uppercase letters
+   *  3. Contains at least one digit
+   *  4. Contains at least one special character
+   *
+   * Each met criterion adds 1 point → score maps to a level label + color.
+   *
+   * @param {string} pass - The password to evaluate
+   * @returns {{ level: number, text: string, color: string }} Strength info
+   */
   const getPasswordStrength = (pass) => {
     if (!pass) return { level: 0, text: '', color: '' };
     let strength = 0;
-    if (pass.length >= 8) strength++;
-    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) strength++;
-    if (/[0-9]/.test(pass)) strength++;
-    if (/[^a-zA-Z0-9]/.test(pass)) strength++;
-    
+    if (pass.length >= 8) strength++;                           // +1 for length
+    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) strength++;  // +1 for mixed case
+    if (/[0-9]/.test(pass)) strength++;                        // +1 for digits
+    if (/[^a-zA-Z0-9]/.test(pass)) strength++;                 // +1 for special chars
+
     const levels = [
       { level: 0, text: '', color: '' },
-      { level: 1, text: 'Weak', color: '#EF4444' },
-      { level: 2, text: 'Fair', color: '#F59E0B' },
-      { level: 3, text: 'Good', color: '#3B82F6' },
-      { level: 4, text: 'Strong', color: '#10B981' }
+      { level: 1, text: 'Weak', color: '#EF4444' },   // Red
+      { level: 2, text: 'Fair', color: '#F59E0B' },   // Amber
+      { level: 3, text: 'Good', color: '#3B82F6' },   // Blue
+      { level: 4, text: 'Strong', color: '#10B981' }   // Emerald
     ];
     return levels[strength];
   };
 
+  /** Derived password strength for the current input */
   const passwordStrength = getPasswordStrength(password);
+  /** Whether the confirm password field matches the password */
   const passwordsMatch = confirmPassword && password === confirmPassword;
 
+  /**
+   * Unified auth handler for both Sign In and Sign Up
+   *
+   * For signin: calls loginUser() with email/password
+   * For signup: validates password match + min length, then calls registerUser()
+   * On success, navigates to /dashboard. Errors display Firebase-friendly messages.
+   *
+   * @param {Event} e - Form submit event
+   */
   const handleAuth = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -92,6 +165,11 @@ const Home = () => {
     }
   };
 
+  /**
+   * Handle Google OAuth authentication
+   *
+   * Opens Google popup for one-click sign in, then navigates on success.
+   */
   const handleGoogleSignIn = async () => {
     const toastId = toast.loading('Connecting to Google...');
     try {
@@ -103,7 +181,7 @@ const Home = () => {
     }
   };
 
-  // Floating animation
+  /** Framer Motion variant for floating decorative icons (infinite bounce) */
   const floatingAnimation = {
     animate: {
       y: [0, -15, 0],
@@ -193,8 +271,8 @@ const Home = () => {
             transition={{ delay: 0.4 }}
             className="subtitle"
           >
-            {activeTab === 'signin' 
-              ? 'Sign in to continue managing your finances' 
+            {activeTab === 'signin'
+              ? 'Sign in to continue managing your finances'
               : 'Start your journey to financial freedom'}
           </motion.p>
         </div>
@@ -255,7 +333,7 @@ const Home = () => {
                   <div className="password-strength">
                     <div className="strength-bars">
                       {[1, 2, 3, 4].map((level) => (
-                        <div 
+                        <div
                           key={level}
                           className={`strength-bar ${passwordStrength.level >= level ? 'active' : ''}`}
                           style={{ backgroundColor: passwordStrength.level >= level ? passwordStrength.color : '' }}
@@ -949,4 +1027,5 @@ const Home = () => {
   );
 };
 
+/* Export the Home component as the default module export */
 export default Home;

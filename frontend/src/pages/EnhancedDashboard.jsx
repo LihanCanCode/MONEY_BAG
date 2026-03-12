@@ -1,5 +1,31 @@
+/**
+ * @fileoverview Enhanced Dashboard Page Component
+ *
+ * Acts as the main tabbed navigation shell for the entire application dashboard.
+ * Wraps all major feature modules under a single sticky tab bar, providing:
+ *  - Dashboard          → Primary financial overview (balance, transactions, charts)
+ *  - Budgets            → Budget creation, tracking, and analytics
+ *  - Goals              → Savings goal management and progress tracking
+ *  - Debts              → Debt tracking (money owed to/by the user)
+ *  - Recurring          → Automated recurring transaction management
+ *  - Calendar           → Unified financial calendar with event overlays
+ *  - Analytics          → Spending heatmap and trend analysis
+ *  - Export             → CSV / PDF report generation and download
+ *  - Transactions       → Full transaction history with search & filters
+ *
+ * Uses Framer Motion for smooth tab-switch animations and an animated
+ * underline indicator on the active tab.
+ *
+ * @module pages/EnhancedDashboard
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion } from 'framer-motion';
+
+// ── Feature Module Components ────────────────────────────────────────────────
 import Dashboard from './Dashboard';
 import RecurringTransactions from '../components/RecurringTransactions';
 import ExportReports from '../components/ExportReports';
@@ -10,27 +36,49 @@ import DebtTracker from '../components/DebtTracker';
 import FinancialCalendar from '../components/FinancialCalendar';
 import SplitBills from '../components/SplitBills';
 import Transactions from './Transactions';
-import { FaHome, FaRedoAlt, FaDownload, FaChartLine, FaDollarSign, FaBullseye, FaUsers, FaCalendarAlt, FaCut, FaExchangeAlt } from 'react-icons/fa';
 
+// ── Icon Library (Feather Icons) ─────────────────────────────────────────────
+import { FiHome, FiRepeat, FiDownload, FiTrendingUp, FiDollarSign, FiTarget, FiActivity, FiUsers, FiCalendar } from 'react-icons/fi';
+
+/**
+ * Tab configuration array
+ *
+ * Each entry defines a navigation tab with:
+ *  - id    : Unique key used for state matching and conditional rendering
+ *  - label : Human-readable text shown on the tab button
+ *  - icon  : Feather icon component rendered beside the label
+ *
+ * The order of entries determines the display order in the tab bar.
+ */
 const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: FaHome },
-  { id: 'budgets', label: 'Budgets', icon: FaDollarSign },
-  { id: 'goals', label: 'Goals', icon: FaBullseye },
-  { id: 'debts', label: 'Debts', icon: FaUsers },
-  { id: 'splits', label: 'Split Bills', icon: FaCut },
-  { id: 'recurring', label: 'Recurring', icon: FaRedoAlt },
-  { id: 'calendar', label: 'Calendar', icon: FaCalendarAlt },
-  { id: 'analytics', label: 'Analytics', icon: FaChartLine },
-  { id: 'export', label: 'Export', icon: FaDownload },
-  { id: 'transactions', label: 'Transactions', icon: FaExchangeAlt }
+  { id: 'dashboard', label: 'Dashboard', icon: FiHome },
+  { id: 'budgets', label: 'Budgets', icon: FiDollarSign },
+  { id: 'goals', label: 'Goals', icon: FiTarget },
+  { id: 'debts', label: 'Debts', icon: FiUsers },
+  { id: 'recurring', label: 'Recurring', icon: FiRepeat },
+  { id: 'calendar', label: 'Calendar', icon: FiCalendar },
+  { id: 'analytics', label: 'Analytics', icon: FiTrendingUp },
+  { id: 'export', label: 'Export', icon: FiDownload },
+  { id: 'transactions', label: 'Transactions', icon: FiActivity }
 ];
 
+/**
+ * EnhancedDashboard Component
+ *
+ * Top-level tabbed container that lazy-renders the selected feature module.
+ * The tab bar sticks to the top of the viewport and is horizontally scrollable
+ * on mobile. Each tab switch triggers a Framer Motion fade + slide animation.
+ *
+ * @returns {JSX.Element} The tabbed dashboard shell with the active feature module
+ */
 const EnhancedDashboard = () => {
+  // Currently active tab ID — defaults to 'dashboard' on first load
   const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
     <div className="enhanced-dashboard">
-      {/* Tab Navigation */}
+
+      {/* ─── Sticky Tab Navigation Bar ─── */}
       <div className="tabs-container">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -42,6 +90,8 @@ const EnhancedDashboard = () => {
             >
               <Icon className="tab-icon" />
               <span className="tab-label">{tab.label}</span>
+
+              {/* Animated underline indicator — shared layout animation via layoutId */}
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTab"
@@ -54,7 +104,8 @@ const EnhancedDashboard = () => {
         })}
       </div>
 
-      {/* Tab Content */}
+      {/* ─── Tab Content Area ─── */}
+      {/* Each tab switch triggers a fade + slide animation via Framer Motion */}
       <motion.div
         key={activeTab}
         initial={{ opacity: 0, y: 20 }}
@@ -63,6 +114,7 @@ const EnhancedDashboard = () => {
         transition={{ duration: 0.3 }}
         className="tab-content"
       >
+        {/* Conditionally render the appropriate feature module based on activeTab */}
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'budgets' && (
           <div style={{ minHeight: '100vh', background: '#0B0F1A', paddingTop: '1.5rem' }}>
@@ -111,12 +163,15 @@ const EnhancedDashboard = () => {
         )}
       </motion.div>
 
+      {/* ─── Scoped Component Styles ─── */}
       <style>{`
+        /* Root container — full viewport dark background */
         .enhanced-dashboard {
           min-height: 100vh;
           background: #0B0F1A;
         }
 
+        /* Sticky horizontal tab bar with scrollable overflow on mobile */
         .tabs-container {
           display: flex;
           gap: 0.5rem;
@@ -130,6 +185,7 @@ const EnhancedDashboard = () => {
           z-index: 30;
         }
 
+        /* Individual tab button — relative for the animated indicator */
         .tab-button {
           position: relative;
           display: flex;
@@ -147,11 +203,13 @@ const EnhancedDashboard = () => {
           white-space: nowrap;
         }
 
+        /* Hover state for inactive tabs */
         .tab-button:hover {
           background: rgba(255,255,255,0.05);
           color: #E5E7EB;
         }
 
+        /* Active tab style — brighter text and background */
         .tab-button.active {
           color: white;
           background: rgba(255,255,255,0.05);
@@ -165,6 +223,7 @@ const EnhancedDashboard = () => {
           font-size: 0.95rem;
         }
 
+        /* Animated green underline indicator beneath the active tab */
         .tab-indicator {
           position: absolute;
           bottom: 0;
@@ -175,10 +234,12 @@ const EnhancedDashboard = () => {
           border-radius: 2px 2px 0 0;
         }
 
+        /* Content area takes at least the remaining viewport height */
         .tab-content {
           min-height: calc(100vh - 80px);
         }
 
+        /* Responsive: collapse labels on mobile, enlarge icons */
         @media (max-width: 768px) {
           .tabs-container {
             padding: 1rem;
@@ -190,6 +251,7 @@ const EnhancedDashboard = () => {
             font-size: 0.875rem;
           }
 
+          /* Hide text labels on small screens — icon-only mode */
           .tab-label {
             display: none;
           }
@@ -203,4 +265,5 @@ const EnhancedDashboard = () => {
   );
 };
 
+/* Export the EnhancedDashboard component as the default module export */
 export default EnhancedDashboard;

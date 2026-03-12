@@ -1,17 +1,47 @@
+/**
+ * @fileoverview Recurring Transactions Component
+ *
+ * Manage automatic, scheduled transactions (bills, subscriptions, salary).
+ * Provides full CRUD lifecycle with:
+ *  - Create recurring transactions with type, category, amount, frequency,
+ *    and optional start/end dates
+ *  - Edit existing recurrences (type, amount, frequency, dates)
+ *  - Toggle active/paused status
+ *  - Delete with confirmation
+ *  - "Process Due" action to trigger all overdue recurrences
+ *  - Animated card list with status badges
+ *  - Empty state CTA
+ *
+ * @module components/RecurringTransactions
+ */
+
+// ── Core React Hooks ──────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+
+// ── Animation Libraries ──────────────────────────────────────────────────────
 import { motion, AnimatePresence } from 'framer-motion';
+
+// ── Auth & API ────────────────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+
+// ── Third-Party UI Utilities ─────────────────────────────────────────────────
 import toast from 'react-hot-toast';
+
+// ── Icon Libraries ─────────────────────────────────────────────────────────────
 import {
     FaPlus, FaCalendarAlt, FaToggleOn, FaToggleOff, FaTrash, FaEdit,
     FaMoneyBillWave, FaReceipt, FaClock
 } from 'react-icons/fa';
 
+/**
+ * Spending/income category options with emoji icons.
+ * Used in both the Add and Edit recurring transaction modals.
+ */
 const CATEGORIES = [
     { value: 'food', label: 'Food & Dining', icon: '🍔' },
     { value: 'transport', label: 'Transportation', icon: '🚗' },
-    { value: 'shopping', label: 'Shopping', icon: '🛍️' },
+    { value: 'shopping', label: 'Shopping', icon: '🛒️' },
     { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
     { value: 'bills', label: 'Bills & Utilities', icon: '💡' },
     { value: 'health', label: 'Health & Fitness', icon: '💊' },
@@ -20,6 +50,7 @@ const CATEGORIES = [
     { value: 'other', label: 'Other', icon: '📦' }
 ];
 
+/** Recurrence frequency options for the dropdown selector */
 const FREQUENCIES = [
     { value: 'daily', label: 'Daily' },
     { value: 'weekly', label: 'Weekly' },
@@ -27,13 +58,28 @@ const FREQUENCIES = [
     { value: 'yearly', label: 'Yearly' }
 ];
 
+/**
+ * RecurringTransactions Component
+ *
+ * Full CRUD management for scheduled, repeating transactions.
+ * Shows a list of active/paused recurrences with toggle, edit,
+ * and delete actions, plus a "Process Due" button to execute
+ * overdue transactions.
+ *
+ * @returns {JSX.Element}
+ */
 const RecurringTransactions = () => {
+    // ── Authentication ────────────────────────────────────────────────────
     const { currentUser } = useAuth();
-    const [recurringTransactions, setRecurringTransactions] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingTransaction, setEditingTransaction] = useState(null);
+
+    // ── Data & UI State ─────────────────────────────────────────────────
+    const [recurringTransactions, setRecurringTransactions] = useState([]);  // All recurring items
+    const [isLoading, setIsLoading] = useState(true);                        // Fetch loading flag
+    const [showAddModal, setShowAddModal] = useState(false);                 // Add modal toggle
+    const [showEditModal, setShowEditModal] = useState(false);               // Edit modal toggle
+    const [editingTransaction, setEditingTransaction] = useState(null);      // Transaction being edited
+
+    // ── Edit Form State ─────────────────────────────────────────────────
     const [editFormData, setEditFormData] = useState({
         type: 'SPEND',
         category: 'bills',
@@ -43,6 +89,8 @@ const RecurringTransactions = () => {
         startDate: '',
         endDate: ''
     });
+
+    // ── Create Form State ───────────────────────────────────────────────
     const [formData, setFormData] = useState({
         type: 'SPEND',
         category: 'bills',
@@ -53,10 +101,15 @@ const RecurringTransactions = () => {
         endDate: ''
     });
 
+    /** Effect: Load recurring transactions on component mount */
     useEffect(() => {
         fetchRecurringTransactions();
     }, []);
 
+    /**
+     * Fetch all recurring transactions from the backend
+     * Populates the card list and clears the loading state.
+     */
     const fetchRecurringTransactions = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -77,6 +130,14 @@ const RecurringTransactions = () => {
         }
     };
 
+    /**
+     * Create a new recurring transaction
+     *
+     * Submits form data to the API. On success, resets the form,
+     * closes the modal, and refreshes the list.
+     *
+     * @param {Event} e - Form submit event
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -118,6 +179,10 @@ const RecurringTransactions = () => {
         }
     };
 
+    /**
+     * Toggle active/paused status for a recurring transaction
+     * @param {string} id - MongoDB ObjectId of the transaction
+     */
     const handleToggle = async (id) => {
         try {
             const token = await currentUser.getIdToken();
@@ -140,6 +205,10 @@ const RecurringTransactions = () => {
         }
     };
 
+    /**
+     * Delete a recurring transaction with confirmation
+     * @param {string} id - MongoDB ObjectId of the transaction to delete
+     */
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this recurring transaction?')) return;
 
@@ -164,6 +233,12 @@ const RecurringTransactions = () => {
         }
     };
 
+    /**
+     * Trigger server-side processing of all due recurring transactions
+     *
+     * The backend will execute any transactions whose nextDueDate
+     * has passed, applying them to the user's wallet.
+     */
     const handleProcessDue = async () => {
         try {
             const token = await currentUser.getIdToken();
@@ -186,6 +261,10 @@ const RecurringTransactions = () => {
         }
     };
 
+    /**
+     * Open the edit modal pre-populated with the selected transaction's data
+     * @param {Object} recurring - The recurring transaction to edit
+     */
     const handleEdit = (recurring) => {
         setEditingTransaction(recurring);
         setEditFormData({
@@ -200,6 +279,10 @@ const RecurringTransactions = () => {
         setShowEditModal(true);
     };
 
+    /**
+     * Submit edits for an existing recurring transaction
+     * @param {Event} e - Form submit event
+     */
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         if (!editingTransaction) return;
@@ -597,7 +680,7 @@ const RecurringTransactions = () => {
                 )}
             </AnimatePresence>
 
-                        <style>{`
+            <style>{`
         .recurring-transactions-container {
           padding: 1.5rem;
           max-width: 1200px;

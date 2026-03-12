@@ -1,20 +1,38 @@
+/**
+ * @fileoverview Export Reports & Summaries Component
+ *
+ * Financial reporting dashboard with date range selectors,
+ * dynamic report summary, and PDF/CSV export capabilities.
+ *
+ * @module components/ExportReports
+ */
+
+// ── Core React Hooks ─────────────────────────────────────────────
 import { useState, useEffect } from 'react';
+// ── Animation ─────────────────────────────────────────────────────
 import { motion } from 'framer-motion';
+// ── Auth & API ────────────────────────────────────────────────────
 import { useAuth } from '../context/AuthContext';
 import { API_ENDPOINTS } from '../utils/api';
+// ── Utilities & Icons ────────────────────────────────────────────
 import toast from 'react-hot-toast';
 import { FaFilePdf, FaFileCsv, FaDownload, FaCalendar, FaChartBar, FaArrowUp, FaArrowDown, FaWallet } from 'react-icons/fa';
 
+/**
+ * ExportReports Component
+ *
+ * @returns {JSX.Element}
+ */
 const ExportReports = () => {
   const { currentUser } = useAuth();
-  const [isExporting, setIsExporting] = useState(false);
-  const [stats, setStats] = useState(null);
-  const [dateRange, setDateRange] = useState({
+  const [isExporting, setIsExporting] = useState(false);  // Export in progress flag
+  const [stats, setStats] = useState(null);                // Report summary statistics
+  const [dateRange, setDateRange] = useState({             // Selected date range
     startDate: '',
     endDate: ''
   });
 
-  // Helper to get local YYYY-MM-DD string
+  /** Convert a Date to local YYYY-MM-DD string (avoids timezone shifts) */
   const getLocalDateString = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -22,7 +40,7 @@ const ExportReports = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // Initialize with "This Month" on mount
+  /** Effect: Initialize date range to "This Month" on mount */
   useEffect(() => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -33,13 +51,14 @@ const ExportReports = () => {
     });
   }, []);
 
-  // Fetch stats whenever dateRange changes
+  /** Effect: Re-fetch summary stats when date range changes */
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {
       fetchStats();
     }
   }, [dateRange]);
 
+  /** Fetch analytics summary for the selected date range */
   const fetchStats = async () => {
     try {
       const token = await currentUser.getIdToken();
@@ -61,6 +80,7 @@ const ExportReports = () => {
     }
   };
 
+  /** Trigger a browser file download from a Blob */
   const downloadFile = (blob, filename) => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -72,6 +92,7 @@ const ExportReports = () => {
     document.body.removeChild(a);
   };
 
+  /** Download PDF for the currently selected date range */
   const downloadCurrentReport = async () => {
     await exportPDF(
       dateRange.startDate,
@@ -80,6 +101,7 @@ const ExportReports = () => {
     );
   };
 
+  /** Generate and download a PDF report from the backend */
   const exportPDF = async (start = dateRange.startDate, end = dateRange.endDate, filename = `MoneyBag_Report_${Date.now()}.pdf`) => {
     try {
       setIsExporting(true);
@@ -110,6 +132,7 @@ const ExportReports = () => {
     }
   };
 
+  /** Export transaction data as CSV for the selected date range */
   const exportCSV = async () => {
     try {
       setIsExporting(true);
@@ -140,6 +163,7 @@ const ExportReports = () => {
     }
   };
 
+  /** Predefined quick-select date range configurations */
   const quickDateRanges = [
     {
       label: 'Last 7 Days',
@@ -644,4 +668,5 @@ const ExportReports = () => {
   );
 };
 
+/* Export the ExportReports component as the default module export */
 export default ExportReports;

@@ -1,7 +1,33 @@
+/**
+ * @fileoverview Budget vs Actual Spending Bar Chart
+ *
+ * Compact Recharts-based grouped bar chart comparing budgeted
+ * amounts against actual spending per category. Rendered inside
+ * the BudgetManagement component's analytics section.
+ *
+ * @module components/BudgetChart
+ */
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+/**
+ * BudgetChart Component
+ *
+ * Displays a side-by-side bar chart of budgeted vs actual spending.
+ * Bars are rounded at the top and use green (Budgeted) / blue (Actual)
+ * colors against a dark background with subtle grid lines.
+ *
+ * @param {Object}   props
+ * @param {Array}    props.data           - Array of budget analytics objects
+ * @param {string}   props.data[].category - Category key (e.g. 'food')
+ * @param {number}   props.data[].budgeted - Budgeted amount ($)
+ * @param {number}   props.data[].actual   - Actual spending ($)
+ * @returns {JSX.Element}
+ */
 const BudgetChart = ({ data }) => {
-    // Transform data for the chart
+    /**
+     * Transform raw analytics data for Recharts.
+     * Capitalizes category names for display labels.
+     */
     const chartData = data.map(item => ({
         category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
         Budgeted: item.budgeted,
@@ -53,4 +79,5 @@ const BudgetChart = ({ data }) => {
     );
 };
 
+/* Export the BudgetChart component as the default module export */
 export default BudgetChart;
