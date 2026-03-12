@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { FiMenu, FiX, FiLogOut, FiDollarSign } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import logoImg from '../assets/logo.png';
 
 /**
  * Navbar Component
@@ -94,13 +95,15 @@ const Navbar = () => {
       style={{ padding: '1rem 3rem' }}
     >
       <div className="flex items-center justify-between">
-        {/* Logo/Brand - Original style */}
+        {/* Logo/Brand - New Logo Image + Text */}
         <Link to="/" className="flex items-center gap-3 group">
-          {/* Icon with gradient background */}
-          <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform">
-            <FiDollarSign size={24} className="stroke-[3px]" />
-          </div>
-          {/* Brand name with gradient text */}
+          <motion.img 
+            src={logoImg} 
+            alt="MoneyBag Logo" 
+            className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          />
           <span className="text-xl font-bold tracking-tight text-white group-hover:text-cyan-400 transition-colors">
             Money<span className="text-cyan-400">Bag</span>
           </span>
