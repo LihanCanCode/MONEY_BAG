@@ -161,7 +161,10 @@ exports.exportTransactionsPDF = async (req, res) => {
         });
 
         // Create PDF
+        // Use Nirmala UI font for Bengali character (৳) support
         const doc = new PDFDocument({ margin: 50 });
+        const fontPath = 'C:\\Windows\\Fonts\\Nirmala.ttf';
+        doc.font(fontPath);
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=transactions_${Date.now()}.pdf`);
@@ -184,11 +187,11 @@ exports.exportTransactionsPDF = async (req, res) => {
         doc.fontSize(14).fillColor('#000').text('Summary', { underline: true });
         doc.moveDown(0.5);
         doc.fontSize(12)
-            .text(`Total Income: $${totalIncome.toFixed(2)}`, { continued: false })
+            .text(`Total Income: ৳${totalIncome.toFixed(2)}`, { continued: false })
             .fillColor('#ef4444')
-            .text(`Total Expenses: $${totalExpenses.toFixed(2)}`, { continued: false })
+            .text(`Total Expenses: ৳${totalExpenses.toFixed(2)}`, { continued: false })
             .fillColor(totalIncome - totalExpenses >= 0 ? '#22c55e' : '#ef4444')
-            .text(`Net Balance: $${(totalIncome - totalExpenses).toFixed(2)}`, { continued: false });
+            .text(`Net Balance: ৳${(totalIncome - totalExpenses).toFixed(2)}`, { continued: false });
 
         doc.moveDown(2);
 
@@ -204,7 +207,7 @@ exports.exportTransactionsPDF = async (req, res) => {
             const date = new Date(txn.createdAt).toLocaleDateString();
             const type = txn.type === 'ADD' ? '+ Income' : '- Expense';
             const category = txn.category || 'N/A';
-            const amount = `$${txn.amount.toFixed(2)}`;
+            const amount = `৳${txn.amount.toFixed(2)}`;
 
             doc.fontSize(10)
                 .fillColor(txn.type === 'ADD' ? '#22c55e' : '#ef4444')

@@ -221,7 +221,7 @@ const SpendingHeatmap = () => {
                 <div className="card-icon income-icon"><FaArrowUp /></div>
                 <div>
                   <h3>Total Income</h3>
-                  <p>${summaryData.totalIncome.toFixed(2)}</p>
+                  <p>৳{summaryData.totalIncome.toFixed(2)}</p>
                 </div>
               </motion.div>
 
@@ -234,7 +234,7 @@ const SpendingHeatmap = () => {
                 <div className="card-icon expense-icon"><FaArrowDown /></div>
                 <div>
                   <h3>Total Expenses</h3>
-                  <p>${summaryData.totalExpenses.toFixed(2)}</p>
+                  <p>৳{summaryData.totalExpenses.toFixed(2)}</p>
                 </div>
               </motion.div>
 
@@ -247,7 +247,7 @@ const SpendingHeatmap = () => {
                 <div className="card-icon balance-icon"><FaWallet /></div>
                 <div>
                   <h3>Net Balance</h3>
-                  <p>${summaryData.netBalance.toFixed(2)}</p>
+                  <p>৳{summaryData.netBalance.toFixed(2)}</p>
                 </div>
               </motion.div>
             </div>
@@ -275,7 +275,7 @@ const SpendingHeatmap = () => {
                         animate={{ width: `${percentage}%` }}
                         transition={{ duration: 0.5, delay: index * 0.1 }}
                       >
-                        <span className="day-amount">${amount.toFixed(0)}</span>
+                        <span className="day-amount">৳{amount.toFixed(0)}</span>
                       </motion.div>
                     </div>
                   );
@@ -305,7 +305,7 @@ const SpendingHeatmap = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: index * 0.002 }}
-                  title={`${day.date.toLocaleDateString()}: $${day.amount.toFixed(2)} (${day.count} txns)`}
+                  title={`${day.date.toLocaleDateString()}: ৳${day.amount.toFixed(2)} (${day.count} txns)`}
                 >
                   {day.count > 0 && <div className="day-indicator">{day.count}</div>}
                 </motion.div>

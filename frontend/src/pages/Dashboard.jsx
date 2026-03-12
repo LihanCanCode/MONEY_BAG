@@ -84,7 +84,7 @@ const Dashboard = () => {
 
   // ── Transaction Form State ──────────────────────────────────────────────
   const [transactionType, setTransactionType] = useState('expense'); // 'expense' | 'income'
-  const [amount, setAmount] = useState('');           // Dollar amount input
+  const [amount, setAmount] = useState('');           // Taka amount input
   const [category, setCategory] = useState('food');   // Expense classification
   const [description, setDescription] = useState(''); // Optional transaction note
   const [isSubmitting, setIsSubmitting] = useState(false); // Submit-in-progress flag
@@ -642,7 +642,7 @@ const Dashboard = () => {
             <div>
               <span className="balance-label"><span className="live-dot"></span> Current Balance</span>
               <div className="balance-value">
-                <span className="currency-sign">$</span><AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
+                <span className="currency-sign">৳</span><AnimatedCounter value={wallet?.currentBalance || 0} decimals={2} />
               </div>
             </div>
             <div className="balance-actions">
@@ -660,14 +660,14 @@ const Dashboard = () => {
               <div className="stat-icon income-icon"><FiArrowUp /></div>
               <div>
                 <span className="stat-label">Total Income</span>
-                <span className="stat-value income">+$<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} /></span>
+                <span className="stat-value income">+৳<AnimatedCounter value={wallet?.totalIncome || 0} decimals={2} /></span>
               </div>
             </div>
             <div className="stat-item">
               <div className="stat-icon expense-icon"><FiArrowDown /></div>
               <div>
                 <span className="stat-label">Total Expenses</span>
-                <span className="stat-value expense">-$<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} /></span>
+                <span className="stat-value expense">-৳<AnimatedCounter value={wallet?.totalExpense || 0} decimals={2} /></span>
               </div>
             </div>
           </div>
@@ -828,7 +828,7 @@ const Dashboard = () => {
                 <textarea
                   value={aiText}
                   onChange={(e) => setAiText(e.target.value)}
-                  placeholder="e.g., 'Spent $45 on groceries today'..."
+                  placeholder="e.g., 'Spent ৳45 on groceries today'..."
                   className="ai-textarea"
                   disabled={aiLoading}
                   rows={5}

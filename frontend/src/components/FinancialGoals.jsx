@@ -300,7 +300,7 @@ const FinancialGoals = () => {
 
         // Client-side insufficient balance guard
         if (currentBalance !== null && amount > currentBalance) {
-            toast.error(`Insufficient balance! Your wallet has ₹${currentBalance.toLocaleString()}. You cannot contribute more than your available balance.`, { duration: 5000 });
+            toast.error(`Insufficient balance! Your wallet has ৳${currentBalance.toLocaleString()}. You cannot contribute more than your available balance.`, { duration: 5000 });
             return;
         }
 
@@ -487,7 +487,7 @@ const FinancialGoals = () => {
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Target Amount ($)</label>
+                                    <label>Target Amount (৳)</label>
                                     <input
                                         type="number"
                                         value={formData.targetAmount}
@@ -500,7 +500,7 @@ const FinancialGoals = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Current Amount ($)</label>
+                                    <label>Current Amount (৳)</label>
                                     <input
                                         type="number"
                                         value={formData.currentAmount}
@@ -611,15 +611,15 @@ const FinancialGoals = () => {
                                     <div className="goal-amounts">
                                         <div className="amount-row">
                                             <span className="label">Current</span>
-                                            <span className="value">${goal.currentAmount.toFixed(2)}</span>
+                                            <span className="value">৳{goal.currentAmount.toFixed(2)}</span>
                                         </div>
                                         <div className="amount-row">
                                             <span className="label">Target</span>
-                                            <span className="value">${goal.targetAmount.toFixed(2)}</span>
+                                            <span className="value">৳{goal.targetAmount.toFixed(2)}</span>
                                         </div>
                                         <div className="amount-row highlight">
                                             <span className="label">Remaining</span>
-                                            <span className="value">${remaining.toFixed(2)}</span>
+                                            <span className="value">৳{remaining.toFixed(2)}</span>
                                         </div>
                                     </div>
 
@@ -652,7 +652,7 @@ const FinancialGoals = () => {
                                                 <h4><FaChartLine /> Predictions</h4>
                                                 <div className="prediction-item">
                                                     <span>Required Monthly Savings:</span>
-                                                    <strong>${requiredMonthlySavings.toFixed(2)}</strong>
+                                                    <strong>৳{requiredMonthlySavings.toFixed(2)}</strong>
                                                 </div>
                                                 <div className="prediction-item">
                                                     <span>Status:</span>
@@ -675,7 +675,7 @@ const FinancialGoals = () => {
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                 >
-                                                    <FaDollarSign /> Contribute
+                                                    <FaMoneyBillWave /> Contribute
                                                 </motion.button>
                                                 {progress >= 100 && (
                                                     <motion.button

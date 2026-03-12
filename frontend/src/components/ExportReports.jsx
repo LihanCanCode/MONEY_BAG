@@ -303,7 +303,7 @@ const ExportReports = () => {
                 <div>
                   <span className="stat-label">Income</span>
                   <span className="stat-value text-green-600">
-                    ${stats.totalIncome.toFixed(2)}
+                    ৳{stats.totalIncome.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -312,7 +312,7 @@ const ExportReports = () => {
                 <div>
                   <span className="stat-label">Expenses</span>
                   <span className="stat-value text-red-500">
-                    ${stats.totalExpenses.toFixed(2)}
+                    ৳{stats.totalExpenses.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -321,7 +321,7 @@ const ExportReports = () => {
                 <div>
                   <span className="stat-label">Net Balance</span>
                   <span className="stat-value text-blue-600">
-                    ${stats.netBalance.toFixed(2)}
+                    ৳{stats.netBalance.toFixed(2)}
                   </span>
                 </div>
               </div>

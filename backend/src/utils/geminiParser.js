@@ -234,10 +234,10 @@ const generateDramaticMessage = async (action, personName, amount, dramaLabel) =
     };
 
     const actionDescriptions = {
-      create_owed: `You just lent $${amount} to ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
-      create_owe: `You just borrowed $${amount} from ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
-      add: `The debt with ${personName} just increased by $${amount}`,
-      subtract: `${personName} just paid back $${amount} of their debt`,
+      create_owed: `You just lent ৳${amount} to ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
+      create_owe: `You just borrowed ৳${amount} from ${personName} (${dramaContext[dramaLabel] || 'an acquaintance'})`,
+      add: `The debt with ${personName} just increased by ৳${amount}`,
+      subtract: `${personName} just paid back ৳${amount} of their debt`,
       resolve: `The debt with ${personName} has been fully resolved`
     };
 
@@ -282,10 +282,10 @@ const generateSplitMessage = async (action, title, amount, participantCount, nam
     });
 
     const actionDescriptions = {
-      create: `A bill of $${amount} for "${title}" has been split among ${participantCount} people (${names}). The creator paid the full bill upfront.`,
-      settle_one: `${names} just paid back their share of $${amount} for "${title}".`,
+      create: `A bill of ৳${amount} for "${title}" has been split among ${participantCount} people (${names}). The creator paid the full bill upfront.`,
+      settle_one: `${names} just paid back their share of ৳${amount} for "${title}".`,
       settle_all: `The LAST person (${names}) just paid their share! The split "${title}" is now FULLY SETTLED — everyone has paid!`,
-      treat: `The user has TREATED ${names} by covering their $${amount} share of "${title}"! No payment expected — pure generosity!`
+      treat: `The user has TREATED ${names} by covering their ৳${amount} share of "${title}"! No payment expected — pure generosity!`
     };
 
     const prompt = `
@@ -296,7 +296,7 @@ Style: Over-the-top dramatic, like a medieval herald or soap opera narrator. Fun
 Include relevant emojis (food/money themed).
 
 Examples of style:
-- "The sacred bill has been DIVIDED! 4 souls now bound by a $120 pizza covenant! May they honor their debts! 🍕⚔️💰"
+- "The sacred bill has been DIVIDED! 4 souls now bound by a ৳120 pizza covenant! May they honor their debts! 🍕⚔️💰"
 - "MIRACLE! Against all odds, Rahul has returned $30! Faith in humanity: RESTORED! 🎉💸"
 - "THE GREAT DEBT IS CLEARED! All have paid their share! Tonight we feast as FREE souls! 🏆🎭🍽️"
 

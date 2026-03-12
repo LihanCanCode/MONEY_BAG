@@ -45,7 +45,7 @@ const updateWalletAndCreateTransaction = async (userId, amount, type, message) =
   });
   await transaction.save();
   
-  console.log(`[DEBT] Transaction created: ${type} $${amount} - ${message}`);
+  console.log(`[DEBT] Transaction created: ${type} ৳${amount} - ${message}`);
 
   return { wallet, transaction };
 };
@@ -83,7 +83,7 @@ exports.createDebt = async (req, res) => {
       const hasSufficientBalance = await checkSufficientBalance(userId, amount);
       if (!hasSufficientBalance) {
         return res.status(400).json({ 
-          error: `🚫 HALT! Your coffers run dry! You cannot lend $${amount} when your treasury lacks the funds. The sacred pact cannot be sealed! 💸`
+          error: `🚫 HALT! Your coffers run dry! You cannot lend ৳${amount} when your treasury lacks the funds. The sacred pact cannot be sealed! 💸`
         });
       }
     }
@@ -109,8 +109,8 @@ exports.createDebt = async (req, res) => {
     // Update wallet based on debt type
     const transactionType = type === 'owed_to_me' ? 'SPEND' : 'ADD';
     const transactionMessage = type === 'owed_to_me'
-      ? `Lent $${amount} to ${personName}`
-      : `Borrowed $${amount} from ${personName}`;
+      ? `Lent ৳${amount} to ${personName}`
+      : `Borrowed ৳${amount} from ${personName}`;
 
     await updateWalletAndCreateTransaction(userId, amount, transactionType, transactionMessage);
 
@@ -210,7 +210,7 @@ exports.addToDebt = async (req, res) => {
       const hasSufficientBalance = await checkSufficientBalance(userId, amount);
       if (!hasSufficientBalance) {
         return res.status(400).json({ 
-          error: `🚫 HALT! Your coffers run dry! You cannot lend $${amount} more when your treasury lacks the funds! 💸`
+          error: `🚫 HALT! Your coffers run dry! You cannot lend ৳${amount} more when your treasury lacks the funds! 💸`
         });
       }
     }
@@ -228,14 +228,14 @@ exports.addToDebt = async (req, res) => {
     // Update wallet
     const transactionType = debt.type === 'owed_to_me' ? 'SPEND' : 'ADD';
     const transactionMessage = debt.type === 'owed_to_me'
-      ? `Lent additional $${amount} to ${debt.personName}`
-      : `Borrowed additional $${amount} from ${debt.personName}`;
+      ? `Lent additional ৳${amount} to ${debt.personName}`
+      : `Borrowed additional ৳${amount} from ${debt.personName}`;
 
     await updateWalletAndCreateTransaction(userId, amount, transactionType, transactionMessage);
 
     res.json({
       debt: debt.toObject(),
-      message: `The debt grows... the plot thickens! 🎭📈 (+$${amount})`
+      message: `The debt grows... the plot thickens! 🎭📈 (+৳${amount})`
     });
   } catch (error) {
     console.error('Error adding to debt:', error);
@@ -272,7 +272,7 @@ exports.subtractFromDebt = async (req, res) => {
       const hasSufficientBalance = await checkSufficientBalance(userId, amount);
       if (!hasSufficientBalance) {
         return res.status(400).json({ 
-          error: `🚫 HALT! Your coffers run dry! You cannot pay back $${amount} when your treasury lacks the funds! Honor your debts when gold flows again! 💸`
+          error: `🚫 HALT! Your coffers run dry! You cannot pay back ৳${amount} when your treasury lacks the funds! Honor your debts when gold flows again! 💸`
         });
       }
     }
@@ -290,14 +290,14 @@ exports.subtractFromDebt = async (req, res) => {
     // Update wallet (reverse of add logic)
     const transactionType = debt.type === 'owed_to_me' ? 'ADD' : 'SPEND';
     const transactionMessage = debt.type === 'owed_to_me'
-      ? `Received $${amount} payment from ${debt.personName}`
-      : `Paid back $${amount} to ${debt.personName}`;
+      ? `Received ৳${amount} payment from ${debt.personName}`
+      : `Paid back ৳${amount} to ${debt.personName}`;
 
     await updateWalletAndCreateTransaction(userId, amount, transactionType, transactionMessage);
 
     res.json({
       debt: debt.toObject(),
-      message: `A small victory! The debt shrinks... 💫✨ (-$${amount})`
+      message: `A small victory! The debt shrinks... 💫✨ (-৳${amount})`
     });
   } catch (error) {
     console.error('Error subtracting from debt:', error);
@@ -329,7 +329,7 @@ exports.resolveDebt = async (req, res) => {
       const hasSufficientBalance = await checkSufficientBalance(userId, remainingAmount);
       if (!hasSufficientBalance) {
         return res.status(400).json({ 
-          error: `🚫 HALT! Your coffers run dry! You cannot fully repay $${remainingAmount} when your treasury lacks the funds! The chains of debt remain unbroken! ⛓️💸`
+          error: `🚫 HALT! Your coffers run dry! You cannot fully repay ৳${remainingAmount} when your treasury lacks the funds! The chains of debt remain unbroken! ⛓️💸`
         });
       }
     }
@@ -338,8 +338,8 @@ exports.resolveDebt = async (req, res) => {
     if (remainingAmount > 0) {
       const transactionType = debtType === 'owed_to_me' ? 'ADD' : 'SPEND';
       const transactionMessage = debtType === 'owed_to_me'
-        ? `${personName} fully repaid debt of $${remainingAmount}`
-        : `Fully repaid debt of $${remainingAmount} to ${personName}`;
+        ? `${personName} fully repaid debt of ৳${remainingAmount}`
+        : `Fully repaid debt of ৳${remainingAmount} to ${personName}`;
 
       await updateWalletAndCreateTransaction(userId, remainingAmount, transactionType, transactionMessage);
     }
@@ -404,10 +404,10 @@ exports.getDramaticMessage = async (req, res) => {
     console.error('Error generating dramatic message:', error);
     // Fallback messages if Gemini fails
     const fallbackMessages = {
-      create_owed: `A sacred pact formed! ${personName} now owes you $${amount}! 📜`,
-      create_owe: `You've accepted ${personName}'s generous offering of $${amount}! 💰`,
-      add: `The debt deepens... $${amount} more added to the ledger! 📈`,
-      subtract: `Progress! $${amount} struck from the ancient debt! ⚔️`,
+      create_owed: `A sacred pact formed! ${personName} now owes you ৳${amount}! 📜`,
+      create_owe: `You've accepted ${personName}'s generous offering of ৳${amount}! 💰`,
+      add: `The debt deepens... ৳${amount} more added to the ledger! 📈`,
+      subtract: `Progress! ৳${amount} struck from the ancient debt! ⚔️`,
       resolve: `FREEDOM! The debt chains are broken! 🎉`
     };
     res.json({ message: fallbackMessages[action] || 'The deed is done! 🎭' });

@@ -358,7 +358,7 @@ const BudgetManagement = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Budget Amount ($)</label>
+                                <label>Budget Amount (৳)</label>
                                 <input
                                     type="number"
                                     value={formData.amount}

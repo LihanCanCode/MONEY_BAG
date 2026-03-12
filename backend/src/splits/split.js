@@ -36,7 +36,7 @@ const updateWalletAndCreateTransaction = async (userId, amount, type, message) =
   });
   await transaction.save();
 
-  console.log(`[SPLIT] ${type} $${amount} — ${message}`);
+  console.log(`[SPLIT] ${type} ৳${amount} — ${message}`);
   return { wallet, transaction };
 };
 
@@ -71,7 +71,7 @@ exports.createSplit = async (req, res) => {
     if (sharesSum > total + 0.01) {
       return res.status(400).json({
         success: false,
-        message: `Participant shares ($${sharesSum.toFixed(2)}) exceed the total ($${total.toFixed(2)})`
+        message: `Participant shares (৳${sharesSum.toFixed(2)}) exceed the total (৳${total.toFixed(2)})`
       });
     }
 
@@ -116,7 +116,7 @@ exports.createSplit = async (req, res) => {
       );
     } catch (err) {
       console.error('[SPLIT] AI message failed, using fallback');
-      dramaticMessage = `💸 The bill of $${total.toFixed(2)} has been split among ${participantShares.length} people. May they all pay their share! 🍕`;
+      dramaticMessage = `💸 The bill of ৳${total.toFixed(2)} has been split among ${participantShares.length} people. May they all pay their share! 🍕`;
     }
 
     res.status(201).json({
@@ -307,7 +307,7 @@ exports.deleteSplit = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Split deleted — $${refundAmount.toFixed(2)} refunded to wallet`
+      message: `Split deleted — ৳${refundAmount.toFixed(2)} refunded to wallet`
     });
   } catch (error) {
     console.error('Error deleting split:', error);
@@ -386,7 +386,7 @@ exports.settleParticipant = async (req, res) => {
       if (allPaid) {
         dramaticMessage = `🎉 THE SPLIT IS SETTLED! Everyone has paid their share for "${split.title}"! 🏆`;
       } else {
-        dramaticMessage = `✅ ${participant.name} paid back $${participant.amount.toFixed(2)}! 💰`;
+        dramaticMessage = `✅ ${participant.name} paid back ৳${participant.amount.toFixed(2)}! 💰`;
       }
     }
 
@@ -438,7 +438,7 @@ exports.partialPayment = async (req, res) => {
     if (payAmount > participant.amount + 0.01) {
       return res.status(400).json({
         success: false,
-        message: `Amount ($${payAmount.toFixed(2)}) exceeds what ${participant.name} owes ($${participant.amount.toFixed(2)})`
+        message: `Amount (৳${payAmount.toFixed(2)}) exceeds what ${participant.name} owes (৳${participant.amount.toFixed(2)})`
       });
     }
 
@@ -472,14 +472,14 @@ exports.partialPayment = async (req, res) => {
     let dramaticMessage = '';
     try {
       if (allPaid) {
-        dramaticMessage = await generateSplitMessage('settle_all', split.title, payAmount, split.participants.length, participant.name);
+        dramaticMessage = `💸 ${participant.name} paid ৳${payAmount.toFixed(2)} — still owes ৳${remaining.toFixed(2)} for "${split.title}"`;
       } else if (participant.isPaid) {
         dramaticMessage = await generateSplitMessage('settle_one', split.title, payAmount, split.participants.length, participant.name);
       } else {
-        dramaticMessage = `💸 ${participant.name} paid $${payAmount.toFixed(2)} — still owes $${remaining.toFixed(2)} for "${split.title}"`;
+        dramaticMessage = `💸 ${participant.name} paid ৳${payAmount.toFixed(2)} — still owes ৳${remaining.toFixed(2)} for "${split.title}"`;
       }
     } catch (err) {
-      dramaticMessage = `💸 ${participant.name} paid $${payAmount.toFixed(2)} — $${remaining.toFixed(2)} remaining`;
+      dramaticMessage = `💸 ${participant.name} paid ৳${payAmount.toFixed(2)} — ৳${remaining.toFixed(2)} remaining`;
     }
 
     res.status(200).json({
@@ -540,7 +540,7 @@ exports.treatParticipant = async (req, res) => {
       );
     } catch (err) {
       console.error('[SPLIT] AI message failed for treat, using fallback');
-      dramaticMessage = `🎁 You treated ${participant.name} to their $${participant.amount.toFixed(2)} share of "${split.title}"! What a legend! 👑`;
+      dramaticMessage = `🎁 You treated ${participant.name} to their ৳${participant.amount.toFixed(2)} share of "${split.title}"! What a legend! 👑`;
     }
 
     res.status(200).json({

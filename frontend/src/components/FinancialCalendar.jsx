@@ -293,8 +293,8 @@ const FinancialCalendar = () => {
 
       {/* ─── Month Summary Cards ─── */}
       <div className="summary-cards">
-        <SummaryCard icon={<FaArrowUp />} label="Income" value={`₹${monthSummary.income.toLocaleString()}`} colorClass="income" />
-        <SummaryCard icon={<FaArrowDown />} label="Expenses" value={`₹${monthSummary.expenses.toLocaleString()}`} colorClass="expense" />
+        <SummaryCard icon={<FaArrowUp />} label="Income" value={`৳${monthSummary.income.toLocaleString()}`} colorClass="income" />
+        <SummaryCard icon={<FaArrowDown />} label="Expenses" value={`৳${monthSummary.expenses.toLocaleString()}`} colorClass="expense" />
         <SummaryCard icon={<FaUsers />} label="Debts Due" value={monthSummary.debtsDue} colorClass="debt" />
         <SummaryCard icon={<FaBullseye />} label="Goal Deadlines" value={monthSummary.goalsCount} colorClass="goal" />
       </div>
@@ -1103,12 +1103,12 @@ const EventCard = ({ event }) => {
       </div>
       {event.type !== 'goal' && event.type !== 'budget_reset' && (
         <span className="event-amount" style={{ color: event.color }}>
-          {event.subType === 'ADD' || event.subType === 'owed_to_me' ? '+' : '−'}₹{event.amount?.toLocaleString()}
+          {event.subType === 'ADD' || event.subType === 'owed_to_me' ? '+' : '−'}৳{event.amount?.toLocaleString()}
         </span>
       )}
       {event.type === 'goal' && (
         <span className="event-amount" style={{ color: '#3B82F6' }}>
-          ₹{event.amount?.toLocaleString()}
+          ৳{event.amount?.toLocaleString()}
         </span>
       )}
     </div>

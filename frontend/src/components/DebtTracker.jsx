@@ -509,7 +509,7 @@ const DebtTracker = () => {
                     </div>
                     <div className="summary-content">
                         <span className="summary-label">They Owe Me</span>
-                        <span className="summary-amount">${summary.totalOwedToMe.toFixed(2)}</span>
+                        <span className="summary-amount">৳{summary.totalOwedToMe.toFixed(2)}</span>
                         <span className="summary-count">{summary.owedToMeCount || 0} {summary.owedToMeCount === 1 ? 'person' : 'people'}</span>
                     </div>
                 </motion.div>
@@ -524,7 +524,7 @@ const DebtTracker = () => {
                     </div>
                     <div className="summary-content">
                         <span className="summary-label">I Owe Them</span>
-                        <span className="summary-amount">${summary.totalIOwe.toFixed(2)}</span>
+                        <span className="summary-amount">৳{summary.totalIOwe.toFixed(2)}</span>
                         <span className="summary-count">{summary.iOweCount || 0} {summary.iOweCount === 1 ? 'person' : 'people'}</span>
                     </div>
                 </motion.div>
@@ -668,7 +668,7 @@ const DebtTracker = () => {
 
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label><FaMoneyBillWave /> Amount ($)</label>
+                                        <label><FaMoneyBillWave /> Amount (৳)</label>
                                         <input
                                             type="number"
                                             value={formData.amount}
@@ -771,11 +771,11 @@ const DebtTracker = () => {
                                 }
                             </p>
                             <p className="current-amount">
-                                Current debt: <strong>${showAmountModal.amount.toFixed(2)}</strong>
+                                Current debt: <strong>৳{showAmountModal.amount.toFixed(2)}</strong>
                             </p>
 
                             <div className="form-group">
-                                <label>Amount ($)</label>
+                                <label>Amount (৳)</label>
                                 <input
                                     type="number"
                                     value={amountInput}
@@ -1426,7 +1426,7 @@ const DebtCard = ({ debt, onAdd, onSubtract, onResolve, onShowHistory, formatDat
                     </span>
                 </div>
                 <div className="debt-amount">
-                    ${debt.amount.toFixed(2)}
+                    ৳{debt.amount.toFixed(2)}
                 </div>
             </div>
 

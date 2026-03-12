@@ -147,6 +147,7 @@ IMPORTANT RULES:
 - Do NOT give legal, tax, or regulatory advice.
 - When the user asks about a specific category or goal, reference exact numbers from the snapshot.
 - Always be encouraging but honest about overspending or behind-schedule goals.
+- Use Taka (৳) as the primary currency for all monetary mentions.
 
 --- USER FINANCIAL SNAPSHOT (as of ${context.currentDate}) ---
 ${JSON.stringify(context, null, 2)}

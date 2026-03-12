@@ -381,7 +381,7 @@ const RecurringTransactions = () => {
                                     </div>
                                 </div>
                                 <div className="recurring-amount" style={{ color: recurring.type === 'ADD' ? '#22c55e' : '#ef4444' }}>
-                                    {recurring.type === 'ADD' ? '+' : '-'}${recurring.amount.toFixed(2)}
+                                    {recurring.type === 'ADD' ? '+' : '-'}৳{recurring.amount.toFixed(2)}
                                 </div>
                             </div>
 
@@ -476,7 +476,7 @@ const RecurringTransactions = () => {
                                 )}
 
                                 <div className="form-group">
-                                    <label>Amount ($)</label>
+                                    <label>Amount (৳)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -607,7 +607,7 @@ const RecurringTransactions = () => {
                                 )}
 
                                 <div className="form-group">
-                                    <label>Amount ($)</label>
+                                    <label>Amount (৳)</label>
                                     <input
                                         type="number"
                                         step="0.01"

@@ -205,7 +205,7 @@ const Transactions = () => {
                                     {/* Right side: Transaction amount (color-coded) */}
                                     <div className="flex items-center justify-between md:justify-end gap-8">
                                         <div className={`font-mono font-black text-3xl tracking-tighter ${(tx.type === 'income' || tx.type === 'ADD') ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                            {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            {(tx.type === 'income' || tx.type === 'ADD') ? '+' : '-'}৳{Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </div>
                                     </div>
                                 </motion.div>

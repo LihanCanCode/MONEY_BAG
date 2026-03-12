@@ -172,12 +172,12 @@ const SplitBills = () => {
       const total = parseFloat(formData.totalAmount);
       const overParticipant = finalParticipants.find(p => p.amount > total);
       if (overParticipant) {
-        toast.error(`${overParticipant.name}'s amount ($${overParticipant.amount.toFixed(2)}) exceeds the total ($${total.toFixed(2)})`);
+        toast.error(`${overParticipant.name}'s amount (৳${overParticipant.amount.toFixed(2)}) exceeds the total (৳${total.toFixed(2)})`);
         return;
       }
       const sum = finalParticipants.reduce((s, p) => s + p.amount, 0);
       if (sum > total + 0.01) {
-        toast.error(`Participants' total ($${sum.toFixed(2)}) exceeds the bill ($${total.toFixed(2)})`);
+        toast.error(`Participants' total (৳${sum.toFixed(2)}) exceeds the bill (৳${total.toFixed(2)})`);
         return;
       }
       if (sum < 0.01) {
@@ -270,7 +270,7 @@ const SplitBills = () => {
 
   // ─── Treat ───
   const handleTreat = async (splitId, participantId, participantName, amount) => {
-    if (!confirm(`Treat ${participantName}? You'll cover their $${amount.toFixed(2)} share — no payback expected! 🎁`)) return;
+    if (!confirm(`Treat ${participantName}? You'll cover their ৳${amount.toFixed(2)} share — no payback expected! 🎁`)) return;
 
     try {
       const token = await currentUser.getIdToken();
@@ -307,7 +307,7 @@ const SplitBills = () => {
       return;
     }
     if (amount > owedAmount + 0.01) {
-      setPartialError(`Exceeds owed amount ($${owedAmount.toFixed(2)})`);
+      setPartialError(`Exceeds owed amount (৳${owedAmount.toFixed(2)})`);
       return;
     }
 
@@ -502,7 +502,7 @@ const SplitBills = () => {
           <div className="summary-icon"><GiReceiveMoney /></div>
           <div className="summary-content">
             <span className="summary-label">Total Owed to You</span>
-            <span className="summary-amount">${summary.totalOwed?.toFixed(2) || '0.00'}</span>
+            <span className="summary-amount">৳{summary.totalOwed?.toFixed(2) || '0.00'}</span>
           </div>
         </motion.div>
 
@@ -565,7 +565,7 @@ const SplitBills = () => {
                     </div>
                   </div>
                   <div className="split-right">
-                    <div className="split-amount">${split.totalAmount.toFixed(2)}</div>
+                    <div className="split-amount">৳{split.totalAmount.toFixed(2)}</div>
                     <div className={`split-status ${split.isSettled ? 'settled' : unpaidCount > 0 ? 'pending' : 'settled'}`}>
                       {split.isSettled ? '✅ Settled' : `⏳ ${unpaidCount} unpaid`}
                     </div>
@@ -586,8 +586,8 @@ const SplitBills = () => {
                 </div>
                 <div className="progress-text">
                   {progressInfo.paid} paid{progressInfo.treated > 0 && `, ${progressInfo.treated} treated`} of {progressInfo.total}
-                  {!split.isSettled && owedAmount > 0 && ` • $${owedAmount.toFixed(2)} remaining`}
-                  {split.userShare > 0 && ` • Your share: $${split.userShare.toFixed(2)}`}
+                  {!split.isSettled && owedAmount > 0 && ` • ৳${owedAmount.toFixed(2)} remaining`}
+                  {split.userShare > 0 && ` • Your share: ৳${split.userShare.toFixed(2)}`}
                 </div>
 
                 {/* Expanded: Participant Details */}
@@ -609,7 +609,7 @@ const SplitBills = () => {
                               </span>
                               <div>
                                 <span className="participant-name">{p.name}</span>
-                                <span className="participant-amount">${p.amount.toFixed(2)}</span>
+                                <span className="participant-amount">৳{p.amount.toFixed(2)}</span>
                               </div>
                             </div>
                             <div className="participant-status">
@@ -628,12 +628,12 @@ const SplitBills = () => {
                                       setPartialAmount(e.target.value);
                                       const val = parseFloat(e.target.value);
                                       if (val > p.amount + 0.01) {
-                                        setPartialError(`Exceeds $${p.amount.toFixed(2)}`);
+                                        setPartialError(`Exceeds ৳${p.amount.toFixed(2)}`);
                                       } else {
                                         setPartialError('');
                                       }
                                     }}
-                                    placeholder={`Max $${p.amount.toFixed(2)}`}
+                                    placeholder={`Max ৳${p.amount.toFixed(2)}`}
                                     min="0.01"
                                     step="0.01"
                                     autoFocus
@@ -750,7 +750,7 @@ const SplitBills = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Total Amount ($)</label>
+                    <label>Total Amount (৳)</label>
                     <input
                       type="number"
                       value={formData.totalAmount}
