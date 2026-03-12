@@ -99,7 +99,7 @@ const DebtTracker = () => {
     // ── Create Debt Form State ───────────────────────────────────────────
     const [formData, setFormData] = useState({
         personName: '',         // Name of the person involved
-        amount: '',             // Initial debt amount ($)
+        amount: '',             // Initial debt amount (৳)
         description: '',        // Optional backstory for the debt
         dueDate: '',            // Optional due date (YYYY-MM-DD)
         dramaLabel: 'trustworthy' // Trust classification (see DRAMA_LABELS)
@@ -852,7 +852,7 @@ const DebtTracker = () => {
                                                     {entry.action.charAt(0).toUpperCase() + entry.action.slice(1)}
                                                 </span>
                                                 <span className="history-amount">
-                                                    {entry.action === 'subtracted' ? '-' : '+'}${entry.amount.toFixed(2)}
+                                                    {entry.action === 'subtracted' ? '-' : '+'}৳{entry.amount.toFixed(2)}
                                                 </span>
                                                 {entry.note && <span className="history-note">{entry.note}</span>}
                                                 <span className="history-date">{formatDate(entry.date)}</span>

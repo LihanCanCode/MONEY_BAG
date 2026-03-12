@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
  * AnimatedCounter - Animates numbers counting up from 0 to target value
  * @param {number} value - Target value to count to
  * @param {number} duration - Animation duration in milliseconds (default: 1500)
- * @param {string} prefix - Optional prefix (e.g., "$")
+ * @param {string} prefix - Optional prefix (e.g., "৳")
  * @param {string} suffix - Optional suffix (e.g., "kg")
  * @param {number} decimals - Number of decimal places (default: 2)
  */

@@ -457,16 +457,16 @@ const BudgetManagement = () => {
                                     <div className="budget-amounts">
                                         <div className="amount-item">
                                             <span className="label">Spent</span>
-                                            <span className="value">${budget.currentSpending.toFixed(2)}</span>
+                                            <span className="value">৳{budget.currentSpending.toFixed(2)}</span>
                                         </div>
                                         <div className="amount-item">
                                             <span className="label">Budget</span>
-                                            <span className="value">${budget.amount.toFixed(2)}</span>
+                                            <span className="value">৳{budget.amount.toFixed(2)}</span>
                                         </div>
                                         <div className="amount-item">
                                             <span className="label">Remaining</span>
                                             <span className={`value ${budget.status.remaining < 0 ? 'negative' : 'positive'}`}>
-                                                ${Math.abs(budget.status.remaining).toFixed(2)}
+                                                ৳{Math.abs(budget.status.remaining).toFixed(2)}
                                             </span>
                                         </div>
                                     </div>

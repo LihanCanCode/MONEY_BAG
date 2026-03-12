@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiUsers, FiGithub, FiTwitter, FiLinkedin, FiMail } from 'react-icons/fi';
+import lihanImg from '../assets/lihan.png';
 
-const TeamMember = ({ name, role, description, delay, isReversed }) => (
+const TeamMember = ({ name, role, description, delay, isReversed, image }) => (
   <motion.div
     initial={{ opacity: 0, x: isReversed ? 50 : -50 }}
     whileInView={{ opacity: 1, x: 0 }}
@@ -15,7 +16,11 @@ const TeamMember = ({ name, role, description, delay, isReversed }) => (
       <div className="relative group">
         <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-slate-800 border-4 border-white/5 flex items-center justify-center relative z-10 group-hover:border-cyan-500/30 transition-all duration-500 overflow-hidden shadow-2xl">
-          <FiUsers className="text-7xl text-slate-600 group-hover:text-cyan-400 transition-colors" />
+          {image ? (
+            <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          ) : (
+            <FiUsers className="text-7xl text-slate-600 group-hover:text-cyan-400 transition-colors" />
+          )}
         </div>
       </div>
     </div>
@@ -96,6 +101,7 @@ const About = () => {
             description="Architect of the Money Bag ecosystem, focusing on core infrastructure and seamless user experiences. Specializes in building robust, scalable financial systems."
             delay={0.1}
             isReversed={false}
+            image={lihanImg}
           />
           <TeamMember 
             name="Multazam Mahmud" 
