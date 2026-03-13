@@ -118,7 +118,15 @@ const ExportReports = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to export PDF');
+        let errorMessage = 'Failed to export PDF';
+        try {
+          const err = await response.json();
+          if (err?.error) errorMessage = err.error;
+          else if (err?.message) errorMessage = err.message;
+        } catch {
+          // Ignore JSON parsing failures and keep default message
+        }
+        throw new Error(errorMessage);
       }
 
       const blob = await response.blob();
@@ -126,7 +134,7 @@ const ExportReports = () => {
       toast.success('PDF exported successfully! 📄');
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      toast.error('Failed to export PDF');
+      toast.error(error.message || 'Failed to export PDF');
     } finally {
       setIsExporting(false);
     }
