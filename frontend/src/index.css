@@ -91,12 +91,208 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg-secondary);
+  background: #0b0d0c;
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+.app-lux-surface {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(214, 180, 109, 0.12), transparent 28%),
+    linear-gradient(135deg, #080a09 0%, #11120f 100%) !important;
+}
+
+.lux-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px clamp(18px, 4vw, 48px);
+  background: rgba(8, 9, 8, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.lux-nav.scrolled {
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+}
+
+.lux-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff6df;
+  font-weight: 900;
+}
+
+.lux-brand > span:last-child span,
+.lux-footer strong span {
+  color: #d6b46d;
+}
+
+.lux-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(214, 180, 109, 0.48);
+  background: linear-gradient(145deg, rgba(214, 180, 109, 0.22), rgba(255, 255, 255, 0.04));
+  color: #f1d28a;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.lux-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lux-user {
+  text-align: right;
+}
+
+.lux-user span {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: #8f8778;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lux-user strong {
+  display: block;
+  color: #d6b46d;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86rem;
+}
+
+.lux-exit {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #eee2ca;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lux-exit:hover {
+  border-color: rgba(214, 180, 109, 0.45);
+  color: #fff6df;
+}
+
+.lux-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px clamp(18px, 4vw, 48px);
+  background: #080908;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a79f91;
+}
+
+.lux-footer strong {
+  display: block;
+  color: #fff6df;
+  font-size: 1.15rem;
+  margin-bottom: 6px;
+}
+
+.lux-footer p {
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+.lux-footer nav {
+  display: flex;
+  gap: 14px;
+  font-weight: 800;
+}
+
+.lux-footer a:hover {
+  color: #d6b46d;
+}
+
+.luxe-dashboard .dashboard-container,
+.luxe-dashboard .budget-management,
+.luxe-dashboard .financial-goals {
+  color: #f7ecd5;
+}
+
+.luxe-dashboard .action-card,
+.luxe-dashboard .health-card,
+.luxe-dashboard .budget-card,
+.luxe-dashboard .goal-card,
+.luxe-dashboard .budget-form-container,
+.luxe-dashboard .goal-form-container,
+.luxe-dashboard .budget-analytics-section,
+.luxe-dashboard .modal-content,
+.luxe-dashboard .coach-drawer,
+.luxe-dashboard .fancy-popup-inner {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.luxe-dashboard .btn-primary,
+.luxe-dashboard .create-budget-btn,
+.luxe-dashboard .create-goal-btn,
+.luxe-dashboard .coach-send-btn,
+.luxe-dashboard .coach-fab {
+  background: #d6b46d !important;
+  color: #11100d !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.luxe-dashboard .btn-secondary,
+.luxe-dashboard .btn-outline,
+.luxe-dashboard .btn-icon,
+.luxe-dashboard .budget-actions button,
+.luxe-dashboard .goal-actions button {
+  border-radius: 8px !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+.luxe-dashboard input,
+.luxe-dashboard select,
+.luxe-dashboard textarea,
+.luxe-dashboard .ai-textarea,
+.luxe-dashboard .coach-input {
+  border-radius: 8px !important;
+}
+
+@media (max-width: 640px) {
+  .lux-nav,
+  .lux-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lux-nav-right {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 html, body {
@@ -2109,4 +2305,4 @@ button:focus-visible {
     right: 1rem;
     bottom: 1rem;
   }
-}
+}

@@ -1,49 +1,23 @@
-/**
- * @fileoverview Home / Landing Page Component
- *
- * The public-facing entry point of the MoneyBag application.
- * Provides a unified Sign-In / Sign-Up interface in a dark-themed,
- * animated card layout with:
- *  - Tab-based toggle between Sign In and Sign Up forms
- *  - Email / password authentication via Firebase
- *  - Google OAuth one-click sign-in
- *  - Real-time password strength meter (Sign Up only)
- *  - Password match indicator for confirmation field
- *  - Floating decorative icons with motion animations
- *  - Top navigation bar with brand logo
- *  - Security badge footer
- *  - Responsive design for mobile viewports
- *
- * @module pages/Home
- */
-
-// ── Core React & Router ────────────────────────────────────────────────────────
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-
-// ── Auth Context ───────────────────────────────────────────────────────────────
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import toast from 'react-hot-toast';
+import { FcGoogle } from 'react-icons/fc';
+import {
+  FiArrowRight,
+  FiBarChart2,
+  FiCheckCircle,
+  FiEye,
+  FiEyeOff,
+  FiLock,
+  FiLogIn,
+  FiPieChart,
+  FiShield,
+  FiTrendingUp,
+  FiUserPlus,
+} from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
-// ── Animation Libraries ────────────────────────────────────────────────────────
-import { motion, AnimatePresence } from 'framer-motion';
-
-// ── Icon Libraries ─────────────────────────────────────────────────────────────
-import { FiEye, FiEyeOff, FiArrowRight, FiUserPlus, FiLogIn, FiDollarSign } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
-import { GiTwoCoins, GiWallet, GiMoneyStack, GiPiggyBank } from 'react-icons/gi';
-
-// ── Third-Party UI Utilities ───────────────────────────────────────────────────
-import toast from 'react-hot-toast';
-
-/**
- * Map Firebase auth error codes to user-friendly messages
- *
- * Translates cryptic Firebase error codes into clear, actionable
- * messages displayed via toast notifications.
- *
- * @param {string} code - Firebase auth error code (e.g. 'auth/weak-password')
- * @returns {string} Human-readable error message
- */
 const getFirebaseErrorMessage = (code) => {
   const messages = {
     'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
@@ -60,966 +34,748 @@ const getFirebaseErrorMessage = (code) => {
     'auth/missing-password': 'Please enter your password.',
     'auth/missing-email': 'Please enter your email address.',
   };
+
   return messages[code] || 'Authentication failed. Please try again.';
 };
 
-/**
- * Home Component
- *
- * Landing page with a dual-purpose auth card that supports both
- * sign-in and sign-up via a tab toggle. The card animates between
- * the two modes with smooth transitions.
- *
- * @returns {JSX.Element} The rendered Home / landing page
- */
-const Home = () => {
-  // ── Form State ─────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState('signin');       // 'signin' | 'signup'
-  const [email, setEmail] = useState('');                     // User email
-  const [password, setPassword] = useState('');               // Password input
-  const [confirmPassword, setConfirmPassword] = useState(''); // Confirm (signup only)
-  const [showPassword, setShowPassword] = useState(false);           // Password reveal toggle
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Confirm reveal toggle
-  const [isLoading, setIsLoading] = useState(false);          // Submission loading flag
+const marketSignals = [
+  { label: 'Monthly surplus', value: '+18.4%', trend: 'above plan' },
+  { label: 'Runway', value: '9.7 mo', trend: 'stable' },
+  { label: 'Goal velocity', value: '72%', trend: 'on pace' },
+];
 
-  // ── Auth & Navigation ──────────────────────────────────────────────
+const deskRows = [
+  ['Dining', 'BDT 12,840', '-7.2%'],
+  ['Income', 'BDT 86,000', '+12.6%'],
+  ['Savings', 'BDT 24,500', '+18.0%'],
+  ['Bills', 'BDT 18,210', '-2.4%'],
+];
+
+const Home = () => {
+  const [activeTab, setActiveTab] = useState('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { loginUser, registerUser, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  /**
-   * Password Strength Checker
-   *
-   * Evaluates password quality using 4 independent criteria:
-   *  1. Length ≥ 8 characters
-   *  2. Contains both lowercase AND uppercase letters
-   *  3. Contains at least one digit
-   *  4. Contains at least one special character
-   *
-   * Each met criterion adds 1 point → score maps to a level label + color.
-   *
-   * @param {string} pass - The password to evaluate
-   * @returns {{ level: number, text: string, color: string }} Strength info
-   */
-  const getPasswordStrength = (pass) => {
-    if (!pass) return { level: 0, text: '', color: '' };
-    let strength = 0;
-    if (pass.length >= 8) strength++;                           // +1 for length
-    if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) strength++;  // +1 for mixed case
-    if (/[0-9]/.test(pass)) strength++;                        // +1 for digits
-    if (/[^a-zA-Z0-9]/.test(pass)) strength++;                 // +1 for special chars
+  const passwordScore = [
+    password.length >= 8,
+    /[a-z]/.test(password) && /[A-Z]/.test(password),
+    /[0-9]/.test(password),
+    /[^a-zA-Z0-9]/.test(password),
+  ].filter(Boolean).length;
 
-    const levels = [
-      { level: 0, text: '', color: '' },
-      { level: 1, text: 'Weak', color: '#EF4444' },   // Red
-      { level: 2, text: 'Fair', color: '#F59E0B' },   // Amber
-      { level: 3, text: 'Good', color: '#3B82F6' },   // Blue
-      { level: 4, text: 'Strong', color: '#10B981' }   // Emerald
-    ];
-    return levels[strength];
-  };
-
-  /** Derived password strength for the current input */
-  const passwordStrength = getPasswordStrength(password);
-  /** Whether the confirm password field matches the password */
   const passwordsMatch = confirmPassword && password === confirmPassword;
 
-  /**
-   * Unified auth handler for both Sign In and Sign Up
-   *
-   * For signin: calls loginUser() with email/password
-   * For signup: validates password match + min length, then calls registerUser()
-   * On success, navigates to /dashboard. Errors display Firebase-friendly messages.
-   *
-   * @param {Event} e - Form submit event
-   */
-  const handleAuth = async (e) => {
-    e.preventDefault();
+  const handleAuth = async (event) => {
+    event.preventDefault();
     setIsLoading(true);
-    const toastId = toast.loading(activeTab === 'signin' ? 'Authenticating...' : 'Creating account...');
+    const toastId = toast.loading(activeTab === 'signin' ? 'Opening your desk...' : 'Preparing your account...');
 
     try {
       if (activeTab === 'signin') {
         await loginUser(email, password);
-        toast.success("Welcome back! 🎉", { id: toastId });
+        toast.success('Welcome back.', { id: toastId });
       } else {
         if (password !== confirmPassword) {
-          toast.error("Passwords do not match!", { id: toastId });
+          toast.error('Passwords do not match.', { id: toastId });
           setIsLoading(false);
           return;
         }
+
         if (password.length < 6) {
-          toast.error("Password must be at least 6 characters!", { id: toastId });
+          toast.error('Password must be at least 6 characters.', { id: toastId });
           setIsLoading(false);
           return;
         }
+
         await registerUser(email, password);
-        toast.success("Account created successfully! 🚀", { id: toastId });
+        toast.success('Your portfolio desk is ready.', { id: toastId });
       }
-      navigate("/dashboard");
+
+      navigate('/dashboard');
     } catch (error) {
-      console.error("Auth error details:", error.code, error.message);
-      const msg = getFirebaseErrorMessage(error.code);
-      toast.error(msg, { id: toastId, duration: 5000 });
+      toast.error(getFirebaseErrorMessage(error.code), { id: toastId, duration: 5000 });
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Handle Google OAuth authentication
-   *
-   * Opens Google popup for one-click sign in, then navigates on success.
-   */
   const handleGoogleSignIn = async () => {
-    const toastId = toast.loading('Connecting to Google...');
+    const toastId = toast.loading('Connecting securely...');
+
     try {
       await signInWithGoogle();
-      toast.success("Signed in with Google! 🎉", { id: toastId, duration: 3000 });
-      navigate("/dashboard");
-    } catch (error) {
-      toast.error("Google sign-in failed", { id: toastId });
-    }
-  };
-
-  /** Framer Motion variant for floating decorative icons (infinite bounce) */
-  const floatingAnimation = {
-    animate: {
-      y: [0, -15, 0],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
+      toast.success('Signed in with Google.', { id: toastId });
+      navigate('/dashboard');
+    } catch {
+      toast.error('Google sign-in failed.', { id: toastId });
     }
   };
 
   return (
-    <div className="home-page">
-      {/* Top Navbar */}
-      <nav className="top-navbar">
-        <Link to="/" className="navbar-brand">
-          {/* Icon with gradient background - same as Navbar.jsx */}
-          <div className="brand-icon-box">
-            <FiDollarSign size={24} strokeWidth={3} />
-          </div>
-          {/* Brand name with gradient text - same as Navbar.jsx */}
-          <span className="brand-text">Money<span className="brand-accent">Bag</span></span>
+    <div className="atelier-home">
+      <nav className="atelier-nav">
+        <Link to="/" className="atelier-brand" aria-label="MoneyBag home">
+          <span className="atelier-mark">MB</span>
+          <span>
+            Money<span>Bag</span>
+          </span>
         </Link>
-        <div className="navbar-buttons">
+        <div className="atelier-nav-actions">
           <button
+            type="button"
             onClick={() => setActiveTab('signin')}
-            className={`nav-btn signin-btn ${activeTab === 'signin' ? 'active' : ''}`}
+            className={activeTab === 'signin' ? 'is-active' : ''}
           >
             <FiLogIn />
-            Sign In
+            Sign in
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('signup')}
-            className={`nav-btn signup-btn ${activeTab === 'signup' ? 'active' : ''}`}
+            className={activeTab === 'signup' ? 'is-active primary' : 'primary'}
           >
             <FiUserPlus />
-            Sign Up
+            Join
           </button>
         </div>
       </nav>
 
-      {/* Background Decorative Elements */}
-      <div className="bg-gradient-blob bg-blob-1"></div>
-      <div className="bg-gradient-blob bg-blob-2"></div>
-      <div className="bg-gradient-blob bg-blob-3"></div>
-
-      {/* Floating decorative icons */}
-      <motion.div className="floating-icon icon-1" variants={floatingAnimation} animate="animate">
-        <GiTwoCoins />
-      </motion.div>
-      <motion.div className="floating-icon icon-2" variants={floatingAnimation} animate="animate">
-        <GiWallet />
-      </motion.div>
-      <motion.div className="floating-icon icon-3" variants={floatingAnimation} animate="animate">
-        <GiMoneyStack />
-      </motion.div>
-      <motion.div className="floating-icon icon-4" variants={floatingAnimation} animate="animate">
-        <GiPiggyBank />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="auth-card"
-      >
-        {/* Header */}
-        <div className="card-header">
-          <motion.div
-            className="logo-container"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          >
-            <div className="logo-icon">💰</div>
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            {activeTab === 'signin' ? 'Welcome Back!' : 'Create Account'}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="subtitle"
-          >
-            {activeTab === 'signin'
-              ? 'Sign in to continue managing your finances'
-              : 'Start your journey to financial freedom'}
+      <main className="atelier-shell">
+        <section className="atelier-copy">
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="eyebrow">
+            Private money cockpit
           </motion.p>
-        </div>
+          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            MoneyBag
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lede">
+            A polished personal finance desk for budgets, goals, debts, recurring spends, and the small decisions that quietly compound.
+          </motion.p>
 
-        {/* Auth Form */}
-        <form onSubmit={handleAuth} className="auth-form">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: activeTab === 'signin' ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: activeTab === 'signin' ? 20 : -20 }}
-              transition={{ duration: 0.3 }}
-              className="form-fields"
-            >
-              {/* Email Field */}
-              <div className="auth-form-group">
-                <span className="auth-label">Email Address</span>
-                <div className="input-wrapper">
+          <motion.div className="signal-grid" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
+            {marketSignals.map((signal) => (
+              <div className="signal-card" key={signal.label}>
+                <span>{signal.label}</span>
+                <strong>{signal.value}</strong>
+                <small>{signal.trend}</small>
+              </div>
+            ))}
+          </motion.div>
+
+          <div className="atelier-proof">
+            <span><FiShield /> Bank-grade auth flow</span>
+            <span><FiPieChart /> Decision-ready views</span>
+            <span><FiTrendingUp /> Goal-first tracking</span>
+          </div>
+        </section>
+
+        <motion.section
+          className="portfolio-board"
+          initial={{ opacity: 0, scale: 0.96, y: 24 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="board-topline">
+            <span>July portfolio</span>
+            <span className="live-pill">Live</span>
+          </div>
+          <div className="board-balance">
+            <span>Available balance</span>
+            <strong>BDT 142,680</strong>
+          </div>
+          <div className="board-chart" aria-hidden="true">
+            <span style={{ height: '42%' }} />
+            <span style={{ height: '64%' }} />
+            <span style={{ height: '51%' }} />
+            <span style={{ height: '78%' }} />
+            <span style={{ height: '58%' }} />
+            <span style={{ height: '88%' }} />
+            <span style={{ height: '72%' }} />
+          </div>
+          <div className="board-table">
+            {deskRows.map(([name, amount, delta]) => (
+              <div className="board-row" key={name}>
+                <span>{name}</span>
+                <strong>{amount}</strong>
+                <em className={delta.startsWith('+') ? 'up' : 'down'}>{delta}</em>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="atelier-auth"
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.08 }}
+        >
+          <div className="auth-heading">
+            <span><FiLock /> Secure access</span>
+            <h2>{activeTab === 'signin' ? 'Return to your desk' : 'Create your desk'}</h2>
+            <p>{activeTab === 'signin' ? 'Sign in to review your current money position.' : 'Start with a clean, focused finance command center.'}</p>
+          </div>
+
+          <div className="auth-switch" role="tablist" aria-label="Authentication mode">
+            <button type="button" onClick={() => setActiveTab('signin')} className={activeTab === 'signin' ? 'active' : ''}>
+              Sign in
+            </button>
+            <button type="button" onClick={() => setActiveTab('signup')} className={activeTab === 'signup' ? 'active' : ''}>
+              Sign up
+            </button>
+          </div>
+
+          <form onSubmit={handleAuth} className="atelier-form">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="form-stack"
+              >
+                <label>
+                  <span>Email address</span>
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="name@example.com"
                     required
-                    className="form-input"
                   />
-                </div>
-              </div>
+                </label>
 
-              {/* Password Field */}
-              <div className="auth-form-group">
-                <div className="label-row">
-                  <span className="auth-label">Password</span>
-                  {activeTab === 'signin' && (
-                    <a href="#" className="forgot-link">Forgot password?</a>
-                  )}
-                </div>
-                <div className="input-wrapper">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={activeTab === 'signin' ? "Enter your password" : "Min. 6 characters"}
-                    required
-                    className="form-input"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="toggle-password"
-                  >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </button>
-                </div>
-                {/* Password strength indicator for signup */}
-                {activeTab === 'signup' && password && (
-                  <div className="password-strength">
-                    <div className="strength-bars">
-                      {[1, 2, 3, 4].map((level) => (
-                        <div
-                          key={level}
-                          className={`strength-bar ${passwordStrength.level >= level ? 'active' : ''}`}
-                          style={{ backgroundColor: passwordStrength.level >= level ? passwordStrength.color : '' }}
-                        />
-                      ))}
-                    </div>
-                    <span className="strength-text" style={{ color: passwordStrength.color }}>
-                      {passwordStrength.text}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Password Field (Sign Up only) */}
-              {activeTab === 'signup' && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="auth-form-group"
-                >
-                  <span className="auth-label">Confirm Password</span>
-                  <div className="input-wrapper">
+                <label>
+                  <span>Password</span>
+                  <div className="password-field">
                     <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Repeat your password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder={activeTab === 'signin' ? 'Enter password' : 'Minimum 6 characters'}
                       required
-                      className={`form-input ${confirmPassword ? (passwordsMatch ? 'match' : 'no-match') : ''}`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="toggle-password"
-                    >
-                      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                    <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility">
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
                     </button>
                   </div>
-                  {/* Password match indicator */}
-                  {confirmPassword && (
-                    <div className="match-indicator">
-                      {passwordsMatch ? (
-                        <span className="match">✓ Passwords match</span>
-                      ) : (
-                        <span className="no-match">✗ Passwords don't match</span>
-                      )}
+                </label>
+
+                {activeTab === 'signup' && (
+                  <>
+                    <div className="strength-meter">
+                      {[1, 2, 3, 4].map((level) => (
+                        <span key={level} className={passwordScore >= level ? 'filled' : ''} />
+                      ))}
                     </div>
-                  )}
-                </motion.div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                    <label>
+                      <span>Confirm password</span>
+                      <div className="password-field">
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(event) => setConfirmPassword(event.target.value)}
+                          placeholder="Repeat password"
+                          required
+                        />
+                        <button type="button" onClick={() => setShowConfirmPassword((value) => !value)} aria-label="Toggle confirm password visibility">
+                          {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                        </button>
+                      </div>
+                      {confirmPassword && (
+                        <small className={passwordsMatch ? 'match' : 'mismatch'}>
+                          {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
+                        </small>
+                      )}
+                    </label>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
 
-          {/* Submit Button */}
-          <motion.button
-            type="submit"
-            disabled={isLoading}
-            className={`submit-btn ${activeTab === 'signup' ? 'signup' : ''}`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {isLoading ? (
-              <span className="loading-text">
-                {activeTab === 'signin' ? 'Signing in...' : 'Creating account...'}
-              </span>
-            ) : (
-              <>
-                {activeTab === 'signin' ? 'Sign In' : 'Create Account'}
-                <FiArrowRight className="btn-icon" />
-              </>
-            )}
-          </motion.button>
+            <button type="submit" className="auth-submit" disabled={isLoading}>
+              {isLoading ? 'Please wait...' : activeTab === 'signin' ? 'Enter MoneyBag' : 'Create account'}
+              {!isLoading && <FiArrowRight />}
+            </button>
 
-          {/* Divider */}
-          <div className="divider">
-            <span>or continue with</span>
+            <button type="button" onClick={handleGoogleSignIn} className="google-submit">
+              <FcGoogle />
+              Continue with Google
+            </button>
+          </form>
+
+          <div className="auth-note">
+            <FiCheckCircle />
+            Encrypted login, focused workspace, no visual clutter.
           </div>
-
-          {/* Google Sign-In Button */}
-          <motion.button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="google-btn"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <FcGoogle className="google-icon" />
-            <span>Continue with Google</span>
-          </motion.button>
-        </form>
-
-        {/* Security Badge */}
-        <div className="security-badge">
-          <div className="badge-dot"></div>
-          <span>Secured with End-to-End Encryption</span>
-        </div>
-      </motion.div>
+        </motion.section>
+      </main>
 
       <style>{`
-        .home-page {
+        .atelier-home {
           min-height: 100vh;
-          width: 100%;
-          background: #0B0F1A;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 2rem;
-          padding-top: 6rem;
+          color: #f5f1e8;
+          background:
+            radial-gradient(circle at 8% 12%, rgba(198, 167, 104, 0.16), transparent 28%),
+            radial-gradient(circle at 86% 6%, rgba(68, 105, 95, 0.18), transparent 30%),
+            linear-gradient(135deg, #090b0d 0%, #11140f 46%, #19150f 100%);
           position: relative;
           overflow: hidden;
         }
 
-        /* Top Navbar */
-        .top-navbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 3rem;
-          background: rgba(11, 15, 26, 0.8);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          z-index: 100;
-        }
-
-        .navbar-brand {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          text-decoration: none;
-        }
-
-        .brand-icon-box {
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(to top right, #06B6D4, #2563EB);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
-          transition: transform 0.3s;
-        }
-
-        .navbar-brand:hover .brand-icon-box {
-          transform: scale(1.1);
-        }
-
-        .brand-text {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: white;
-          letter-spacing: -0.025em;
-          transition: color 0.3s;
-        }
-
-        .navbar-brand:hover .brand-text {
-          color: #22D3EE;
-        }
-
-        .brand-accent {
-          color: #22D3EE;
-        }
-
-        .navbar-buttons {
-          display: flex;
-          gap: 1rem;
-        }
-
-        .nav-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
-          border-radius: 0.75rem;
-          font-size: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .signin-btn {
-          background: transparent;
-          border: 2px solid rgba(255, 255, 255, 0.15);
-          color: #E2E8F0;
-        }
-
-        .signin-btn:hover {
-          border-color: rgba(99, 102, 241, 0.5);
-          color: white;
-        }
-
-        .signin-btn.active {
-          background: rgba(99, 102, 241, 0.15);
-          border-color: #6366F1;
-          color: white;
-        }
-
-        .signup-btn {
-          background: linear-gradient(135deg, #6366F1, #4F46E5);
-          border: 2px solid transparent;
-          color: white;
-          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .signup-btn:hover {
-          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-          transform: translateY(-1px);
-        }
-
-        .signup-btn.active {
-          background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-        }
-
-        /* Background gradient blobs */
-        .bg-gradient-blob {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(120px);
-          pointer-events: none;
-        }
-
-        .bg-blob-1 {
-          top: -15%;
-          right: -10%;
-          width: 45%;
-          height: 45%;
-          background: rgba(99, 102, 241, 0.15);
-        }
-
-        .bg-blob-2 {
-          bottom: -15%;
-          left: -10%;
-          width: 45%;
-          height: 45%;
-          background: rgba(6, 182, 212, 0.12);
-        }
-
-        .bg-blob-3 {
-          top: 40%;
-          left: 50%;
-          width: 30%;
-          height: 30%;
-          background: rgba(139, 92, 246, 0.08);
-        }
-
-        /* Floating icons */
-        .floating-icon {
-          position: absolute;
-          font-size: 3rem;
-          opacity: 0.12;
-          pointer-events: none;
-        }
-
-        .icon-1 {
-          top: 12%;
-          left: 8%;
-          color: #6366F1;
-        }
-
-        .icon-2 {
-          top: 20%;
-          right: 10%;
-          color: #06B6D4;
-        }
-
-        .icon-3 {
-          bottom: 18%;
-          left: 12%;
-          color: #8B5CF6;
-        }
-
-        .icon-4 {
-          bottom: 25%;
-          right: 8%;
-          color: #10B981;
-        }
-
-        /* Auth Card */
-        .auth-card {
-          width: 100%;
-          max-width: 580px;
-          background: rgba(20, 27, 45, 0.9);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 2.5rem;
-          padding: 3.5rem 4rem;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Header */
-        .card-header {
-          text-align: center;
-          margin-bottom: 2.5rem;
-        }
-
-        .logo-container {
-          display: inline-block;
-          margin-bottom: 1.5rem;
-        }
-
-        .logo-icon {
-          width: 90px;
-          height: 90px;
-          background: linear-gradient(135deg, #6366F1, #06B6D4);
-          border-radius: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2.75rem;
-          box-shadow: 0 15px 40px rgba(99, 102, 241, 0.35);
-        }
-
-        .card-header h1 {
-          font-size: 2.75rem;
-          font-weight: 800;
-          color: white;
-          margin: 0 0 0.75rem;
-          letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-          color: #94A3B8;
-          font-size: 1.1rem;
-          margin: 0;
-          font-weight: 500;
-        }
-
-        /* Form */
-        .auth-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1.75rem;
-        }
-
-        .form-fields {
-          display: flex;
-          flex-direction: column;
-          gap: 1.75rem;
-        }
-
-        .auth-form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .label-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .auth-label {
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: #E2E8F0;
-          letter-spacing: 0.02em;
-          margin-left: 0.25rem;
-          background: transparent;
-          padding: 0;
-          display: inline;
-        }
-
-        .forgot-link {
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: #6366F1;
-          text-decoration: none;
-          transition: color 0.3s;
-          background: transparent;
-        }
-
-        .forgot-link:hover {
-          color: #818CF8;
-        }
-
-        .input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .form-input {
-          width: 100%;
-          padding: 1.25rem 1.5rem;
-          background: rgba(11, 15, 26, 0.7);
-          border: 2px solid rgba(255, 255, 255, 0.08);
-          border-radius: 1.25rem;
-          color: white;
-          font-size: 1.1rem;
-          font-weight: 500;
-          transition: all 0.3s;
-        }
-
-        .form-input::placeholder {
-          color: #475569;
-        }
-
-        .form-input:focus {
-          outline: none;
-          border-color: rgba(99, 102, 241, 0.6);
-          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-          background: rgba(11, 15, 26, 0.9);
-        }
-
-        .form-input.match {
-          border-color: rgba(16, 185, 129, 0.6);
-        }
-
-        .form-input.no-match {
-          border-color: rgba(239, 68, 68, 0.6);
-        }
-
-        .toggle-password {
-          position: absolute;
-          right: 1.25rem;
-          background: none;
-          border: none;
-          color: #64748B;
-          cursor: pointer;
-          font-size: 1.4rem;
-          display: flex;
-          align-items: center;
-          padding: 0.75rem;
-          transition: color 0.3s;
-        }
-
-        .toggle-password:hover {
-          color: #6366F1;
-        }
-
-        /* Password strength indicator */
-        .password-strength {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-top: 0.5rem;
-          padding: 0 0.25rem;
-        }
-
-        .strength-bars {
-          display: flex;
-          gap: 6px;
-          flex: 1;
-        }
-
-        .strength-bar {
-          height: 6px;
-          flex: 1;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
-          transition: all 0.3s;
-        }
-
-        .strength-bar.active {
-          background: #10B981;
-        }
-
-        .strength-text {
-          font-size: 0.8rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        /* Match indicator */
-        .match-indicator {
-          margin-top: 0.5rem;
-          font-size: 0.9rem;
-          font-weight: 600;
-          padding-left: 0.25rem;
-        }
-
-        .match-indicator .match {
-          color: #10B981;
-        }
-
-        .match-indicator .no-match {
-          color: #EF4444;
-        }
-
-        /* Submit button */
-        .submit-btn {
-          width: 100%;
-          padding: 1.35rem 2rem;
-          background: linear-gradient(135deg, #6366F1, #4F46E5);
-          color: white;
-          border: none;
-          border-radius: 1.25rem;
-          font-size: 1.2rem;
-          font-weight: 700;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          transition: all 0.3s;
-          box-shadow: 0 12px 35px rgba(99, 102, 241, 0.3);
-          margin-top: 0.5rem;
-        }
-
-        .submit-btn.signup {
-          background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-          box-shadow: 0 12px 35px rgba(139, 92, 246, 0.3);
-        }
-
-        .submit-btn:hover:not(:disabled) {
-          box-shadow: 0 18px 45px rgba(99, 102, 241, 0.4);
-          transform: translateY(-2px);
-        }
-
-        .submit-btn.signup:hover:not(:disabled) {
-          box-shadow: 0 18px 45px rgba(139, 92, 246, 0.4);
-        }
-
-        .submit-btn:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-
-        .btn-icon {
-          font-size: 1.4rem;
-          transition: transform 0.3s;
-        }
-
-        .submit-btn:hover .btn-icon {
-          transform: translateX(5px);
-        }
-
-        .loading-text {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        /* Divider */
-        .divider {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          margin: 0.75rem 0;
-        }
-
-        .divider::before,
-        .divider::after {
+        .atelier-home::before {
           content: '';
-          flex: 1;
-          height: 2px;
-          background: rgba(255, 255, 255, 0.08);
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+          background-size: 72px 72px;
+          mask-image: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent 88%);
+          pointer-events: none;
         }
 
-        .divider span {
-          color: #64748B;
-          font-size: 0.95rem;
-          font-weight: 600;
-          white-space: nowrap;
+        .atelier-nav {
+          position: relative;
+          z-index: 5;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px clamp(20px, 4vw, 64px);
         }
 
-        /* Google button */
-        .google-btn {
-          width: 100%;
-          padding: 1.25rem 2rem;
-          background: rgba(255, 255, 255, 0.04);
-          border: 2px solid rgba(255, 255, 255, 0.1);
-          border-radius: 1.25rem;
-          color: white;
-          font-size: 1.1rem;
-          font-weight: 600;
+        .atelier-brand {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          color: #fff8e8;
+          font-weight: 800;
+          font-size: 1.05rem;
+        }
+
+        .atelier-brand span span {
+          color: #d6b46d;
+        }
+
+        .atelier-mark {
+          width: 42px;
+          height: 42px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(214, 180, 109, 0.55);
+          background: linear-gradient(145deg, rgba(214,180,109,0.24), rgba(255,255,255,0.05));
+          color: #f8df9d;
+          border-radius: 8px;
+          font-size: 0.78rem;
+          letter-spacing: 0.08em;
+        }
+
+        .atelier-nav-actions,
+        .auth-switch {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .atelier-nav-actions button,
+        .auth-switch button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.05);
+          color: #d8d2c4;
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-weight: 700;
           cursor: pointer;
-          display: flex;
+        }
+
+        .atelier-nav-actions button.is-active,
+        .auth-switch button.active {
+          color: #fff8e8;
+          border-color: rgba(214,180,109,0.45);
+          background: rgba(214,180,109,0.12);
+        }
+
+        .atelier-nav-actions .primary {
+          background: #d6b46d;
+          color: #12100b;
+          border-color: #d6b46d;
+        }
+
+        .atelier-shell {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.75fr) minmax(340px, 0.72fr);
+          gap: clamp(20px, 3vw, 34px);
           align-items: center;
-          justify-content: center;
-          gap: 1rem;
-          transition: all 0.3s;
+          padding: clamp(24px, 4vw, 58px) clamp(20px, 4vw, 64px) 56px;
         }
 
-        .google-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.25);
-          transform: translateY(-2px);
+        .atelier-copy h1 {
+          font-size: clamp(4rem, 9vw, 8.4rem);
+          line-height: 0.88;
+          letter-spacing: 0;
+          color: #fff9e8;
+          margin: 0 0 28px;
         }
 
-        .google-icon {
-          font-size: 1.75rem;
-        }
-
-        /* Security Badge */
-        .security-badge {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          margin-top: 2.5rem;
-          padding: 1rem 1.5rem;
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 2rem;
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .badge-dot {
-          width: 8px;
-          height: 8px;
-          background: #06B6D4;
-          border-radius: 50%;
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        .security-badge span {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #64748B;
+        .eyebrow,
+        .auth-heading span {
+          color: #d6b46d;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          font-size: 0.75rem;
+          font-weight: 900;
+          letter-spacing: 0.18em;
         }
 
-        /* Responsive */
-        @media (max-width: 640px) {
-          .home-page {
-            padding: 1.5rem;
-            padding-top: 5.5rem;
+        .lede {
+          max-width: 680px;
+          color: #b8b0a0;
+          font-size: clamp(1rem, 1.5vw, 1.2rem);
+          line-height: 1.8;
+          margin-bottom: 28px;
+        }
+
+        .signal-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          max-width: 700px;
+        }
+
+        .signal-card,
+        .portfolio-board,
+        .atelier-auth {
+          border: 1px solid rgba(255,255,255,0.11);
+          background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.035));
+          box-shadow: 0 28px 80px rgba(0,0,0,0.36);
+          backdrop-filter: blur(22px);
+          border-radius: 8px;
+        }
+
+        .signal-card {
+          padding: 16px;
+        }
+
+        .signal-card span,
+        .board-topline,
+        .board-row span,
+        .board-balance span {
+          color: #948b7d;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .signal-card strong {
+          display: block;
+          color: #fff6df;
+          font-size: 1.45rem;
+          margin: 10px 0 2px;
+        }
+
+        .signal-card small {
+          color: #9ac4a4;
+          font-weight: 700;
+        }
+
+        .atelier-proof {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 28px;
+          color: #c9c0b1;
+          font-weight: 700;
+        }
+
+        .atelier-proof span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .portfolio-board {
+          padding: 22px;
+          min-height: 520px;
+          align-self: stretch;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .board-topline,
+        .board-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .live-pill {
+          color: #12100b;
+          background: #d6b46d;
+          padding: 5px 9px;
+          border-radius: 6px;
+        }
+
+        .board-balance strong {
+          display: block;
+          margin-top: 10px;
+          font-size: clamp(2.2rem, 4vw, 3.4rem);
+          color: #fff6df;
+          line-height: 1;
+        }
+
+        .board-chart {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          align-items: end;
+          gap: 9px;
+          height: 180px;
+          padding-top: 22px;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .board-chart span {
+          display: block;
+          border-radius: 6px 6px 0 0;
+          background: linear-gradient(180deg, #e6c983, #466d62);
+        }
+
+        .board-table {
+          display: grid;
+          gap: 10px;
+        }
+
+        .board-row {
+          padding: 12px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .board-row strong {
+          color: #f7ecd5;
+        }
+
+        .board-row em {
+          font-style: normal;
+          font-weight: 900;
+          font-size: 0.82rem;
+        }
+
+        .board-row em.up {
+          color: #93caa1;
+        }
+
+        .board-row em.down {
+          color: #d8907b;
+        }
+
+        .atelier-auth {
+          padding: clamp(22px, 3vw, 34px);
+        }
+
+        .auth-heading span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .auth-heading h2 {
+          margin: 14px 0 8px;
+          color: #fff6df;
+          font-size: clamp(1.8rem, 3vw, 2.5rem);
+        }
+
+        .auth-heading p,
+        .auth-note {
+          color: #a9a092;
+          line-height: 1.6;
+        }
+
+        .auth-switch {
+          background: rgba(0,0,0,0.22);
+          padding: 6px;
+          margin: 24px 0;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+        }
+
+        .auth-switch button {
+          flex: 1;
+          border: 0;
+        }
+
+        .atelier-form,
+        .form-stack {
+          display: grid;
+          gap: 16px;
+        }
+
+        .atelier-form label {
+          display: grid;
+          gap: 8px;
+          color: #ded6c5;
+          font-weight: 800;
+          font-size: 0.86rem;
+        }
+
+        .atelier-form input {
+          width: 100%;
+          border: 1px solid rgba(255,255,255,0.11);
+          background: rgba(0,0,0,0.28);
+          color: #fff6df;
+          border-radius: 8px;
+          padding: 14px 14px;
+          font-size: 1rem;
+          outline: none;
+        }
+
+        .atelier-form input:focus {
+          border-color: rgba(214,180,109,0.7);
+          box-shadow: 0 0 0 3px rgba(214,180,109,0.13);
+        }
+
+        .password-field {
+          position: relative;
+        }
+
+        .password-field input {
+          padding-right: 48px;
+        }
+
+        .password-field button {
+          position: absolute;
+          right: 7px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 36px;
+          height: 36px;
+          display: grid;
+          place-items: center;
+          border: 0;
+          border-radius: 8px;
+          color: #d6b46d;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .strength-meter {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 7px;
+        }
+
+        .strength-meter span {
+          height: 5px;
+          background: rgba(255,255,255,0.1);
+          border-radius: 99px;
+        }
+
+        .strength-meter span.filled {
+          background: #d6b46d;
+        }
+
+        small.match {
+          color: #93caa1;
+        }
+
+        small.mismatch {
+          color: #e49a84;
+        }
+
+        .auth-submit,
+        .google-submit {
+          min-height: 52px;
+          border: 0;
+          border-radius: 8px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .auth-submit {
+          background: #d6b46d;
+          color: #11100d;
+          margin-top: 6px;
+        }
+
+        .auth-submit:disabled {
+          opacity: 0.7;
+          cursor: wait;
+        }
+
+        .google-submit {
+          background: rgba(255,255,255,0.06);
+          color: #fff7e5;
+          border: 1px solid rgba(255,255,255,0.11);
+        }
+
+        .google-submit svg {
+          font-size: 1.35rem;
+        }
+
+        .auth-note {
+          margin-top: 22px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.88rem;
+        }
+
+        @media (max-width: 1180px) {
+          .atelier-shell {
+            grid-template-columns: 1fr 0.82fr;
           }
 
-          .top-navbar {
-            padding: 0.75rem 1.25rem;
-          }
-
-          .brand-text {
-            font-size: 1.2rem;
-          }
-
-          .brand-icon-box {
-            width: 30px;
-            height: 30px;
-          }
-
-          .nav-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.9rem;
-          }
-
-          .navbar-buttons {
-            gap: 0.5rem;
-          }
-
-          .auth-card {
-            padding: 2.5rem 2rem;
-            border-radius: 2rem;
-          }
-
-          .card-header h1 {
-            font-size: 2rem;
-          }
-
-          .logo-icon {
-            width: 70px;
-            height: 70px;
-            font-size: 2rem;
-          }
-
-          .form-input {
-            padding: 1.1rem 1.25rem;
-            font-size: 1rem;
-          }
-
-          .submit-btn, .google-btn {
-            padding: 1.1rem 1.5rem;
-            font-size: 1.05rem;
-          }
-
-          .floating-icon {
+          .portfolio-board {
             display: none;
+          }
+        }
+
+        @media (max-width: 820px) {
+          .atelier-shell {
+            grid-template-columns: 1fr;
+          }
+
+          .atelier-nav {
+            gap: 18px;
+            align-items: flex-start;
+          }
+
+          .signal-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .atelier-nav {
+            flex-direction: column;
+          }
+
+          .atelier-nav-actions {
+            width: 100%;
+          }
+
+          .atelier-nav-actions button {
+            flex: 1;
+          }
+
+          .atelier-copy h1 {
+            font-size: 3.7rem;
           }
         }
       `}</style>
@@ -1027,5 +783,4 @@ const Home = () => {
   );
 };
 
-/* Export the Home component as the default module export */
 export default Home;

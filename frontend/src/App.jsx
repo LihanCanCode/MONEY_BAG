@@ -25,7 +25,7 @@ function App() {
       <Navbar />
 
       {/* Main Content Area - Renders child routes with smooth theme transitions */}
-      <main className="main-content bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-300 flex justify-center w-full">
+      <main className="main-content app-lux-surface min-h-screen transition-colors duration-300 flex justify-center w-full">
         <Outlet />
       </main>
 
